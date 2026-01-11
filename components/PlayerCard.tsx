@@ -39,13 +39,30 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                 transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
             >
                 {/* Front Side */}
-                <div className="absolute inset-0 backface-hidden rounded-[24px] overflow-hidden shadow-2xl">
+                <div className="absolute inset-0 backface-hidden rounded-[24px] overflow-hidden shadow-2xl group/card">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#1a1c20] via-[#0f1012] to-[#000000]" />
-                    <div className="absolute inset-[4px] rounded-[20px] border-2 bg-gradient-to-br from-[#2a2d33] to-[#151618]" style={{ borderColor: `${cardColor}4D` }} />
-                    <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay" />
+                    <div className="absolute inset-[4px] rounded-[20px] border-2 bg-gradient-to-br from-[#2a2d33] to-[#151618] z-0" style={{ borderColor: `${cardColor}4D` }} />
 
-                    <div className="absolute top-6 left-6 z-10">
-                        <div className="font-black text-[32px] leading-none drop-shadow-md" style={{ color: cardColor }}>
+                    {/* Holographic Overlay */}
+                    <div className="absolute inset-0 opacity-[0.15] mix-blend-color-dodge z-10 pointer-events-none group-hover/card:opacity-30 transition-opacity duration-500 animate-hologram"
+                        style={{
+                            background: `linear-gradient(110deg, 
+                                transparent 20%, 
+                                #ff00ff 30%, 
+                                #00ffff 40%, 
+                                #ffff00 50%, 
+                                #00ffff 60%, 
+                                #ff00ff 70%, 
+                                transparent 80%)`,
+                            backgroundSize: '200% 200%'
+                        }}
+                    />
+
+                    {/* Texture & Patterns */}
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay z-10" />
+
+                    <div className="absolute top-6 left-6 z-20">
+                        <div className="font-black text-[32px] leading-none drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" style={{ color: cardColor }}>
                             {profile.style === '공격' ? '92' : profile.style === '수비' ? '88' : '90'}
                         </div>
                         <div className="text-white/60 text-[14px] font-bold tracking-widest mt-1 uppercase">
@@ -53,16 +70,16 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                         </div>
                     </div>
 
-                    <div className="absolute top-4 right-6 z-10">
-                        <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center shadow-lg" style={{ borderColor: cardColor }}>
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center bg-white">
+                    <div className="absolute top-4 right-6 z-20">
+                        <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center shadow-lg bg-black/20" style={{ borderColor: cardColor }}>
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]">
                                 <span className="text-[10px] font-bold text-black italic">TEN</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="absolute top-[80px] left-1/2 -translate-x-1/2 w-[200px] h-[200px] z-10">
-                        <div className="w-full h-full rounded-full border-4 shadow-2xl overflow-hidden bg-[#333D4B] relative" style={{ borderColor: cardColor, boxShadow: `0 0 30px ${cardColor}66` }}>
+                    <div className="absolute top-[80px] left-1/2 -translate-x-1/2 w-[200px] h-[200px] z-20">
+                        <div className="w-full h-full rounded-full border-4 shadow-2xl overflow-hidden bg-[#333D4B] relative" style={{ borderColor: cardColor, boxShadow: `0 0 40px ${cardColor}44` }}>
                             {profile.photo_url ? (
                                 <img src={profile.photo_url} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
@@ -70,28 +87,29 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                                     {initials}
                                 </div>
                             )}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
                         </div>
                     </div>
 
-                    <div className="absolute bottom-6 left-6 right-6 z-10 text-center">
+                    <div className="absolute bottom-6 left-6 right-6 z-20 text-center">
                         {/* Signature Badges System */}
                         <div className="mb-4">
                             <SignatureBadges activeBadgeIds={activeBadges} />
                         </div>
 
                         <h2 className="text-[28px] font-black text-white uppercase tracking-tight drop-shadow-lg mb-1">{profile.nickname || 'PLAYER'}</h2>
-                        <div className="h-[2px] w-12 mx-auto mb-4" style={{ backgroundColor: cardColor }} />
+                        <div className="h-[2px] w-12 mx-auto mb-4 shadow-[0_0_10px_rgba(255,255,255,0.5)]" style={{ backgroundColor: cardColor }} />
                         <div className="grid grid-cols-3 gap-2 text-center text-white">
                             <div>
-                                <div className="text-[11px] font-bold tracking-wider" style={{ color: cardColor }}>STYLE</div>
+                                <div className="text-[11px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>STYLE</div>
                                 <div className="text-[14px] font-bold mt-0.5">{profile.style || '무관'}</div>
                             </div>
                             <div>
-                                <div className="text-[11px] font-bold tracking-wider" style={{ color: cardColor }}>HAND</div>
+                                <div className="text-[11px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>HAND</div>
                                 <div className="text-[14px] font-bold mt-0.5">{profile.hand || 'R'}</div>
                             </div>
                             <div>
-                                <div className="text-[11px] font-bold tracking-wider" style={{ color: cardColor }}>POS</div>
+                                <div className="text-[11px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>POS</div>
                                 <div className="text-[14px] font-bold mt-0.5">
                                     {profile.position === '무관' ? 'ALL' : (profile.position ? profile.position.substring(0, 2) : 'ALL')}
                                 </div>
@@ -107,6 +125,9 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                 <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-[24px] overflow-hidden shadow-2xl">
                     <div className="absolute inset-0 bg-[#0A0B0D]" />
                     <div className="absolute inset-[4px] rounded-[20px] border-2 bg-gradient-to-br from-[#1a1c20] to-[#0a0b0d]" style={{ borderColor: cardColor }} />
+
+                    {/* Back Holographic Accents */}
+                    <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/5 to-transparent z-0" />
 
                     <div className="absolute inset-0 z-10 flex flex-col pt-10 pb-6">
                         <h3 className="text-[14px] font-bold tracking-[0.2em] mb-2 text-center" style={{ color: cardColor }}>PLAYER ABILITY</h3>
@@ -136,7 +157,10 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                         </div>
 
                         <div className="mt-auto pb-4 flex flex-col items-center">
-                            <div className="text-[9px] font-black tracking-[0.3em] text-white/20 italic">PRO ANALYTICS</div>
+                            <div className="text-[9px] font-black tracking-[0.3em] text-white/10 italic relative">
+                                PRO ANALYTICS
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent animate-shimmer pointer-events-none" />
+                            </div>
                         </div>
                     </div>
                 </div>

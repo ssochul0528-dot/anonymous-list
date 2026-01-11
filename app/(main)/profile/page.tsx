@@ -77,7 +77,7 @@ export default function ProfilePage() {
                 setPosition(data.position || '무관')
                 setBio(data.bio || '')
                 setPhotoUrl(data.photo_url || null)
-                // setCardColor(data.color || '#D4AF37')
+                setCardColor(data.color || '#D4AF37')
                 setRacket(data.racket || '')
                 setStringTension(data.string_tension || '')
                 setPrefDays(data.pref_time_days || '무관')
@@ -141,7 +141,7 @@ export default function ProfilePage() {
                 position,
                 bio,
                 photo_url: photoUrl,
-                // color: cardColor,
+                color: cardColor,
                 racket,
                 string_tension: stringTension,
                 pref_time_days: prefDays,
@@ -384,6 +384,21 @@ export default function ProfilePage() {
                 }
                 .animate-shine {
                     animation: shine 2s infinite;
+                }
+                @keyframes hologram {
+                    0% { background-position: 0% 0%; }
+                    50% { background-position: 100% 100%; }
+                    100% { background-position: 0% 0%; }
+                }
+                .animate-hologram {
+                    animation: hologram 6s ease infinite;
+                }
+                @keyframes shimmer {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+                .animate-shimmer {
+                    animation: shimmer 3s infinite;
                 }
             `}</style>
         </div>
