@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { motion, AnimatePresence } from 'framer-motion'
+import { getAttendanceTargetDate } from '@/utils/attendance'
 
 export default function TournamentGeneratorPage() {
     const router = useRouter()
@@ -14,28 +15,41 @@ export default function TournamentGeneratorPage() {
     // Config State
     const [courtCount, setCourtCount] = useState(2)
     const [participants, setParticipants] = useState<string[]>([])
-    const [allPlayers, setAllPlayers] = useState<{ id: string, name: string }[]>([])
+    const [allPlayers, setAllPlayers] = useState<{ id: string, name: string, attended?: boolean, preferred_time?: string }[]>([])
     const [newPlayerName, setNewPlayerName] = useState('')
 
     // Result State
     const [tournament, setTournament] = useState<any | null>(null)
 
     useEffect(() => {
-        const fetchPlayers = async () => {
+        const fetchData = async () => {
             const supabase = createClient()
-            const { data, error } = await supabase
+            const targetDate = getAttendanceTargetDate().toISOString().split('T')[0]
+
+            // Fetch all players
+            const { data: profiles } = await supabase
                 .from('profiles')
                 .select('id, real_name, nickname')
                 .order('real_name', { ascending: true })
 
-            if (!error && data) {
-                setAllPlayers(data.map((p: any) => ({
+            // Fetch attendance for the target date
+            const { data: attendance } = await supabase
+                .from('attendance')
+                .select('user_id, status, preferred_time')
+                .eq('target_date', targetDate)
+
+            if (profiles) {
+                const attendanceMap = new Map(attendance?.map(a => [a.user_id, a]) || [])
+
+                setAllPlayers(profiles.map((p: any) => ({
                     id: p.id,
-                    name: p.real_name || p.nickname || 'Unknown'
+                    name: p.real_name || p.nickname || 'Unknown',
+                    attended: attendanceMap.get(p.id)?.status === 'ATTEND',
+                    preferred_time: attendanceMap.get(p.id)?.preferred_time
                 })))
             }
         }
-        fetchPlayers()
+        fetchData()
     }, [])
 
     const togglePlayer = (name: string) => {
@@ -152,19 +166,25 @@ export default function TournamentGeneratorPage() {
                         {allPlayers.length > 0 && (
                             <div className="mb-8">
                                 <label className="block text-[12px] font-bold text-[#8B95A1] mb-4 uppercase tracking-wider">Registered Players</label>
-                                <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto p-4 bg-[#F9FAFB] rounded-[24px] border border-[#F2F4F6]">
+                                <div className="flex flex-wrap gap-2 max-h-80 overflow-y-auto p-5 bg-[#F9FAFB] rounded-[28px] border border-[#F2F4F6]">
                                     {allPlayers.map((player: any) => {
                                         const isSelected = participants.includes(player.name)
                                         return (
                                             <button
                                                 key={player.id}
                                                 onClick={() => togglePlayer(player.name)}
-                                                className={`text-[14px] px-5 py-2.5 rounded-full border transition-all duration-300 ${isSelected
-                                                    ? "bg-[#0064FF] text-white border-[#0064FF] font-bold shadow-md scale-105"
-                                                    : "bg-white text-[#4E5968] border-[#E5E8EB] hover:border-[#0064FF]/30"
+                                                className={`text-[14px] px-5 py-2.5 rounded-full border transition-all duration-300 flex items-center gap-2 ${isSelected
+                                                        ? "bg-[#0064FF] text-white border-[#0064FF] font-black shadow-lg scale-105"
+                                                        : "bg-white text-[#4E5968] border-[#E5E8EB] hover:border-[#0064FF]/30"
                                                     }`}
                                             >
                                                 {player.name}
+                                                {player.attended && (
+                                                    <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-white' : 'bg-green-500'} animate-pulse`} />
+                                                )}
+                                                {player.preferred_time && !isSelected && (
+                                                    <span className="text-[10px] opacity-50 font-bold ml-1">{player.preferred_time.split(':')[0]}시</span>
+                                                )}
                                             </button>
                                         )
                                     })}
