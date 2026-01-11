@@ -147,3 +147,29 @@ using (
   bucket_id = 'avatars' and
   auth.uid() = owner
 );
+
+-- ATTENDANCE Table
+create table public.attendance (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) not null,
+  target_date date not null, -- Every Wednesday date
+  status text not null, -- 'ATTEND' | 'ABSENT'
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+
+  unique(user_id, target_date)
+);
+
+alter table public.attendance enable row level security;
+
+create policy "Attendance is viewable by everyone."
+  on public.attendance for select
+  using ( true );
+
+create policy "Users can check their own attendance."
+  on public.attendance for insert
+  with check ( auth.uid() = user_id );
+
+create policy "Users can update their own attendance."
+  on public.attendance for update
+  using ( auth.uid() = user_id );
