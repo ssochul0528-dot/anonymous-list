@@ -27,6 +27,7 @@ create table public.profiles (
   skill_volley integer default 50,
   skill_stamina integer default 50,
   skill_manner integer default 50,
+  badges text[] default '{}',
   updated_at timestamp with time zone,
   
   constraint username_length check (char_length(nickname) >= 2)

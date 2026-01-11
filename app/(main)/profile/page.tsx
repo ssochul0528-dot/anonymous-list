@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import PlayerRadarChart from '@/components/PlayerRadarChart'
+import SignatureBadges from '@/components/SignatureBadges'
 
 export default function ProfilePage() {
     const { user } = useAuth()
@@ -40,6 +41,19 @@ export default function ProfilePage() {
     const [skillVolley, setSkillVolley] = useState(50)
     const [skillStamina, setSkillStamina] = useState(50)
     const [skillManner, setSkillManner] = useState(50)
+
+    // Badge Logic
+    const getActiveBadges = () => {
+        const badges = []
+        if (skillServe >= 80) badges.push('big_server')
+        if (skillStamina >= 80) badges.push('court_dog')
+        if (style === '수비' && skillStamina >= 70) badges.push('iron_wall')
+        if ((position === '전위(네트)' || position === '무관') && skillVolley >= 75) badges.push('net_shark')
+        if (skillManner >= 90) badges.push('gentleman')
+        if (skillForehand >= 85 || skillBackhand >= 85) badges.push('sniper')
+        if (skillServe >= 70 && skillForehand >= 70 && skillBackhand >= 70) badges.push('streak_king') // Placeholder logic
+        return badges
+    }
 
     useEffect(() => {
         if (user) {
@@ -212,6 +226,11 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="absolute bottom-6 left-6 right-6 z-10 text-center">
+                            {/* Signature Badges System */}
+                            <div className="mb-4">
+                                <SignatureBadges activeBadgeIds={getActiveBadges()} />
+                            </div>
+
                             <h2 className="text-[28px] font-black text-white uppercase tracking-tight drop-shadow-lg mb-1">{nickname || 'PLAYER'}</h2>
                             <div className="h-[2px] w-12 mx-auto mb-4" style={{ backgroundColor: cardColor }} />
                             <div className="grid grid-cols-3 gap-2 text-center text-white">
@@ -293,6 +312,21 @@ export default function ProfilePage() {
                         <SkillSlider label="발리 (Volley)" value={skillVolley} onChange={setSkillVolley} color="#CCFF00" />
                         <SkillSlider label="체력 (Stamina)" value={skillStamina} onChange={setSkillStamina} color="#00D1FF" />
                         <SkillSlider label="매너 (Manner)" value={skillManner} onChange={setSkillManner} color="#CCFF00" />
+                    </div>
+                </div>
+
+                {/* Signature Badges Preview */}
+                <div className="space-y-4">
+                    <h3 className="font-bold text-[16px] flex items-center gap-2">
+                        <span className="w-1 h-4 bg-[#FFD700] rounded-full" />
+                        획득한 시그니처 배지
+                    </h3>
+                    <div className="bg-[#F2F4F6] p-4 rounded-[20px] min-h-[80px] flex items-center justify-center">
+                        {getActiveBadges().length > 0 ? (
+                            <SignatureBadges activeBadgeIds={getActiveBadges()} />
+                        ) : (
+                            <p className="text-[13px] text-[#8B95A1] font-medium">능력치를 올려 배지를 획득해보세요!</p>
+                        )}
                     </div>
                 </div>
 
@@ -438,6 +472,14 @@ export default function ProfilePage() {
                 .preserve-3d { transform-style: preserve-3d; }
                 .backface-hidden { backface-visibility: hidden; }
                 .rotate-y-180 { transform: rotateY(180deg); }
+                
+                @keyframes shine {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+                .animate-shine {
+                    animation: shine 2s infinite;
+                }
             `}</style>
         </div>
     )
