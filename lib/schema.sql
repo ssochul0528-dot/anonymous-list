@@ -21,6 +21,12 @@ create table public.profiles (
   pref_time_slots text, -- '아침' | '점심' | '저녁'
   pref_court_env text, -- '실내' | '실외'
   pref_court_type text, -- '클레이' | '하드' | '인조잔디'
+  skill_serve integer default 50,
+  skill_forehand integer default 50,
+  skill_backhand integer default 50,
+  skill_volley integer default 50,
+  skill_stamina integer default 50,
+  skill_manner integer default 50,
   updated_at timestamp with time zone,
   
   constraint username_length check (char_length(nickname) >= 2)

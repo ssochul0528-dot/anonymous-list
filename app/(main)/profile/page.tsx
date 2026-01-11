@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
+import PlayerRadarChart from '@/components/PlayerRadarChart'
 
 export default function ProfilePage() {
     const { user } = useAuth()
@@ -31,6 +32,14 @@ export default function ProfilePage() {
     const [prefSlots, setPrefSlots] = useState('아침')
     const [prefEnv, setPrefEnv] = useState('무관')
     const [prefType, setPrefType] = useState('하드')
+
+    // Skill Fields
+    const [skillServe, setSkillServe] = useState(50)
+    const [skillForehand, setSkillForehand] = useState(50)
+    const [skillBackhand, setSkillBackhand] = useState(50)
+    const [skillVolley, setSkillVolley] = useState(50)
+    const [skillStamina, setSkillStamina] = useState(50)
+    const [skillManner, setSkillManner] = useState(50)
 
     useEffect(() => {
         if (user) {
@@ -60,6 +69,12 @@ export default function ProfilePage() {
                 setPrefSlots(data.pref_time_slots || '아침')
                 setPrefEnv(data.pref_court_env || '무관')
                 setPrefType(data.pref_court_type || '하드')
+                setSkillServe(data.skill_serve || 50)
+                setSkillForehand(data.skill_forehand || 50)
+                setSkillBackhand(data.skill_backhand || 50)
+                setSkillVolley(data.skill_volley || 50)
+                setSkillStamina(data.skill_stamina || 50)
+                setSkillManner(data.skill_manner || 50)
             }
         } catch (error) {
             console.error(error)
@@ -118,6 +133,12 @@ export default function ProfilePage() {
                 pref_time_slots: prefSlots,
                 pref_court_env: prefEnv,
                 pref_court_type: prefType,
+                skill_serve: skillServe,
+                skill_forehand: skillForehand,
+                skill_backhand: skillBackhand,
+                skill_volley: skillVolley,
+                skill_stamina: skillStamina,
+                skill_manner: skillManner,
                 updated_at: new Date().toISOString(),
             }
 
@@ -218,43 +239,63 @@ export default function ProfilePage() {
                         <div className="absolute inset-0 bg-[#0A0B0D]" />
                         <div className="absolute inset-[4px] rounded-[20px] border-2 bg-gradient-to-br from-[#1a1c20] to-[#0a0b0d]" style={{ borderColor: cardColor }} />
 
-                        <div className="absolute top-8 left-0 right-0 z-10 text-center">
-                            <h3 className="text-[14px] font-bold tracking-[0.2em] mb-4" style={{ color: cardColor }}>EQUIPMENT & PREFS</h3>
-                            <div className="space-y-6 px-8 text-left">
-                                <div>
-                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Racket</p>
-                                    <p className="text-[16px] font-bold text-white">{racket || '-'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">String / Tension</p>
-                                    <p className="text-[16px] font-bold text-white">{stringTension || '-'}</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
+                        <div className="absolute inset-0 z-10 flex flex-col pt-10 pb-6">
+                            <h3 className="text-[14px] font-bold tracking-[0.2em] mb-2 text-center" style={{ color: cardColor }}>PLAYER ABILITY</h3>
+
+                            <div className="flex-1 w-full px-4 overflow-hidden">
+                                <PlayerRadarChart skills={{
+                                    serve: skillServe,
+                                    forehand: skillForehand,
+                                    backhand: skillBackhand,
+                                    volley: skillVolley,
+                                    stamina: skillStamina,
+                                    manner: skillManner
+                                }} />
+                            </div>
+
+                            <div className="px-8 mt-2">
+                                <div className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-white/10 pt-4">
                                     <div>
-                                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Schedule</p>
-                                        <p className="text-[13px] font-bold text-white">{prefDays} / {prefSlots}</p>
+                                        <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Equipment</p>
+                                        <p className="text-[12px] font-bold text-white truncate">{racket || '-'}</p>
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Court</p>
-                                        <p className="text-[13px] font-bold text-white">{prefEnv} / {prefType}</p>
+                                        <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Schedule</p>
+                                        <p className="text-[12px] font-bold text-white truncate">{prefDays} / {prefSlots}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[70%] h-[120px] bg-gradient-to-t from-white/5 to-transparent rounded-t-3xl border-t border-white/10 flex flex-col items-center justify-center">
-                                <div className="text-[10px] font-black tracking-[0.3em] text-white/20 mb-2 italic">PRO PERFORMANCE</div>
-                                <div className="w-12 h-1 bg-white/20 rounded-full" />
+                            <div className="mt-auto pb-4 flex flex-col items-center">
+                                <div className="text-[9px] font-black tracking-[0.3em] text-white/10 italic">PRO ANALYTICS</div>
                             </div>
                         </div>
                     </div>
                 </motion.div>
                 <p className="mt-4 text-[12px] text-[#6B7684] font-medium flex items-center gap-2">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 11 3 3 3-3" /><path d="m22 13-3-3-3 3" /><path d="M5 14v1a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-1" /></svg>
-                    마우스로 카드를 뒤집어보세요
+                    마우스로 카드를 뒤집어 능력치를 확인하세요
                 </p>
             </div>
 
             <Card className="space-y-8 p-6 md:p-8">
+                {/* Skill Evolution */}
+                <div className="space-y-6">
+                    <h3 className="font-bold text-[16px] flex items-center gap-2">
+                        <span className="w-1 h-4 bg-[#CCFF00] rounded-full" />
+                        능력치 (Abilities)
+                    </h3>
+
+                    <div className="grid gap-6">
+                        <SkillSlider label="서브 (Serve)" value={skillServe} onChange={setSkillServe} color="#00D1FF" />
+                        <SkillSlider label="포핸드 (Forehand)" value={skillForehand} onChange={setSkillForehand} color="#CCFF00" />
+                        <SkillSlider label="백핸드 (Backhand)" value={skillBackhand} onChange={setSkillBackhand} color="#00D1FF" />
+                        <SkillSlider label="발리 (Volley)" value={skillVolley} onChange={setSkillVolley} color="#CCFF00" />
+                        <SkillSlider label="체력 (Stamina)" value={skillStamina} onChange={setSkillStamina} color="#00D1FF" />
+                        <SkillSlider label="매너 (Manner)" value={skillManner} onChange={setSkillManner} color="#CCFF00" />
+                    </div>
+                </div>
+
                 {/* Visual Settings */}
                 <div className="space-y-4">
                     <h3 className="font-bold text-[16px] flex items-center gap-2">
@@ -398,6 +439,30 @@ export default function ProfilePage() {
                 .backface-hidden { backface-visibility: hidden; }
                 .rotate-y-180 { transform: rotateY(180deg); }
             `}</style>
+        </div>
+    )
+}
+
+function SkillSlider({ label, value, onChange, color }: any) {
+    return (
+        <div className="space-y-3">
+            <div className="flex justify-between items-center">
+                <span className="text-[13px] font-bold text-[#4E5968]">{label}</span>
+                <span className="text-[15px] font-black" style={{ color }}>{value}</span>
+            </div>
+            <div className="relative flex items-center">
+                <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={value}
+                    onChange={(e) => onChange(parseInt(e.target.value))}
+                    className="w-full h-2 bg-[#F2F4F6] rounded-lg appearance-none cursor-pointer accent-[#0064FF] focus:outline-none"
+                    style={{
+                        background: `linear-gradient(to right, ${color} 0%, ${color} ${value}%, #F2F4F6 ${value}%, #F2F4F6 100%)`
+                    }}
+                />
+            </div>
         </div>
     )
 }
