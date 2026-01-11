@@ -83,9 +83,6 @@ body {
 .backface-hidden {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  -webkit-transform: translateZ(0);
-  /* Force GPU acceleration on iOS */
-  transform: translateZ(0);
 }
 
 .rotate-y-180 {

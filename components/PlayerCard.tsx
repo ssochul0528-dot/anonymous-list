@@ -39,7 +39,14 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                 transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
             >
                 {/* Front Side */}
-                <div className="absolute inset-0 backface-hidden rounded-[24px] overflow-hidden shadow-2xl group/card">
+                <div
+                    className="absolute inset-0 backface-hidden rounded-[24px] overflow-hidden shadow-2xl group/card isolate"
+                    style={{
+                        transform: 'translateZ(1px)',
+                        WebkitTransform: 'translateZ(1px)',
+                        zIndex: isFlipped ? 0 : 10
+                    }}
+                >
                     <div className="absolute inset-0 bg-gradient-to-br from-[#1a1c20] via-[#0f1012] to-[#000000]" />
                     <div className="absolute inset-[4px] rounded-[20px] border-2 bg-gradient-to-br from-[#2a2d33] to-[#151618] z-0" style={{ borderColor: `${cardColor}4D` }} />
 
@@ -122,7 +129,14 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                 </div>
 
                 {/* Back Side */}
-                <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-[24px] overflow-hidden shadow-2xl">
+                <div
+                    className="absolute inset-0 backface-hidden rotate-y-180 rounded-[24px] overflow-hidden shadow-2xl isolate"
+                    style={{
+                        transform: 'rotateY(180deg) translateZ(1px)',
+                        WebkitTransform: 'rotateY(180deg) translateZ(1px)',
+                        zIndex: isFlipped ? 10 : 0
+                    }}
+                >
                     <div className="absolute inset-0 bg-[#0A0B0D]" />
                     <div className="absolute inset-[4px] rounded-[20px] border-2 bg-gradient-to-br from-[#1a1c20] to-[#0a0b0d]" style={{ borderColor: cardColor }} />
 
