@@ -72,15 +72,27 @@ export default function Dashboard() {
             </div>
 
             {/* Admin Action */}
-            <Card className="flex items-center justify-between">
-                <div>
-                    <h4 className="font-bold text-[16px]">스케줄 생성</h4>
-                    <p className="text-[#6B7684] text-[13px]">관리자 전용 기능</p>
-                </div>
-                <Button size="sm" onClick={() => router.push('/admin/schedule')}>
-                    START
-                </Button>
-            </Card>
+            <div className="space-y-3">
+                <Card className="flex items-center justify-between">
+                    <div>
+                        <h4 className="font-bold text-[16px]">스케줄 생성</h4>
+                        <p className="text-[#6B7684] text-[13px]">라운드별 랜덤 대진표</p>
+                    </div>
+                    <Button size="sm" onClick={() => router.push('/admin/schedule')}>
+                        START
+                    </Button>
+                </Card>
+
+                <Card className="flex items-center justify-between">
+                    <div>
+                        <h4 className="font-bold text-[16px]">복식 토너먼트</h4>
+                        <p className="text-[#6B7684] text-[13px]">승자 진출방식 대진표</p>
+                    </div>
+                    <Button size="sm" variant="secondary" onClick={() => router.push('/admin/tournament')}>
+                        CREATE
+                    </Button>
+                </Card>
+            </div>
 
             {/* Recent Matches Feed (Optional Placeholder) */}
             <section>
