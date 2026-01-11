@@ -29,6 +29,9 @@ create table public.profiles (
   skill_manner integer default 50,
   badges text[] default '{}',
   color text default '#D4AF37',
+  membership_type text default 'NONE', -- 'MONTHLY' | 'ANNUAL' | 'NONE'
+  membership_until date,
+  bank_info text, -- Format: "Bank Name 123-456-789"
   updated_at timestamp with time zone,
   
   constraint username_length check (char_length(nickname) >= 2)
@@ -188,3 +191,61 @@ create policy "Users can check their own attendance."
 create policy "Users can update their own attendance."
   on public.attendance for update
   using ( auth.uid() = user_id );
+
+-- SETTLEMENTS & MEMBERSHIP MANAGEMENT
+-- 1. Dues Configuration
+create table public.dues_config (
+  id uuid default uuid_generate_v4() primary key,
+  monthly_fee numeric default 30000,
+  annual_fee numeric default 300000,
+  guest_fee numeric default 10000,
+  updated_at timestamp with time zone default now()
+);
+
+-- 2. Settlements (Revenue)
+create table public.settlements (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id),
+  payer_name text not null, -- Display name or actual sender name
+  amount numeric not null,
+  type text not null, -- 'MONTHLY' | 'ANNUAL' | 'GUEST' | 'OTHER'
+  method text not null, -- 'CASH' | 'TRANSFER'
+  status text default 'UNPAID', -- 'UNPAID' | 'PENDING' | 'PAID'
+  notes text,
+  confirmed_at timestamp with time zone,
+  confirmed_by uuid references public.profiles(id),
+  created_at timestamp with time zone default now()
+);
+
+-- 3. Expenses
+create table public.expenses (
+  id uuid default uuid_generate_v4() primary key,
+  item_name text not null,
+  amount numeric not null,
+  expense_date date default current_date,
+  notes text,
+  created_at timestamp with time zone default now()
+);
+
+-- RLS for Settlements & Expenses
+alter table public.dues_config enable row level security;
+alter table public.settlements enable row level security;
+alter table public.expenses enable row level security;
+
+create policy "Dues config is viewable by everyone" on public.dues_config for select using (true);
+create policy "Settlements are viewable by everyone" on public.settlements for select using (true);
+create policy "Expenses are viewable by everyone" on public.expenses for select using (true);
+
+-- Only ADMIN can insert/update dues_config, settlements, and expenses
+-- Assuming role check in profiles table
+create policy "Admin can manage dues config" on public.dues_config for all 
+  using (exists (select 1 from public.profiles where id = auth.uid() and role = 'ADMIN'));
+
+create policy "Admin can manage settlements" on public.settlements for all 
+  using (exists (select 1 from public.profiles where id = auth.uid() and role = 'ADMIN'));
+
+create policy "Users can insert their own pending transfer" on public.settlements for insert
+  with check (auth.uid() = user_id);
+
+create policy "Admin can manage expenses" on public.expenses for all 
+  using (exists (select 1 from public.profiles where id = auth.uid() and role = 'ADMIN'));

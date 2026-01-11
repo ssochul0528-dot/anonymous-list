@@ -3,7 +3,7 @@
 
 import React from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 
 export default function MainLayout({
@@ -13,6 +13,7 @@ export default function MainLayout({
 }) {
     const { user, isLoading, signOut } = useAuth()
     const router = useRouter()
+    const pathname = usePathname()
 
     React.useEffect(() => {
         if (!isLoading && !user) {
@@ -56,11 +57,12 @@ export default function MainLayout({
             </main>
 
             {/* Bottom Navigation for Mobile */}
-            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-3 flex justify-between items-center z-20 max-w-[600px] mx-auto">
-                <NavItem label="홈" icon="home" path="/" active={false} />
-                <NavItem label="랭킹" icon="chart" path="/rankings" active={false} />
-                <NavItem label="스케줄" icon="calendar" path="/admin/schedule" active={false} />
-                <NavItem label="마이" icon="user" path="/profile" active={false} />
+            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 flex justify-between items-center z-20 max-w-[600px] mx-auto">
+                <NavItem label="홈" icon="home" path="/" active={pathname === '/'} />
+                <NavItem label="랭킹" icon="chart" path="/rankings" active={pathname === '/rankings'} />
+                <NavItem label="스케줄" icon="calendar" path="/admin/schedule" active={pathname?.startsWith('/admin/schedule')} />
+                <NavItem label="정산" icon="wallet" path="/settlement" active={pathname === '/settlement'} />
+                <NavItem label="마이" icon="user" path="/profile" active={pathname === '/profile'} />
             </nav>
         </div>
     )
@@ -74,6 +76,7 @@ function NavItem({ label, icon, path, active }: { label: string; icon: string; p
         home: <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>,
         chart: <path d="M12 20V10M18 20V4M6 20v-4"></path>,
         calendar: <path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm-2-12h-2v2h2V8zm-4 0h-2v2h2V8zm-4 0H7v2h2V8z"></path>,
+        wallet: <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />,
         user: <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
     }
 
@@ -94,6 +97,7 @@ function NavItem({ label, icon, path, active }: { label: string; icon: string; p
             >
                 {icons[icon]}
                 {icon === 'user' && <circle cx="12" cy="7" r="4"></circle>}
+                {icon === 'wallet' && <line x1="18" y1="12" x2="22" y2="12"></line>}
             </svg>
             <span className="text-[11px] font-medium">{label}</span>
         </button>

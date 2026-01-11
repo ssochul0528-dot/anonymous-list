@@ -26,6 +26,9 @@ export default function ProfilePage() {
     const [bio, setBio] = useState('')
     const [photoUrl, setPhotoUrl] = useState<string | null>(null)
     const [cardColor, setCardColor] = useState('#D4AF37') // Default Gold
+    const [membershipType, setMembershipType] = useState('NONE')
+    const [membershipUntil, setMembershipUntil] = useState<string | null>(null)
+    const [bankInfo, setBankInfo] = useState('')
 
     // New Fields
     const [racket, setRacket] = useState('')
@@ -90,6 +93,9 @@ export default function ProfilePage() {
                 setSkillVolley(data.skill_volley || 50)
                 setSkillStamina(data.skill_stamina || 50)
                 setSkillManner(data.skill_manner || 50)
+                setMembershipType(data.membership_type || 'NONE')
+                setMembershipUntil(data.membership_until || null)
+                setBankInfo(data.bank_info || '')
             }
         } catch (error) {
             console.error(error)
@@ -154,6 +160,9 @@ export default function ProfilePage() {
                 skill_volley: skillVolley,
                 skill_stamina: skillStamina,
                 skill_manner: skillManner,
+                membership_type: membershipType,
+                membership_until: membershipUntil,
+                bank_info: bankInfo,
                 updated_at: new Date().toISOString(),
             }
 
@@ -360,6 +369,51 @@ export default function ProfilePage() {
                                 {['하드', '클레이', '인조잔디'].map(t => <option key={t} value={t}>{t}</option>)}
                             </select>
                         </div>
+                    </div>
+                </div>
+
+                {/* Membership Status (Read Only for non-admin, or semi-editable) */}
+                <div className="space-y-4">
+                    <h3 className="font-bold text-[16px] flex items-center gap-2">
+                        <span className="w-1 h-4 bg-purple-500 rounded-full" />
+                        클럽 멤버십
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">회비 납부 방식</label>
+                            <select value={membershipType} onChange={(e) => setMembershipType(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
+                                <option value="NONE">가입 안함</option>
+                                <option value="MONTHLY">월납 회원</option>
+                                <option value="ANNUAL">연납 회원</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">멤버십 만료일</label>
+                            <input
+                                type="date"
+                                value={membershipUntil || ''}
+                                onChange={(e) => setMembershipUntil(e.target.value)}
+                                className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bank Account Info (Admin only for display, but users can set their own if they are a leader) */}
+                <div className="space-y-4">
+                    <h3 className="font-bold text-[16px] flex items-center gap-2">
+                        <span className="w-1 h-4 bg-amber-500 rounded-full" />
+                        정산 계좌 정보
+                    </h3>
+                    <div>
+                        <label className="block text-[13px] font-bold text-[#4E5968] mb-2">입금 받을 계좌 (총무/관리자용)</label>
+                        <input
+                            type="text"
+                            value={bankInfo}
+                            onChange={(e) => setBankInfo(e.target.value)}
+                            className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all font-medium"
+                            placeholder="예: 카카오뱅크 3333-01-234567 홍길동"
+                        />
                     </div>
                 </div>
 
