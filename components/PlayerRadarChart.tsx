@@ -34,7 +34,7 @@ export default function PlayerRadarChart({ skills }: PlayerRadarChartProps) {
     return (
         <div className="w-full h-full flex items-center justify-center p-2">
             <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="65%" data={data}>
+                <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
                     <defs>
                         <linearGradient id="radarGradient" x1="0" y1="0" x2="1" y2="1">
                             <stop offset="0%" stopColor="#00D1FF" stopOpacity={0.8} />

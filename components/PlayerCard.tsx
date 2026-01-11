@@ -132,7 +132,7 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                     <div className="absolute inset-0 z-10 flex flex-col pt-10 pb-6">
                         <h3 className="text-[14px] font-bold tracking-[0.2em] mb-2 text-center" style={{ color: cardColor }}>PLAYER ABILITY</h3>
 
-                        <div className="flex-1 w-full px-4 overflow-hidden">
+                        <div className="w-full flex-1 min-h-[280px] flex items-center justify-center -mt-4">
                             <PlayerRadarChart skills={{
                                 serve: profile.skill_serve || 50,
                                 forehand: profile.skill_forehand || 50,
@@ -143,7 +143,7 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                             }} />
                         </div>
 
-                        <div className="px-8 mt-2">
+                        <div className="px-8 mt-2 space-y-4">
                             <div className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-white/10 pt-4">
                                 <div>
                                     <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Equipment</p>
