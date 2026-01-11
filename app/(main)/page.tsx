@@ -103,13 +103,20 @@ export default function Dashboard() {
                                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                     <h3 className="font-bold text-[17px] tracking-tight">{formatDate(targetDate)} 정기 출석</h3>
                                 </div>
-                                <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest italic tracking-tighter">Attendance Window</span>
+                                <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest italic tracking-tighter">화요일 18:00 마감</span>
                             </div>
 
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
-                                        onClick={() => setAttendanceStatus(attendanceStatus === 'ATTEND' ? null : 'ATTEND')}
+                                        onClick={() => {
+                                            if (attendanceStatus === 'ATTEND' && selectedTime) {
+                                                // If already attended with time, clicking 'Attend' again does nothing
+                                            } else {
+                                                setAttendanceStatus('ATTEND');
+                                                setSelectedTime(null);
+                                            }
+                                        }}
                                         className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ATTEND'
                                                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                                                 : 'bg-white/10 text-white hover:bg-white/20'
@@ -139,18 +146,18 @@ export default function Dashboard() {
                                             <div className="pt-2 grid grid-cols-2 gap-3 border-t border-white/5 mt-2">
                                                 <button
                                                     onClick={() => handleAttendance('ATTEND', '08:00')}
-                                                    className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 ${selectedTime === '08:00'
-                                                            ? 'bg-white text-[#191F28] shadow-lg'
-                                                            : 'bg-white/5 text-white/60 hover:bg-white/10'
+                                                    className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border-2 ${selectedTime === '08:00'
+                                                            ? 'bg-white text-[#191F28] border-white shadow-lg'
+                                                            : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
                                                         }`}
                                                 >
                                                     오전 08:00
                                                 </button>
                                                 <button
                                                     onClick={() => handleAttendance('ATTEND', '09:00')}
-                                                    className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 ${selectedTime === '09:00'
-                                                            ? 'bg-white text-[#191F28] shadow-lg'
-                                                            : 'bg-white/5 text-white/60 hover:bg-white/10'
+                                                    className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border-2 ${selectedTime === '09:00'
+                                                            ? 'bg-white text-[#191F28] border-white shadow-lg'
+                                                            : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
                                                         }`}
                                                 >
                                                     오전 09:00
