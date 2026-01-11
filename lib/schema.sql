@@ -15,6 +15,12 @@ create table public.profiles (
   level text, -- '1' ~ '5'
   photo_url text,
   role text default 'USER', -- 'USER' | 'ADMIN'
+  racket text,
+  string_tension text,
+  pref_time_days text, -- '주말' | '평일' | '무관'
+  pref_time_slots text, -- '아침' | '점심' | '저녁'
+  pref_court_env text, -- '실내' | '실외'
+  pref_court_type text, -- '클레이' | '하드' | '인조잔디'
   updated_at timestamp with time zone,
   
   constraint username_length check (char_length(nickname) >= 2)

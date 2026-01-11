@@ -7,12 +7,14 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function ProfilePage() {
     const { user } = useAuth()
     const supabase = createClient()
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [isFlipped, setIsFlipped] = useState(false)
 
     // Profile State
     const [nickname, setNickname] = useState('')
@@ -21,6 +23,14 @@ export default function ProfilePage() {
     const [bio, setBio] = useState('')
     const [photoUrl, setPhotoUrl] = useState<string | null>(null)
     const [cardColor, setCardColor] = useState('#D4AF37') // Default Gold
+
+    // New Fields
+    const [racket, setRacket] = useState('')
+    const [stringTension, setStringTension] = useState('')
+    const [prefDays, setPrefDays] = useState('무관')
+    const [prefSlots, setPrefSlots] = useState('아침')
+    const [prefEnv, setPrefEnv] = useState('무관')
+    const [prefType, setPrefType] = useState('하드')
 
     useEffect(() => {
         if (user) {
@@ -44,6 +54,12 @@ export default function ProfilePage() {
                 setBio(data.bio || '')
                 setPhotoUrl(data.photo_url || null)
                 // setCardColor(data.color || '#D4AF37')
+                setRacket(data.racket || '')
+                setStringTension(data.string_tension || '')
+                setPrefDays(data.pref_time_days || '무관')
+                setPrefSlots(data.pref_time_slots || '아침')
+                setPrefEnv(data.pref_court_env || '무관')
+                setPrefType(data.pref_court_type || '하드')
             }
         } catch (error) {
             console.error(error)
@@ -96,6 +112,12 @@ export default function ProfilePage() {
                 bio,
                 photo_url: photoUrl,
                 // color: cardColor,
+                racket,
+                string_tension: stringTension,
+                pref_time_days: prefDays,
+                pref_time_slots: prefSlots,
+                pref_court_env: prefEnv,
+                pref_court_type: prefType,
                 updated_at: new Date().toISOString(),
             }
 
@@ -123,185 +145,259 @@ export default function ProfilePage() {
                 <h2 className="text-[20px] font-bold">선수 카드 수정</h2>
             </div>
 
-            {/* Game Card Preview */}
-            <div className="flex justify-center mb-8">
-                <div className="relative w-[300px] h-[480px] rounded-[24px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.3)] transition-transform duration-300 hover:scale-[1.02]">
-                    {/* Background Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#1a1c20] via-[#0f1012] to-[#000000]" />
+            {/* Game Card Preview with 3D Flip */}
+            <div className="flex flex-col items-center mb-8 perspective-1000">
+                <motion.div
+                    className="relative w-[300px] h-[480px] cursor-pointer preserve-3d"
+                    onMouseEnter={() => setIsFlipped(true)}
+                    onMouseLeave={() => setIsFlipped(false)}
+                    onClick={() => setIsFlipped(!isFlipped)}
+                    animate={{ rotateY: isFlipped ? 180 : 0 }}
+                    transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
+                >
+                    {/* Front Side */}
+                    <div className="absolute inset-0 backface-hidden rounded-[24px] overflow-hidden shadow-2xl">
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1c20] via-[#0f1012] to-[#000000]" />
+                        <div className="absolute inset-[4px] rounded-[20px] border-2 bg-gradient-to-br from-[#2a2d33] to-[#151618]" style={{ borderColor: `${cardColor}4D` }} />
+                        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay" />
 
-                    {/* Dynamic Accent/Border */}
-                    <div
-                        className="absolute inset-[4px] rounded-[20px] border-2 bg-gradient-to-br from-[#2a2d33] to-[#151618]"
-                        style={{ borderColor: `${cardColor}4D` }} // 30% opacity
-                    />
-                    <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay" />
-
-                    {/* Top Stats / Rating */}
-                    <div className="absolute top-6 left-6 z-10">
-                        <div className="font-black text-[32px] leading-none drop-shadow-md" style={{ color: cardColor }}>
-                            {style === '공격' ? '92' : style === '수비' ? '88' : '90'}
-                        </div>
-                        <div className="text-white/60 text-[14px] font-bold tracking-widest mt-1">
-                            {position === '전위(네트)' ? 'NET' : position === '후위(베이스)' ? 'BAS' : 'ALL'}
-                        </div>
-                    </div>
-
-                    {/* Badge */}
-                    <div className="absolute top-4 right-6 z-10">
-                        <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center" style={{ borderColor: cardColor }}>
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: cardColor }}>
-                                <span className="text-[10px] font-bold text-black">KR</span>
+                        <div className="absolute top-6 left-6 z-10">
+                            <div className="font-black text-[32px] leading-none drop-shadow-md" style={{ color: cardColor }}>
+                                {style === '공격' ? '92' : style === '수비' ? '88' : '90'}
+                            </div>
+                            <div className="text-white/60 text-[14px] font-bold tracking-widest mt-1 uppercase">
+                                {position === '전위(네트)' ? 'NET' : position === '후위(베이스)' ? 'BAS' : 'ALL'}
                             </div>
                         </div>
-                    </div>
 
-                    {/* Player Image */}
-                    <div className="absolute top-[80px] left-1/2 -translate-x-1/2 w-[200px] h-[200px] z-10">
-                        <div
-                            className="w-full h-full rounded-full border-4 shadow-lg overflow-hidden bg-[#333D4B] relative"
-                            style={{ borderColor: cardColor, boxShadow: `0 0 20px ${cardColor}66` }}
-                        >
-                            {photoUrl ? (
-                                <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-5xl font-bold bg-gradient-to-b from-[#333D4B] to-[#111315]" style={{ color: cardColor }}>
-                                    {getInitials(nickname)}
+                        <div className="absolute top-4 right-6 z-10">
+                            <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center shadow-lg" style={{ borderColor: cardColor }}>
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-white">
+                                    <span className="text-[10px] font-bold text-black italic">TEN</span>
                                 </div>
-                            )}
-                        </div>
-                        <div className="absolute inset-0 rounded-full ring-2 ring-white/10" />
-                    </div>
-
-                    {/* Name & Info */}
-                    <div className="absolute bottom-6 left-6 right-6 z-10 text-center">
-                        <h2 className="text-[28px] font-black text-white uppercase tracking-tight drop-shadow-lg mb-1">
-                            {nickname || 'PLAYER'}
-                        </h2>
-
-                        <div className="h-[2px] w-12 mx-auto mb-4" style={{ backgroundColor: cardColor }} />
-
-                        <div className="grid grid-cols-3 gap-2 text-center text-white">
-                            <div>
-                                <div className="text-[11px] font-bold tracking-wider" style={{ color: cardColor }}>STYLE</div>
-                                <div className="text-[14px] font-bold mt-0.5">{style}</div>
-                            </div>
-                            <div>
-                                <div className="text-[11px] font-bold tracking-wider" style={{ color: cardColor }}>HAND</div>
-                                <div className="text-[14px] font-bold mt-0.5">R</div>
-                            </div>
-                            <div>
-                                <div className="text-[11px] font-bold tracking-wider" style={{ color: cardColor }}>POS</div>
-                                <div className="text-[14px] font-bold mt-0.5">{position === '무관' ? 'ALL' : position.substring(0, 2)}</div>
                             </div>
                         </div>
 
-                        {bio && (
-                            <p className="text-[12px] text-gray-400 mt-4 line-clamp-2 px-2 font-medium">
-                                "{bio}"
+                        <div className="absolute top-[80px] left-1/2 -translate-x-1/2 w-[200px] h-[200px] z-10">
+                            <div className="w-full h-full rounded-full border-4 shadow-2xl overflow-hidden bg-[#333D4B] relative" style={{ borderColor: cardColor, boxShadow: `0 0 30px ${cardColor}66` }}>
+                                {photoUrl ? (
+                                    <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-5xl font-bold bg-gradient-to-b from-[#333D4B] to-[#111315]" style={{ color: cardColor }}>
+                                        {getInitials(nickname)}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="absolute bottom-6 left-6 right-6 z-10 text-center">
+                            <h2 className="text-[28px] font-black text-white uppercase tracking-tight drop-shadow-lg mb-1">{nickname || 'PLAYER'}</h2>
+                            <div className="h-[2px] w-12 mx-auto mb-4" style={{ backgroundColor: cardColor }} />
+                            <div className="grid grid-cols-3 gap-2 text-center text-white">
+                                <div>
+                                    <div className="text-[11px] font-bold tracking-wider" style={{ color: cardColor }}>STYLE</div>
+                                    <div className="text-[14px] font-bold mt-0.5">{style}</div>
+                                </div>
+                                <div>
+                                    <div className="text-[11px] font-bold tracking-wider" style={{ color: cardColor }}>HAND</div>
+                                    <div className="text-[14px] font-bold mt-0.5">R</div>
+                                </div>
+                                <div>
+                                    <div className="text-[11px] font-bold tracking-wider" style={{ color: cardColor }}>POS</div>
+                                    <div className="text-[14px] font-bold mt-0.5">{position === '무관' ? 'ALL' : position.substring(0, 2)}</div>
+                                </div>
+                            </div>
+                            <p className="text-[12px] text-gray-400 mt-4 line-clamp-2 px-2 font-medium italic opacity-70">
+                                {bio || "Elite Tennis Player"}
                             </p>
-                        )}
+                        </div>
                     </div>
-                </div>
+
+                    {/* Back Side */}
+                    <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-[24px] overflow-hidden shadow-2xl">
+                        <div className="absolute inset-0 bg-[#0A0B0D]" />
+                        <div className="absolute inset-[4px] rounded-[20px] border-2 bg-gradient-to-br from-[#1a1c20] to-[#0a0b0d]" style={{ borderColor: cardColor }} />
+
+                        <div className="absolute top-8 left-0 right-0 z-10 text-center">
+                            <h3 className="text-[14px] font-bold tracking-[0.2em] mb-4" style={{ color: cardColor }}>EQUIPMENT & PREFS</h3>
+                            <div className="space-y-6 px-8 text-left">
+                                <div>
+                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Racket</p>
+                                    <p className="text-[16px] font-bold text-white">{racket || '-'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">String / Tension</p>
+                                    <p className="text-[16px] font-bold text-white">{stringTension || '-'}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Schedule</p>
+                                        <p className="text-[13px] font-bold text-white">{prefDays} / {prefSlots}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Court</p>
+                                        <p className="text-[13px] font-bold text-white">{prefEnv} / {prefType}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[70%] h-[120px] bg-gradient-to-t from-white/5 to-transparent rounded-t-3xl border-t border-white/10 flex flex-col items-center justify-center">
+                                <div className="text-[10px] font-black tracking-[0.3em] text-white/20 mb-2 italic">PRO PERFORMANCE</div>
+                                <div className="w-12 h-1 bg-white/20 rounded-full" />
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+                <p className="mt-4 text-[12px] text-[#6B7684] font-medium flex items-center gap-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 11 3 3 3-3" /><path d="m22 13-3-3-3 3" /><path d="M5 14v1a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-1" /></svg>
+                    마우스로 카드를 뒤집어보세요
+                </p>
             </div>
 
-            <Card className="space-y-6">
-                <div>
-                    <label className="block text-[13px] font-bold text-[#333D4B] mb-2">카드 테마 색상</label>
-                    <div className="flex gap-3 overflow-x-auto pb-2">
-                        {['#D4AF37', '#E53E3E', '#3182CE', '#38A169', '#805AD5', '#D69E2E', '#718096'].map((c) => (
-                            <button
-                                key={c}
-                                onClick={() => setCardColor(c)}
-                                className={`w-10 h-10 rounded-full flex-shrink-0 transition-all ${cardColor === c ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : ''}`}
-                                style={{ backgroundColor: c }}
-                            />
-                        ))}
-                    </div>
-                </div>
-                <div>
-                    <label className="block text-[13px] font-bold text-[#333D4B] mb-2">프로필 사진</label>
-                    <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-[#F2F4F6] overflow-hidden flex-shrink-0 border border-gray-200">
-                            {photoUrl ? (
-                                <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold">
-                                    ?
-                                </div>
-                            )}
+            <Card className="space-y-8 p-6 md:p-8">
+                {/* Visual Settings */}
+                <div className="space-y-4">
+                    <h3 className="font-bold text-[16px] flex items-center gap-2">
+                        <span className="w-1 h-4 bg-[#0064FF] rounded-full" />
+                        카드 커스텀
+                    </h3>
+                    <div>
+                        <label className="block text-[13px] font-bold text-[#4E5968] mb-3">테마 색상</label>
+                        <div className="flex gap-3 overflow-x-auto pb-2">
+                            {['#D4AF37', '#E53E3E', '#3182CE', '#38A169', '#805AD5', '#FAAD14', '#191F28'].map((c) => (
+                                <button
+                                    key={c}
+                                    onClick={() => setCardColor(c)}
+                                    className={`w-10 h-10 rounded-full flex-shrink-0 transition-all ${cardColor === c ? 'ring-2 ring-offset-2 ring-[#0064FF] scale-110' : 'opacity-80 hover:scale-105'}`}
+                                    style={{ backgroundColor: c }}
+                                />
+                            ))}
                         </div>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            className="block w-full text-sm text-gray-500
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-full file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-[#E5E8EB] file:text-[#333D4B]
-                                hover:file:bg-[#D1D6DB]
-                            "
-                        />
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-[13px] font-bold text-[#333D4B] mb-2">닉네임 (필수)</label>
-                    <input
-                        type="text"
-                        value={nickname}
-                        onChange={(e) => setNickname(e.target.value)}
-                        className="w-full p-3 bg-[#F9FAFB] rounded-[12px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all"
-                        placeholder="코트 위 별명을 입력하세요"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-[13px] font-bold text-[#333D4B] mb-2">플레이 스타일</label>
-                    <div className="flex gap-2">
-                        {['공격', '수비', '올라운드'].map((s) => (
-                            <button
-                                key={s}
-                                onClick={() => setStyle(s)}
-                                className={`flex-1 py-3 rounded-[12px] text-[14px] font-medium transition-all ${style === s ? 'bg-[#0064FF] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'
-                                    }`}
-                            >
-                                {s}
-                            </button>
-                        ))}
+                {/* Personal Info */}
+                <div className="space-y-4">
+                    <h3 className="font-bold text-[16px] flex items-center gap-2">
+                        <span className="w-1 h-4 bg-[#0064FF] rounded-full" />
+                        선수 정보
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">닉네임 (필수)</label>
+                            <input
+                                type="text"
+                                value={nickname}
+                                onChange={(e) => setNickname(e.target.value)}
+                                className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all font-medium"
+                                placeholder="코트 위 별명"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">프로필 사진</label>
+                            <div className="flex items-center gap-3">
+                                <label className="flex-1 p-4 bg-[#F2F4F6] rounded-[16px] border-none text-[14px] font-bold text-center cursor-pointer hover:bg-gray-200 transition-colors">
+                                    사진 선택하기
+                                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-[13px] font-bold text-[#4E5968] mb-2">플레이 스타일</label>
+                        <div className="flex gap-2">
+                            {['공격', '수비', '올라운드'].map((s) => (
+                                <button key={s} onClick={() => setStyle(s)} className={`flex-1 py-4 rounded-[16px] text-[14px] font-bold transition-all ${style === s ? 'bg-[#0064FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#F2F4F6] text-[#6B7684]'}`}>{s}</button>
+                            ))}
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-[13px] font-bold text-[#4E5968] mb-2">선호 포지션</label>
+                        <div className="flex gap-2">
+                            {['전위(네트)', '후위(베이스)', '무관'].map((p) => (
+                                <button key={p} onClick={() => setPosition(p)} className={`flex-1 py-4 rounded-[16px] text-[14px] font-bold transition-all ${position === p ? 'bg-[#333D4B] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'}`}>{p}</button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-[13px] font-bold text-[#333D4B] mb-2">선호 포지션</label>
-                    <div className="flex gap-2">
-                        {['전위(네트)', '후위(베이스)', '무관'].map((p) => (
-                            <button
-                                key={p}
-                                onClick={() => setPosition(p)}
-                                className={`flex-1 py-3 rounded-[12px] text-[14px] font-medium transition-all ${position === p ? 'bg-[#333D4B] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'
-                                    }`}
-                            >
-                                {p}
-                            </button>
-                        ))}
+                {/* Equipment */}
+                <div className="space-y-4">
+                    <h3 className="font-bold text-[16px] flex items-center gap-2">
+                        <span className="w-1 h-4 bg-[#0064FF] rounded-full" />
+                        장비 정보
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">사용 라켓</label>
+                            <input
+                                type="text"
+                                value={racket}
+                                onChange={(e) => setRacket(e.target.value)}
+                                className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all font-medium"
+                                placeholder="예: 바볼랏 퓨어에어로"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">스트링 / 텐션</label>
+                            <input
+                                type="text"
+                                value={stringTension}
+                                onChange={(e) => setStringTension(e.target.value)}
+                                className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all font-medium"
+                                placeholder="예: 알루파워 48lbs"
+                            />
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-[13px] font-bold text-[#333D4B] mb-2">한 줄 소개</label>
-                    <textarea
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        className="w-full p-3 bg-[#F9FAFB] rounded-[12px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all resize-none h-24"
-                        placeholder="자신을 소개해보세요."
-                    />
+                {/* Preferences */}
+                <div className="space-y-4">
+                    <h3 className="font-bold text-[16px] flex items-center gap-2">
+                        <span className="w-1 h-4 bg-[#0064FF] rounded-full" />
+                        선호 환경
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">요일</label>
+                            <select value={prefDays} onChange={(e) => setPrefDays(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
+                                {['주말', '평일', '무관'].map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">시간대</label>
+                            <select value={prefSlots} onChange={(e) => setPrefSlots(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
+                                {['아침', '점심', '저녁'].map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">실내/실외</label>
+                            <select value={prefEnv} onChange={(e) => setPrefEnv(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
+                                {['실내', '실외', '무관'].map(e => <option key={e} value={e}>{e}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">코트 종류</label>
+                            <select value={prefType} onChange={(e) => setPrefType(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
+                                {['하드', '클레이', '인조잔디'].map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <Button fullWidth size="lg" onClick={updateProfile} disabled={loading}>
-                    {loading ? '저장 중...' : '저장하기'}
-                </Button>
+                <div className="pt-4">
+                    <Button fullWidth size="lg" onClick={updateProfile} disabled={loading} className="h-16 text-[18px] font-black rounded-[20px] shadow-xl shadow-blue-500/20">
+                        {loading ? '저장 중...' : '프로필 완성하기'}
+                    </Button>
+                </div>
             </Card>
+
+            <style jsx global>{`
+                .perspective-1000 { perspective: 1000px; }
+                .preserve-3d { transform-style: preserve-3d; }
+                .backface-hidden { backface-visibility: hidden; }
+                .rotate-y-180 { transform: rotateY(180deg); }
+            `}</style>
         </div>
     )
 }
