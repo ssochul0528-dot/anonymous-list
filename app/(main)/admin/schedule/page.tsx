@@ -1,10 +1,11 @@
 
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 // Initial List for manual input or selection (Mock for MVP)
 const MOCK_PLAYERS = [
@@ -19,12 +20,39 @@ export default function ScheduleGeneratorPage() {
     const [courtCount, setCourtCount] = useState(2)
     const [roundCount, setRoundCount] = useState(4)
     const [participants, setParticipants] = useState<string[]>([])
+    const [allPlayers, setAllPlayers] = useState<{ id: string, name: string }[]>([])
 
     // Input State
     const [newPlayerName, setNewPlayerName] = useState('')
 
     // Result State
     const [schedule, setSchedule] = useState<any[] | null>(null)
+
+    useEffect(() => {
+        const fetchPlayers = async () => {
+            const supabase = createClient()
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id, real_name, nickname')
+                .order('real_name', { ascending: true })
+
+            if (!error && data) {
+                setAllPlayers(data.map(p => ({
+                    id: p.id,
+                    name: p.real_name || p.nickname || 'Unknown'
+                })))
+            }
+        }
+        fetchPlayers()
+    }, [])
+
+    const togglePlayer = (name: string) => {
+        if (participants.includes(name)) {
+            setParticipants(participants.filter(p => p !== name))
+        } else {
+            setParticipants([...participants, name])
+        }
+    }
 
     const addPlayer = () => {
         if (newPlayerName.trim()) {
@@ -161,31 +189,63 @@ export default function ScheduleGeneratorPage() {
                     <Card>
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold">2. 참가자 ({participants.length}명)</h3>
-                            <button onClick={addMockPlayers} className="text-[12px] text-[#0064FF] underline">
-                                기본 명단 불러오기
-                            </button>
+                            {allPlayers.length === 0 && (
+                                <button onClick={addMockPlayers} className="text-[12px] text-[#0064FF] underline">
+                                    기본 명단 불러오기
+                                </button>
+                            )}
                         </div>
 
-                        <div className="flex gap-2 mb-4">
-                            <input
-                                value={newPlayerName}
-                                onChange={(e) => setNewPlayerName(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
-                                placeholder="이름 입력"
-                                className="flex-1 bg-[#F9FAFB] px-3 rounded-[12px] outline-none"
-                            />
-                            <Button size="sm" onClick={addPlayer}>추가</Button>
+                        {/* Registered Players Selection */}
+                        {allPlayers.length > 0 && (
+                            <div className="mb-6">
+                                <label className="block text-[13px] text-[#6B7684] mb-3 font-medium text-xs">등록된 선수 선택 (클릭하여 추가/제외)</label>
+                                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-3 bg-[#F9FAFB] rounded-[16px] border border-[#F2F4F6]">
+                                    {allPlayers.map((player) => {
+                                        const isSelected = participants.includes(player.name)
+                                        return (
+                                            <button
+                                                key={player.id}
+                                                onClick={() => togglePlayer(player.name)}
+                                                className={`text-[13px] px-4 py-2 rounded-full border transition-all duration-200 ${isSelected
+                                                    ? "bg-[#0064FF] text-white border-[#0064FF] font-semibold shadow-sm"
+                                                    : "bg-white text-[#4E5968] border-[#E5E8EB] hover:bg-[#F2F4F6]"
+                                                    }`}
+                                            >
+                                                {player.name}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex flex-col gap-2 mb-4">
+                            <label className="block text-[13px] text-[#6B7684] font-medium text-xs">직접 입력 (게스트)</label>
+                            <div className="flex gap-2">
+                                <input
+                                    value={newPlayerName}
+                                    onChange={(e) => setNewPlayerName(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
+                                    placeholder="이름 입력"
+                                    className="flex-1 bg-[#F9FAFB] h-11 px-4 rounded-[12px] outline-none border border-transparent focus:border-[#0064FF] transition-all text-[15px]"
+                                />
+                                <Button size="sm" onClick={addPlayer} className="h-11 px-6">추가</Button>
+                            </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 pt-2 border-t border-[#F2F4F6] mt-4 capitalize">
+                            <span className="w-full text-[12px] text-[#8B95A1] mb-1">현재 명단:</span>
                             {participants.map((p, i) => (
-                                <div key={i} className="bg-[#F2F4F6] px-3 py-1.5 rounded-full text-[14px] flex items-center gap-1">
+                                <div key={i} className="bg-[#E8F3FF] text-[#0064FF] px-3 py-1.5 rounded-full text-[14px] flex items-center gap-1 font-semibold border border-[#D0E5FF]">
                                     {p}
-                                    <button onClick={() => setParticipants(participants.filter((_, idx) => idx !== i))} className="opacity-50 hover:opacity-100">×</button>
+                                    <button onClick={() => setParticipants(participants.filter((_, idx) => idx !== i))} className="hover:text-red-500 transition-colors ml-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                    </button>
                                 </div>
                             ))}
                             {participants.length === 0 && (
-                                <p className="text-[#8B95A1] text-[13px]">참가자를 추가해주세요.</p>
+                                <p className="text-[#8B95A1] text-[13px] py-2 italic">참가자를 선택하거나 이름을 직접 추가해주세요.</p>
                             )}
                         </div>
                     </Card>
