@@ -4,12 +4,15 @@
 import React, { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { createClient } from '@/lib/supabase/client'
+import { motion, AnimatePresence } from 'framer-motion'
+import PlayerCard from '@/components/PlayerCard'
 
 export default function RankingsPage() {
     const supabase = createClient()
     const [loading, setLoading] = useState(true)
     const [rankings, setRankings] = useState<any[]>([])
     const [filter, setFilter] = useState<'WEEK' | 'ALL'>('WEEK')
+    const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
 
     useEffect(() => {
         fetchRankings()
@@ -22,8 +25,12 @@ export default function RankingsPage() {
             const { data: profiles, error: pError } = await supabase.from('profiles').select('*')
             if (pError) throw pError
 
+            // Map profiles to original table structure for PlayerCard compatibility
+            // The Ranking aggregation logic might need more data from profiles
+            const profileMap: Record<string, any> = {}
+            profiles.forEach((p: any) => { profileMap[p.id] = p })
+
             // 2. Fetch Scores
-            // In a real app, filtering by date/week would happen here
             const { data: scores, error: sError } = await supabase.from('scores').select('*')
             if (sError) throw sError
 
@@ -32,14 +39,10 @@ export default function RankingsPage() {
 
             profiles.forEach((p: any) => {
                 stats[p.id] = {
-                    id: p.id,
-                    nickname: p.nickname || '무명',
-                    photoUrl: p.photo_url,
-                    level: p.level,
+                    ...p, // Spread all profile data (badges, racket, skills etc)
                     points: 0,
                     wins: 0,
                     matches: 0,
-                    // losses/draws if needed
                 }
             })
 
@@ -51,7 +54,6 @@ export default function RankingsPage() {
                 }
             })
 
-            // 4. Sort (Points > Wins > Matches > Name)
             const sorted = Object.values(stats).sort((a: any, b: any) => {
                 if (b.points !== a.points) return b.points - a.points
                 if (b.wins !== a.wins) return b.wins - a.wins
@@ -99,6 +101,7 @@ export default function RankingsPage() {
                             key={player.id}
                             rank={index + 1}
                             player={player}
+                            onPhotoClick={() => setSelectedPlayer(player)}
                         />
                     ))}
 
@@ -109,11 +112,41 @@ export default function RankingsPage() {
                     )}
                 </div>
             )}
+
+            {/* Player Card Modal */}
+            <AnimatePresence>
+                {selectedPlayer && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedPlayer(null)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative z-10"
+                        >
+                            <PlayerCard profile={selectedPlayer} />
+                            <button
+                                onClick={() => setSelectedPlayer(null)}
+                                className="absolute -top-12 right-0 text-white/60 hover:text-white flex items-center gap-1 font-medium bg-white/10 px-4 py-2 rounded-full backdrop-blur-md"
+                            >
+                                <span>닫기</span>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }
 
-function RankingCard({ rank, player }: any) {
+function RankingCard({ rank, player, onPhotoClick }: any) {
     const isTop3 = rank <= 3
     const cardColor = player.color || '#D4AF37' // Fallback to gold if no color
 
@@ -142,13 +175,13 @@ function RankingCard({ rank, player }: any) {
                 </div>
 
                 {/* 2. Photo / Avatar */}
-                <div className="relative">
+                <div className="relative cursor-pointer group" onClick={onPhotoClick}>
                     <div
-                        className="w-14 h-14 rounded-full border-2 overflow-hidden bg-[#333D4B] shadow-lg"
+                        className="w-14 h-14 rounded-full border-2 overflow-hidden bg-[#333D4B] shadow-lg transition-transform group-hover:scale-105"
                         style={{ borderColor: cardColor }}
                     >
-                        {player.photoUrl ? (
-                            <img src={player.photoUrl} alt={player.nickname} className="w-full h-full object-cover" />
+                        {player.photo_url ? (
+                            <img src={player.photo_url} alt={player.nickname} className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-xl font-bold text-white bg-gradient-to-b from-[#333D4B] to-[#111315]">
                                 {player.nickname?.[0]}
@@ -162,6 +195,8 @@ function RankingCard({ rank, player }: any) {
                     >
                         KR
                     </div>
+                    {/* View Label on hover */}
+                    <div className="absolute -top-1 px-1 bg-black/60 rounded text-[8px] text-white opacity-0 group-hover:opacity-100 transition-opacity">VIEW</div>
                 </div>
 
                 {/* 3. Info */}
