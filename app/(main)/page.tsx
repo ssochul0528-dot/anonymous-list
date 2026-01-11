@@ -1,4 +1,6 @@
 
+'use client'
+
 import React, { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -103,8 +105,8 @@ export default function Dashboard() {
                                 <button
                                     onClick={() => handleAttendance('ATTEND')}
                                     className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ATTEND'
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-[1.02]'
-                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-[1.02]'
+                                        : 'bg-white/10 text-white hover:bg-white/20'
                                         }`}
                                 >
                                     {attendanceStatus === 'ATTEND' && (
@@ -115,8 +117,8 @@ export default function Dashboard() {
                                 <button
                                     onClick={() => handleAttendance('ABSENT')}
                                     className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ABSENT'
-                                            ? 'bg-red-500/80 text-white shadow-lg shadow-red-500/30 scale-[1.02]'
-                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                        ? 'bg-red-500/80 text-white shadow-lg shadow-red-500/30 scale-[1.02]'
+                                        : 'bg-white/10 text-white hover:bg-white/20'
                                         }`}
                                 >
                                     {attendanceStatus === 'ABSENT' && (
