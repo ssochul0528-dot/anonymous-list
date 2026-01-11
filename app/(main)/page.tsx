@@ -20,32 +20,49 @@ export default function Dashboard() {
     const [attendanceStatus, setAttendanceStatus] = useState<string | null>(null)
     const [selectedTime, setSelectedTime] = useState<string | null>(null)
     const [isLoadingAttendance, setIsLoadingAttendance] = useState(true)
+    const [isAdmin, setIsAdmin] = useState(false)
     const targetDate = getAttendanceTargetDate()
     const isOpen = isAttendanceWindowOpen()
 
+    const SUPER_ADMIN_EMAIL = 'ssochul@naver.com'
+
     useEffect(() => {
-        const fetchAttendance = async () => {
+        const checkUser = async () => {
             const supabase = createClient()
             const { data: { user } } = await supabase.auth.getUser()
+
             if (!user) {
                 setIsLoadingAttendance(false)
                 return
             }
 
-            const { data, error } = await supabase
+            // Check Admin Status
+            if (user.email === SUPER_ADMIN_EMAIL) {
+                setIsAdmin(true)
+            } else {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single()
+                if (profile?.role === 'ADMIN') setIsAdmin(true)
+            }
+
+            // Fetch Attendance
+            const { data: attData, error: attError } = await supabase
                 .from('attendance')
                 .select('status, preferred_time')
                 .eq('user_id', user.id)
                 .eq('target_date', targetDate.toISOString().split('T')[0])
                 .maybeSingle()
 
-            if (!error && data) {
-                setAttendanceStatus(data.status)
-                setSelectedTime(data.preferred_time)
+            if (!attError && attData) {
+                setAttendanceStatus(attData.status)
+                setSelectedTime(attData.preferred_time)
             }
             setIsLoadingAttendance(false)
         }
-        fetchAttendance()
+        checkUser()
     }, [targetDate])
 
     const handleAttendance = async (status: string, time?: string) => {
@@ -118,8 +135,8 @@ export default function Dashboard() {
                                             }
                                         }}
                                         className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ATTEND'
-                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                                                : 'bg-white/10 text-white hover:bg-white/20'
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                            : 'bg-white/10 text-white hover:bg-white/20'
                                             }`}
                                     >
                                         참석
@@ -127,8 +144,8 @@ export default function Dashboard() {
                                     <button
                                         onClick={() => handleAttendance('ABSENT')}
                                         className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ABSENT'
-                                                ? 'bg-red-500/80 text-white shadow-lg shadow-red-500/30'
-                                                : 'bg-white/10 text-white hover:bg-white/20'
+                                            ? 'bg-red-500/80 text-white shadow-lg shadow-red-500/30'
+                                            : 'bg-white/10 text-white hover:bg-white/20'
                                             }`}
                                     >
                                         참석불가
@@ -147,8 +164,8 @@ export default function Dashboard() {
                                                 <button
                                                     onClick={() => handleAttendance('ATTEND', '08:00')}
                                                     className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border-2 ${selectedTime === '08:00'
-                                                            ? 'bg-white text-[#191F28] border-white shadow-lg'
-                                                            : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
+                                                        ? 'bg-white text-[#191F28] border-white shadow-lg'
+                                                        : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
                                                         }`}
                                                 >
                                                     오전 08:00
@@ -156,8 +173,8 @@ export default function Dashboard() {
                                                 <button
                                                     onClick={() => handleAttendance('ATTEND', '09:00')}
                                                     className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border-2 ${selectedTime === '09:00'
-                                                            ? 'bg-white text-[#191F28] border-white shadow-lg'
-                                                            : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
+                                                        ? 'bg-white text-[#191F28] border-white shadow-lg'
+                                                        : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
                                                         }`}
                                                 >
                                                     오전 09:00
@@ -241,27 +258,41 @@ export default function Dashboard() {
             </div>
 
             {/* Admin Action */}
-            <div className="space-y-3">
-                <Card className="flex items-center justify-between border-none shadow-sm hover:shadow-md transition-shadow">
-                    <div>
-                        <h4 className="font-bold text-[16px] text-[#333D4B]">스케줄 생성</h4>
-                        <p className="text-[#8B95A1] text-[13px]">라운드별 랜덤 대진표</p>
-                    </div>
-                    <Button size="sm" variant="secondary" onClick={() => router.push('/admin/schedule')}>
-                        START
-                    </Button>
-                </Card>
+            {isAdmin && (
+                <div className="space-y-3">
+                    <h3 className="font-bold text-[18px] px-1 text-[#333D4B]">관리자 전용</h3>
 
-                <Card className="flex items-center justify-between border-none shadow-sm hover:shadow-md transition-shadow">
-                    <div>
-                        <h4 className="font-bold text-[16px] text-[#333D4B]">복식 토너먼트</h4>
-                        <p className="text-[#8B95A1] text-[13px]">승자 진출방식 대진표</p>
-                    </div>
-                    <Button size="sm" variant="secondary" onClick={() => router.push('/admin/tournament')}>
-                        CREATE
-                    </Button>
-                </Card>
-            </div>
+                    <Card className="flex items-center justify-between border-none shadow-sm hover:shadow-md transition-shadow bg-[#191F28] text-white">
+                        <div>
+                            <h4 className="font-bold text-[16px]">경기 결과 관리</h4>
+                            <p className="text-white/50 text-[13px]">지난 게임 수정 및 삭제</p>
+                        </div>
+                        <Button size="sm" onClick={() => router.push('/admin/history')}>
+                            MANAGE
+                        </Button>
+                    </Card>
+
+                    <Card className="flex items-center justify-between border-none shadow-sm hover:shadow-md transition-shadow">
+                        <div>
+                            <h4 className="font-bold text-[16px] text-[#333D4B]">스케줄 생성</h4>
+                            <p className="text-[#8B95A1] text-[13px]">라운드별 랜덤 대진표</p>
+                        </div>
+                        <Button size="sm" variant="secondary" onClick={() => router.push('/admin/schedule')}>
+                            START
+                        </Button>
+                    </Card>
+
+                    <Card className="flex items-center justify-between border-none shadow-sm hover:shadow-md transition-shadow">
+                        <div>
+                            <h4 className="font-bold text-[16px] text-[#333D4B]">복식 토너먼트</h4>
+                            <p className="text-[#8B95A1] text-[13px]">승자 진출방식 대진표</p>
+                        </div>
+                        <Button size="sm" variant="secondary" onClick={() => router.push('/admin/tournament')}>
+                            CREATE
+                        </Button>
+                    </Card>
+                </div>
+            )}
 
             {/* Recent Matches Feed */}
             <section>
