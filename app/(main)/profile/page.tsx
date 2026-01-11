@@ -169,8 +169,6 @@ export default function ProfilePage() {
         }
     }
 
-    // Helper to get initials
-    const getInitials = (name: string) => name ? name.substring(0, 2).toUpperCase() : '??'
 
     return (
         <div className="pt-2 pb-20 space-y-6">
@@ -371,36 +369,6 @@ export default function ProfilePage() {
                     </Button>
                 </div>
             </Card>
-
-            <style jsx global>{`
-                .perspective-1000 { perspective: 1000px; }
-                .preserve-3d { transform-style: preserve-3d; }
-                .backface-hidden { backface-visibility: hidden; }
-                .rotate-y-180 { transform: rotateY(180deg); }
-                
-                @keyframes shine {
-                    0% { transform: translateX(-100%); }
-                    100% { transform: translateX(100%); }
-                }
-                .animate-shine {
-                    animation: shine 2s infinite;
-                }
-                @keyframes hologram {
-                    0% { background-position: 0% 0%; }
-                    50% { background-position: 100% 100%; }
-                    100% { background-position: 0% 0%; }
-                }
-                .animate-hologram {
-                    animation: hologram 6s ease infinite;
-                }
-                @keyframes shimmer {
-                    0% { transform: translateX(-100%); }
-                    100% { transform: translateX(100%); }
-                }
-                .animate-shimmer {
-                    animation: shimmer 3s infinite;
-                }
-            `}</style>
         </div>
     )
 }
