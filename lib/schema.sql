@@ -154,6 +154,7 @@ create table public.attendance (
   user_id uuid references public.profiles(id) not null,
   target_date date not null, -- Every Wednesday date
   status text not null, -- 'ATTEND' | 'ABSENT'
+  preferred_time text, -- '08:00' | '09:00'
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now(),
 

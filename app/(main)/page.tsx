@@ -18,6 +18,7 @@ export default function Dashboard() {
 
     // Attendance State
     const [attendanceStatus, setAttendanceStatus] = useState<string | null>(null)
+    const [selectedTime, setSelectedTime] = useState<string | null>(null)
     const [isLoadingAttendance, setIsLoadingAttendance] = useState(true)
     const targetDate = getAttendanceTargetDate()
     const isOpen = isAttendanceWindowOpen()
@@ -33,20 +34,21 @@ export default function Dashboard() {
 
             const { data, error } = await supabase
                 .from('attendance')
-                .select('status')
+                .select('status, preferred_time')
                 .eq('user_id', user.id)
                 .eq('target_date', targetDate.toISOString().split('T')[0])
                 .maybeSingle()
 
             if (!error && data) {
                 setAttendanceStatus(data.status)
+                setSelectedTime(data.preferred_time)
             }
             setIsLoadingAttendance(false)
         }
         fetchAttendance()
     }, [targetDate])
 
-    const handleAttendance = async (status: string) => {
+    const handleAttendance = async (status: string, time?: string) => {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
@@ -61,11 +63,14 @@ export default function Dashboard() {
                 user_id: user.id,
                 target_date: targetDate.toISOString().split('T')[0],
                 status,
+                preferred_time: time || null,
                 updated_at: new Date().toISOString()
             }, { onConflict: 'user_id,target_date' })
 
         if (!error) {
             setAttendanceStatus(status)
+            if (time) setSelectedTime(time)
+            if (status === 'ABSENT') setSelectedTime(null)
         } else {
             console.error('Attendance error:', error)
             alert('출석체크 중 오류가 발생했습니다.')
@@ -75,7 +80,7 @@ export default function Dashboard() {
     return (
         <div className="space-y-6 pt-2">
             {/* Top Summary */}
-            <section className="flex justify-between items-end">
+            <section className="flex justify-between items-end px-1">
                 <div>
                     <h2 className="text-[24px] font-bold mb-1">이번 주 {currentWeek}</h2>
                     <p className="text-[#6B7684]">오늘도 즐거운 테니스 되세요!</p>
@@ -96,45 +101,75 @@ export default function Dashboard() {
                             <div className="flex justify-between items-center mb-5">
                                 <div className="flex items-center gap-2">
                                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <h3 className="font-bold text-[17px] tracking-tight">{formatDate(targetDate)} 출석체크</h3>
+                                    <h3 className="font-bold text-[17px] tracking-tight">{formatDate(targetDate)} 정기 출석</h3>
                                 </div>
-                                <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest italic">Wednesday 08:00</span>
+                                <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest italic tracking-tighter">Attendance Window</span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={() => handleAttendance('ATTEND')}
-                                    className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ATTEND'
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-[1.02]'
-                                        : 'bg-white/10 text-white hover:bg-white/20'
-                                        }`}
-                                >
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={() => setAttendanceStatus(attendanceStatus === 'ATTEND' ? null : 'ATTEND')}
+                                        className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ATTEND'
+                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                                : 'bg-white/10 text-white hover:bg-white/20'
+                                            }`}
+                                    >
+                                        참석
+                                    </button>
+                                    <button
+                                        onClick={() => handleAttendance('ABSENT')}
+                                        className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ABSENT'
+                                                ? 'bg-red-500/80 text-white shadow-lg shadow-red-500/30'
+                                                : 'bg-white/10 text-white hover:bg-white/20'
+                                            }`}
+                                    >
+                                        참석불가
+                                    </button>
+                                </div>
+
+                                <AnimatePresence>
                                     {attendanceStatus === 'ATTEND' && (
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="pt-2 grid grid-cols-2 gap-3 border-t border-white/5 mt-2">
+                                                <button
+                                                    onClick={() => handleAttendance('ATTEND', '08:00')}
+                                                    className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 ${selectedTime === '08:00'
+                                                            ? 'bg-white text-[#191F28] shadow-lg'
+                                                            : 'bg-white/5 text-white/60 hover:bg-white/10'
+                                                        }`}
+                                                >
+                                                    오전 08:00
+                                                </button>
+                                                <button
+                                                    onClick={() => handleAttendance('ATTEND', '09:00')}
+                                                    className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 ${selectedTime === '09:00'
+                                                            ? 'bg-white text-[#191F28] shadow-lg'
+                                                            : 'bg-white/5 text-white/60 hover:bg-white/10'
+                                                        }`}
+                                                >
+                                                    오전 09:00
+                                                </button>
+                                            </div>
+                                        </motion.div>
                                     )}
-                                    출석
-                                </button>
-                                <button
-                                    onClick={() => handleAttendance('ABSENT')}
-                                    className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ABSENT'
-                                        ? 'bg-red-500/80 text-white shadow-lg shadow-red-500/30 scale-[1.02]'
-                                        : 'bg-white/10 text-white hover:bg-white/20'
-                                        }`}
-                                >
-                                    {attendanceStatus === 'ABSENT' && (
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                                    )}
-                                    참석불가
-                                </button>
+                                </AnimatePresence>
                             </div>
 
                             {attendanceStatus && (
                                 <motion.p
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="text-center text-[12px] text-white/40 mt-4 font-medium"
+                                    className="text-center text-[12px] text-white/40 mt-4 font-bold uppercase"
                                 >
-                                    {attendanceStatus === 'ATTEND' ? '👍 출석이 완료되었습니다!' : '😢 다음에 함께해요!'}
+                                    {attendanceStatus === 'ATTEND'
+                                        ? (selectedTime ? `✅ ${selectedTime} 출석 완료!` : '⏰ 시간을 선택해주세요')
+                                        : '❌ 이번 주는 참석불가'}
                                 </motion.p>
                             )}
                         </div>
