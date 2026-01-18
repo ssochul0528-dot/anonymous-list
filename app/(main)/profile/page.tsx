@@ -249,11 +249,11 @@ export default function ProfilePage() {
 
                 {/* Signature Badges Preview */}
                 <div className="space-y-4">
-                    <h3 className="font-bold text-[16px] flex items-center gap-2">
-                        <span className="w-1 h-4 bg-[#FFD700] rounded-full" />
-                        획득한 시그니처 배지
+                    <h3 className="font-black text-[14px] flex items-center gap-2 text-white/40 uppercase tracking-widest italic">
+                        <span className="w-1 h-3 bg-[#FFD700] rounded-full shadow-[0_0_8px_#FFD700]" />
+                        SIGNATURE BADGES
                     </h3>
-                    <div className="bg-[#F2F4F6] p-4 rounded-[20px] min-h-[80px] flex items-center justify-center">
+                    <div className="bg-white/5 p-5 rounded-[24px] min-h-[100px] flex items-center justify-center border border-white/5 shadow-inner">
                         {getActiveBadges().length > 0 ? (
                             <SignatureBadges activeBadgeIds={getActiveBadges()} />
                         ) : (
@@ -263,19 +263,19 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Visual Settings */}
-                <div className="space-y-4">
-                    <h3 className="font-bold text-[16px] flex items-center gap-2">
-                        <span className="w-1 h-4 bg-[#0064FF] rounded-full" />
-                        카드 커스텀
+                <div className="space-y-6">
+                    <h3 className="font-black text-[14px] flex items-center gap-2 text-white/40 uppercase tracking-widest italic">
+                        <span className="w-1 h-3 bg-[#CCFF00] rounded-full shadow-[0_0_8px_#CCFF00]" />
+                        VISUAL CUSTOM
                     </h3>
                     <div>
-                        <label className="block text-[13px] font-bold text-[#4E5968] mb-3">테마 색상</label>
+                        <label className="block text-[11px] font-black text-white/30 uppercase tracking-[0.2em] mb-3 ml-1">Card Theme Color</label>
                         <div className="flex gap-3 overflow-x-auto pb-2">
-                            {['#D4AF37', '#E53E3E', '#3182CE', '#38A169', '#805AD5', '#FAAD14', '#191F28'].map((c) => (
+                            {['#CCFF00', '#00D1FF', '#D4AF37', '#E53E3E', '#805AD5', '#FFFFFF', '#191F28'].map((c) => (
                                 <button
                                     key={c}
                                     onClick={() => setCardColor(c)}
-                                    className={`w-10 h-10 rounded-full flex-shrink-0 transition-all ${cardColor === c ? 'ring-2 ring-offset-2 ring-[#0064FF] scale-110' : 'opacity-80 hover:scale-105'}`}
+                                    className={`w-12 h-12 rounded-full flex-shrink-0 transition-all border-2 ${cardColor === c ? 'border-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'border-transparent opacity-50 hover:opacity-100'}`}
                                     style={{ backgroundColor: c }}
                                 />
                             ))}
@@ -284,178 +284,173 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Personal Info */}
-                <div className="space-y-4">
-                    <h3 className="font-bold text-[16px] flex items-center gap-2">
-                        <span className="w-1 h-4 bg-[#0064FF] rounded-full" />
-                        선수 정보
+                <div className="space-y-6">
+                    <h3 className="font-black text-[14px] flex items-center gap-2 text-white/40 uppercase tracking-widest italic">
+                        <span className="w-1 h-3 bg-[#00D1FF] rounded-full shadow-[0_0_8px_#00D1FF]" />
+                        PLAYER INFO
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">닉네임 (필수-v2)</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Nickname</label>
                             <input
                                 type="text"
                                 value={nickname}
                                 onChange={(e) => setNickname(e.target.value)}
-                                className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all font-medium"
+                                className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none transition-all font-bold placeholder:text-white/10"
                                 placeholder="코트 위 별명"
                             />
                         </div>
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">프로필 사진</label>
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Profile Image</label>
                             <div className="flex items-center gap-3">
-                                <label className="flex-1 p-4 bg-[#F2F4F6] rounded-[16px] border-none text-[14px] font-bold text-center cursor-pointer hover:bg-gray-200 transition-colors">
-                                    사진 선택하기
+                                <label className="flex-1 p-4 bg-white/5 rounded-[16px] border border-white/5 text-[14px] font-black text-white text-center cursor-pointer hover:bg-white/10 transition-colors italic">
+                                    UPLOAD PHOTO
                                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                                 </label>
                             </div>
                         </div>
                     </div>
-                    {/* 선호 사이드 선택 섹션 - 상단 이동 */}
-                    <div className="bg-[#E6F7FF] p-4 rounded-[16px] border-2 border-[#00D1FF]/30">
-                        <label className="block text-[13px] font-bold text-[#0064FF] mb-2">🏸 최우선: 선호 코트 사이드 (포/백)</label>
+                    <div className="bg-[#CCFF00]/5 p-5 rounded-[24px] border border-[#CCFF00]/20">
+                        <label className="block text-[11px] font-black text-[#CCFF00] mb-3 ml-1 uppercase tracking-widest italic">Preferred Court Side</label>
                         <div className="flex gap-2">
                             {['포사이드', '백사이드', '무관'].map((s) => (
                                 <button
                                     key={s}
                                     type="button"
                                     onClick={() => setPrefSide(s)}
-                                    className={`flex-1 py-4 rounded-[16px] text-[14px] font-bold transition-all ${prefSide === s ? 'bg-[#00D1FF] text-white shadow-lg' : 'bg-white text-[#6B7684]'}`}
+                                    className={`flex-1 py-4 rounded-[16px] text-[14px] font-black transition-all border-2 ${prefSide === s ? 'bg-[#CCFF00] text-[#0A0E17] border-[#CCFF00]' : 'bg-transparent border-white/5 text-white/40 hover:border-white/20'}`}
                                 >
                                     {s}
                                 </button>
                             ))}
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-[13px] font-bold text-[#4E5968] mb-2">플레이 스타일</label>
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Play Style</label>
                         <div className="flex gap-2">
                             {['공격', '수비', '올라운드'].map((s) => (
-                                <button key={s} onClick={() => setStyle(s)} className={`flex-1 py-4 rounded-[16px] text-[14px] font-bold transition-all ${style === s ? 'bg-[#0064FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#F2F4F6] text-[#6B7684]'}`}>{s}</button>
+                                <button key={s} onClick={() => setStyle(s)} className={`flex-1 py-4 rounded-[16px] text-[14px] font-black transition-all border-2 ${style === s ? 'bg-white text-[#0A0E17] border-white shadow-lg' : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}>{s}</button>
                             ))}
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-[13px] font-bold text-[#4E5968] mb-2">선호 포지션</label>
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Preferred Position</label>
                         <div className="flex gap-2">
                             {['전위(네트)', '후위(베이스)', '무관'].map((p) => (
-                                <button key={p} onClick={() => setPosition(p)} className={`flex-1 py-4 rounded-[16px] text-[14px] font-bold transition-all ${position === p ? 'bg-[#333D4B] text-white' : 'bg-[#F2F4F6] text-[#6B7684]'}`}>{p}</button>
+                                <button key={p} onClick={() => setPosition(p)} className={`flex-1 py-4 rounded-[16px] text-[14px] font-black transition-all border-2 ${position === p ? 'bg-white text-[#0A0E17] border-white shadow-lg' : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}>{p}</button>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Equipment */}
-                <div className="space-y-4">
-                    <h3 className="font-bold text-[16px] flex items-center gap-2">
-                        <span className="w-1 h-4 bg-[#0064FF] rounded-full" />
-                        장비 정보
+                <div className="space-y-6">
+                    <h3 className="font-black text-[14px] flex items-center gap-2 text-white/40 uppercase tracking-widest italic">
+                        <span className="w-1 h-3 bg-[#CCFF00] rounded-full shadow-[0_0_8px_#CCFF00]" />
+                        EQUIPMENT
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">사용 라켓</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Racket</label>
                             <input
                                 type="text"
                                 value={racket}
                                 onChange={(e) => setRacket(e.target.value)}
-                                className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all font-medium"
+                                className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none transition-all font-bold placeholder:text-white/10"
                                 placeholder="예: 바볼랏 퓨어에어로"
                             />
                         </div>
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">스트링 / 텐션</label>
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">String & Tension</label>
                             <input
                                 type="text"
                                 value={stringTension}
                                 onChange={(e) => setStringTension(e.target.value)}
-                                className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all font-medium"
+                                className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none transition-all font-bold placeholder:text-white/10"
                                 placeholder="예: 알루파워 48lbs"
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* Preferences */}
-                <div className="space-y-4">
-                    <h3 className="font-bold text-[16px] flex items-center gap-2">
-                        <span className="w-1 h-4 bg-[#0064FF] rounded-full" />
-                        선호 환경
+                <div className="space-y-6">
+                    <h3 className="font-black text-[14px] flex items-center gap-2 text-white/40 uppercase tracking-widest italic">
+                        <span className="w-1 h-3 bg-[#00D1FF] rounded-full shadow-[0_0_8px_#00D1FF]" />
+                        PREFERENCES
                     </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">요일</label>
-                            <select value={prefDays} onChange={(e) => setPrefDays(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
-                                {['주말', '평일', '무관'].map(d => <option key={d} value={d}>{d}</option>)}
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Days</label>
+                            <select value={prefDays} onChange={(e) => setPrefDays(e.target.value)} className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none font-bold appearance-none">
+                                {['주말', '평일', '무관'].map(d => <option key={d} value={d} className="bg-[#121826]">{d}</option>)}
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">시간대</label>
-                            <select value={prefSlots} onChange={(e) => setPrefSlots(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
-                                {['아침', '점심', '저녁'].map(s => <option key={s} value={s}>{s}</option>)}
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Slots</label>
+                            <select value={prefSlots} onChange={(e) => setPrefSlots(e.target.value)} className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none font-bold appearance-none">
+                                {['아침', '점심', '저녁'].map(s => <option key={s} value={s} className="bg-[#121826]">{s}</option>)}
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">실내/실외</label>
-                            <select value={prefEnv} onChange={(e) => setPrefEnv(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
-                                {['실내', '실외', '무관'].map(e => <option key={e} value={e}>{e}</option>)}
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Location</label>
+                            <select value={prefEnv} onChange={(e) => setPrefEnv(e.target.value)} className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none font-bold appearance-none">
+                                {['실내', '실외', '무관'].map(e => <option key={e} value={e} className="bg-[#121826]">{e}</option>)}
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">코트 종류</label>
-                            <select value={prefType} onChange={(e) => setPrefType(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
-                                {['하드', '클레이', '인조잔디'].map(t => <option key={t} value={t}>{t}</option>)}
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Surface</label>
+                            <select value={prefType} onChange={(e) => setPrefType(e.target.value)} className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none font-bold appearance-none">
+                                {['하드', '클레이', '인조잔디'].map(t => <option key={t} value={t} className="bg-[#121826]">{t}</option>)}
                             </select>
                         </div>
                     </div>
                 </div>
 
-                {/* Membership Status (Read Only for non-admin, or semi-editable) */}
-                <div className="space-y-4">
-                    <h3 className="font-bold text-[16px] flex items-center gap-2">
-                        <span className="w-1 h-4 bg-purple-500 rounded-full" />
-                        클럽 멤버십
+                <div className="space-y-6">
+                    <h3 className="font-black text-[14px] flex items-center gap-2 text-white/40 uppercase tracking-widest italic">
+                        <span className="w-1 h-3 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.4)]" />
+                        MEMBERSHIP
                     </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">회비 납부 방식</label>
-                            <select value={membershipType} onChange={(e) => setMembershipType(e.target.value)} className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold">
-                                <option value="NONE">가입 안함</option>
-                                <option value="MONTHLY">월납 회원</option>
-                                <option value="ANNUAL">연납 회원</option>
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Dues Type</label>
+                            <select value={membershipType} onChange={(e) => setMembershipType(e.target.value)} className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none font-bold appearance-none">
+                                <option value="NONE" className="bg-[#121826]">가입 안함</option>
+                                <option value="MONTHLY" className="bg-[#121826]">월납 회원</option>
+                                <option value="ANNUAL" className="bg-[#121826]">연납 회원</option>
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">멤버십 만료일</label>
+                        <div className="space-y-2">
+                            <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Expiry Date</label>
                             <input
                                 type="date"
                                 value={membershipUntil || ''}
                                 onChange={(e) => setMembershipUntil(e.target.value)}
-                                className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none font-bold"
+                                className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none font-bold color-scheme-dark"
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* Bank Account Info (Admin only for display, but users can set their own if they are a leader) */}
-                <div className="space-y-4">
-                    <h3 className="font-bold text-[16px] flex items-center gap-2">
-                        <span className="w-1 h-4 bg-amber-500 rounded-full" />
-                        정산 계좌 정보
+                <div className="space-y-6">
+                    <h3 className="font-black text-[14px] flex items-center gap-2 text-white/40 uppercase tracking-widest italic">
+                        <span className="w-1 h-3 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
+                        SETTLEMENT
                     </h3>
-                    <div>
-                        <label className="block text-[13px] font-bold text-[#4E5968] mb-2">입금 받을 계좌 (총무/관리자용)</label>
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Bank Account</label>
                         <input
                             type="text"
                             value={bankInfo}
                             onChange={(e) => setBankInfo(e.target.value)}
-                            className="w-full p-4 bg-[#F2F4F6] rounded-[16px] border-none focus:ring-2 focus:ring-[#0064FF] outline-none transition-all font-medium"
+                            className="w-full p-4 bg-white/5 rounded-[16px] border border-white/5 text-white focus:border-[#CCFF00]/50 outline-none transition-all font-bold placeholder:text-white/10"
                             placeholder="예: 카카오뱅크 3333-01-234567 홍길동"
                         />
                     </div>
                 </div>
 
-                <div className="pt-4">
-                    <Button fullWidth size="lg" onClick={updateProfile} disabled={loading} className="h-16 text-[18px] font-black rounded-[20px] shadow-xl shadow-blue-500/20">
-                        {loading ? '저장 중...' : '프로필 완성하기'}
+                <div className="pt-8">
+                    <Button fullWidth size="lg" onClick={updateProfile} disabled={loading}>
+                        {loading ? 'SAVING...' : 'SAVE PLAYER CARD'}
                     </Button>
                 </div>
             </Card>
@@ -465,10 +460,10 @@ export default function ProfilePage() {
 
 function SkillSlider({ label, value, onChange, color }: any) {
     return (
-        <div className="space-y-3">
-            <div className="flex justify-between items-center">
-                <span className="text-[13px] font-bold text-[#4E5968]">{label}</span>
-                <span className="text-[15px] font-black" style={{ color }}>{value}</span>
+        <div className="space-y-4">
+            <div className="flex justify-between items-center px-1">
+                <span className="text-[11px] font-black text-white/40 uppercase tracking-widest italic">{label}</span>
+                <span className="text-[16px] font-black italic" style={{ color }}>{value}<span className="text-[10px] opacity-30 ml-0.5 ml-1">PT</span></span>
             </div>
             <div className="relative flex items-center">
                 <input
@@ -477,9 +472,9 @@ function SkillSlider({ label, value, onChange, color }: any) {
                     max="100"
                     value={value}
                     onChange={(e) => onChange(parseInt(e.target.value))}
-                    className="w-full h-2 bg-[#F2F4F6] rounded-lg appearance-none cursor-pointer accent-[#0064FF] focus:outline-none"
+                    className="w-full h-1.5 bg-white/5 rounded-full appearance-none cursor-pointer accent-[#CCFF00] focus:outline-none"
                     style={{
-                        background: `linear-gradient(to right, ${color} 0%, ${color} ${value}%, #F2F4F6 ${value}%, #F2F4F6 100%)`
+                        background: `linear-gradient(to right, ${color} 0%, ${color} ${value}%, rgba(255,255,255,0.05) ${value}%, rgba(255,255,255,0.05) 100%)`
                     }}
                 />
             </div>
