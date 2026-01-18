@@ -51,63 +51,46 @@ export default function RankingsPage() {
     const fetchRankings = async () => {
         setLoading(true)
         try {
-            // 1. Fetch Profiles
-            const { data: profiles, error: pError } = await supabase.from('profiles').select('*')
-            if (pError) throw pError
+            // 1 & 2. Fetch Profiles and Scores in parallel for speed
+            const currentWeekLabel = "1월 1주차"
+            const [profilesRes, weekRes] = await Promise.all([
+                supabase.from('profiles').select('*'),
+                filter === 'WEEK'
+                    ? supabase.from('weeks').select('id').eq('label', currentWeekLabel).single()
+                    : Promise.resolve({ data: null })
+            ])
 
-            // 2. Fetch Scores with Week Filtering
-            let query = supabase.from('scores').select('*')
+            if (profilesRes.error) throw profilesRes.error
+            const profiles = profilesRes.data || []
 
-            if (filter === 'WEEK') {
-                const currentWeekLabel = "1월 1주차" // Same as in ScorePage
-                const { data: weekData } = await supabase
-                    .from('weeks')
-                    .select('id')
-                    .eq('label', currentWeekLabel)
-                    .single()
-
-                if (weekData) {
-                    query = query.eq('week_id', weekData.id)
-                }
+            let scoresQuery = supabase.from('scores').select('*')
+            if (filter === 'WEEK' && weekRes.data) {
+                scoresQuery = scoresQuery.eq('week_id', weekRes.data.id)
             }
 
-            const { data: scores, error: sError } = await query
+            const { data: scores, error: sError } = await scoresQuery
             if (sError) throw sError
 
-            // 3. Aggregate
-            const stats: Record<string, any> = {}
+            // 3. Aggregate (Optimized)
+            const stats = new Map()
+            profiles.forEach(p => stats.set(p.id, { ...p, points: 0, wins: 0, matches: 0 }))
 
-            profiles.forEach((p: any) => {
-                stats[p.id] = {
-                    ...p,
-                    points: 0,
-                    wins: 0,
-                    matches: 0,
+            scores?.forEach(s => {
+                const p = stats.get(s.user_id)
+                if (p) {
+                    p.points += Number(s.points)
+                    p.matches += 1
+                    if (s.result === 'WIN') p.wins += 1
                 }
             })
 
-            scores?.forEach((s: any) => {
-                if (stats[s.user_id]) {
-                    stats[s.user_id].points += Number(s.points)
-                    stats[s.user_id].matches += 1
-                    if (s.result === 'WIN') stats[s.user_id].wins += 1
-                }
-            })
-
-            // Filter out players with no matches in the current period if desired, 
-            // but for now let's keep all and sort. 
-            // In WEEK view, maybe we only want to show those who played.
-            const statsArray = Object.values(stats)
-            const filteredStats = filter === 'WEEK'
-                ? statsArray.filter((s: any) => s.matches > 0)
-                : statsArray
-
-            const sorted = filteredStats.sort((a: any, b: any) => {
-                if (b.points !== a.points) return b.points - a.points
-                if (b.wins !== a.wins) return b.wins - a.wins
-                if (b.matches !== a.matches) return b.matches - a.matches
-                return (a.nickname || '').localeCompare(b.nickname || '')
-            })
+            const sorted = Array.from(stats.values())
+                .filter(s => filter === 'ALL' || s.matches > 0)
+                .sort((a, b) => {
+                    if (b.points !== a.points) return b.points - a.points
+                    if (b.wins !== a.wins) return b.wins - a.wins
+                    return b.matches - a.matches
+                })
 
             setRankings(sorted)
 

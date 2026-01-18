@@ -15,19 +15,12 @@ export default function MainLayout({
     const router = useRouter()
     const pathname = usePathname()
 
-    /* 
-    React.useEffect(() => {
-        if (!isLoading && !user) {
-            router.replace('/login')
-        }
-    }, [user, isLoading, router])
-    */
-
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#F2F4F6]">
-                <div className="animate-pulse flex flex-col items-center">
-                    <div className="h-4 w-32 bg-gray-200 rounded mb-4"></div>
+            <div className="min-h-screen flex items-center justify-center bg-[#0A0E17]">
+                <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 border-4 border-[#CCFF00]/20 border-t-[#CCFF00] rounded-full animate-spin mb-4" />
+                    <h1 className="text-[18px] font-black italic text-white tracking-tighter uppercase animate-pulse">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
                 </div>
             </div>
         )
@@ -40,16 +33,15 @@ export default function MainLayout({
             {/* Main Header Area - sticky top */}
             <header className="sticky top-0 z-10 bg-[#0A0E17]/80 backdrop-blur-md px-5 py-4 flex items-center justify-between border-b border-white/5">
                 <h1 className="text-[22px] font-black italic text-white tracking-tighter uppercase">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-3 items-center">
                     <button
                         onClick={() => signOut()}
-                        className="text-[13px] text-[#8B95A1] font-medium px-2 py-1 hover:bg-gray-200 rounded-md transition-colors"
+                        className="text-[11px] text-white/40 font-black uppercase tracking-widest px-3 py-1.5 hover:bg-white/5 rounded-lg transition-colors border border-white/5"
                     >
-                        로그아웃
+                        LOGOUT
                     </button>
-                    {/* Placeholder for notification or profile icon */}
-                    <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden cursor-pointer" onClick={() => router.push('/profile')}>
-                        {/* User Avatar */}
+                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#CCFF00]/50 transition-all" onClick={() => router.push('/profile')}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/40"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                     </div>
                 </div>
             </header>
@@ -59,21 +51,20 @@ export default function MainLayout({
             </main>
 
             {/* Bottom Navigation for Mobile */}
-            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 flex justify-between items-center z-20 max-w-[600px] mx-auto">
-                <NavItem label="홈" icon="home" path="/" active={pathname === '/'} />
-                <NavItem label="랭킹" icon="chart" path="/rankings" active={pathname === '/rankings'} />
-                <NavItem label="스케줄" icon="calendar" path="/admin/schedule" active={pathname?.startsWith('/admin/schedule')} />
-                {isStaff && <NavItem label="정산" icon="wallet" path="/settlement" active={pathname === '/settlement'} />}
-                <NavItem label="마이" icon="user" path="/profile" active={pathname === '/profile'} />
+            <nav className="fixed bottom-0 left-0 right-0 bg-[#0A0E17]/90 backdrop-blur-xl border-t border-white/5 px-4 py-2 flex justify-between items-center z-20 max-w-[600px] mx-auto pb-safe">
+                <NavItem label="HOME" icon="home" path="/" active={pathname === '/'} />
+                <NavItem label="RANK" icon="chart" path="/rankings" active={pathname === '/rankings'} />
+                <NavItem label="PLAY" icon="calendar" path="/admin/schedule" active={pathname?.startsWith('/admin/schedule')} />
+                {isStaff && <NavItem label="DUES" icon="wallet" path="/settlement" active={pathname === '/settlement'} />}
+                <NavItem label="PRO" icon="user" path="/profile" active={pathname === '/profile'} />
             </nav>
         </div>
     )
 }
 
-function NavItem({ label, icon, path, active }: { label: string; icon: string; path: string; active: boolean }) {
-    const router = useRouter()
+import Link from 'next/link'
 
-    // Simple icon placeholders
+function NavItem({ label, icon, path, active }: { label: string; icon: string; path: string; active: boolean }) {
     const icons: any = {
         home: <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>,
         chart: <path d="M12 20V10M18 20V4M6 20v-4"></path>,
@@ -83,25 +74,27 @@ function NavItem({ label, icon, path, active }: { label: string; icon: string; p
     }
 
     return (
-        <button
-            onClick={() => router.push(path)}
-            className={`flex flex-col items-center gap-1 min-w-[50px] ${active ? 'text-[#0064FF]' : 'text-[#B0B8C1]'}`}
+        <Link
+            href={path}
+            className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition-all ${active ? 'text-[#CCFF00]' : 'text-white/20 hover:text-white/40'}`}
         >
-            <svg
-                viewBox="0 0 24 24"
-                width="24"
-                height="24"
-                stroke="currentColor"
-                strokeWidth="2"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            >
-                {icons[icon]}
-                {icon === 'user' && <circle cx="12" cy="7" r="4"></circle>}
-                {icon === 'wallet' && <line x1="18" y1="12" x2="22" y2="12"></line>}
-            </svg>
-            <span className="text-[11px] font-medium">{label}</span>
-        </button>
+            <div className={`p-1 rounded-lg transition-all ${active ? 'bg-[#CCFF00]/10' : ''}`}>
+                <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    {icons[icon]}
+                    {icon === 'user' && <circle cx="12" cy="7" r="4"></circle>}
+                    {icon === 'wallet' && <line x1="18" y1="12" x2="22" y2="12"></line>}
+                </svg>
+            </div>
+            <span className="text-[9px] font-black italic tracking-tighter uppercase">{label}</span>
+        </Link>
     )
 }
