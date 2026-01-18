@@ -15,11 +15,13 @@ export default function MainLayout({
     const router = useRouter()
     const pathname = usePathname()
 
+    /* 
     React.useEffect(() => {
         if (!isLoading && !user) {
             router.replace('/login')
         }
     }, [user, isLoading, router])
+    */
 
     if (isLoading) {
         return (
@@ -31,7 +33,7 @@ export default function MainLayout({
         )
     }
 
-    if (!user) return null
+    // if (!user) return null
 
     return (
         <div className="min-h-screen pb-20 max-w-[600px] mx-auto bg-[#F2F4F6] min-[600px]:border-x border-gray-100">
