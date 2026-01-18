@@ -104,21 +104,39 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
                             <SignatureBadges activeBadgeIds={activeBadges} />
                         </div>
 
+                        {/* Role Badge */}
+                        {(profile.role === 'PRESIDENT' || profile.role === 'STAFF') && (
+                            <div className="flex justify-center mb-2">
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-tighter shadow-lg ${profile.role === 'PRESIDENT'
+                                    ? 'bg-gradient-to-r from-amber-400 to-yellow-600 text-amber-950'
+                                    : 'bg-gradient-to-r from-slate-300 to-slate-500 text-slate-900'
+                                    }`}>
+                                    {profile.role === 'PRESIDENT' ? 'PRESIDENT' : 'STAFF'}
+                                </span>
+                            </div>
+                        )}
+
                         <h2 className="text-[28px] font-black text-white uppercase tracking-tight drop-shadow-lg mb-1">{profile.nickname || 'PLAYER'}</h2>
                         <div className="h-[2px] w-12 mx-auto mb-4 shadow-[0_0_10px_rgba(255,255,255,0.5)]" style={{ backgroundColor: cardColor }} />
-                        <div className="grid grid-cols-3 gap-2 text-center text-white">
+                        <div className="grid grid-cols-4 gap-1 text-center text-white">
                             <div>
-                                <div className="text-[11px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>STYLE</div>
-                                <div className="text-[14px] font-bold mt-0.5">{profile.style || '무관'}</div>
+                                <div className="text-[10px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>STYLE</div>
+                                <div className="text-[13px] font-bold mt-0.5">{profile.style || '무관'}</div>
                             </div>
                             <div>
-                                <div className="text-[11px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>HAND</div>
-                                <div className="text-[14px] font-bold mt-0.5">{profile.hand || 'R'}</div>
+                                <div className="text-[10px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>HAND</div>
+                                <div className="text-[13px] font-bold mt-0.5">{profile.hand || 'R'}</div>
                             </div>
                             <div>
-                                <div className="text-[11px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>POS</div>
-                                <div className="text-[14px] font-bold mt-0.5">
+                                <div className="text-[10px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>POS</div>
+                                <div className="text-[13px] font-bold mt-0.5">
                                     {profile.position === '무관' ? 'ALL' : (profile.position ? profile.position.substring(0, 2) : 'ALL')}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-[10px] font-bold tracking-wider opacity-80" style={{ color: cardColor }}>SIDE</div>
+                                <div className="text-[13px] font-bold mt-0.5">
+                                    {profile.pref_side === '포사이드' ? 'FORE' : profile.pref_side === '백사이드' ? 'BACK' : 'ALL'}
                                 </div>
                             </div>
                         </div>

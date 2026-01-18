@@ -8,10 +8,13 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { getAttendanceTargetDate, isAttendanceWindowOpen, formatDate } from '@/utils/attendance'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Dashboard() {
+    const { user, isAdmin: isSuperAdmin, isStaff: isAnyStaff } = useAuth()
     const router = useRouter()
-    // Mock Data (Static for now, should be fetched from DB)
+
+    // Mock Data
     const currentWeek = "1월 2주차"
     const myRank = 1
     const myPoints = 12.5
@@ -20,35 +23,17 @@ export default function Dashboard() {
     const [attendanceStatus, setAttendanceStatus] = useState<string | null>(null)
     const [selectedTime, setSelectedTime] = useState<string | null>(null)
     const [isLoadingAttendance, setIsLoadingAttendance] = useState(true)
-    const [isAdmin, setIsAdmin] = useState(false)
     const targetDate = getAttendanceTargetDate()
     const isOpen = isAttendanceWindowOpen()
 
-    const SUPER_ADMIN_EMAIL = 'ssochul@naver.com'
-
     useEffect(() => {
-        const checkUser = async () => {
-            const supabase = createClient()
-            const { data: { user } } = await supabase.auth.getUser()
-
+        const fetchAttendance = async () => {
             if (!user) {
                 setIsLoadingAttendance(false)
                 return
             }
 
-            // Check Admin Status
-            if (user.email === SUPER_ADMIN_EMAIL) {
-                setIsAdmin(true)
-            } else {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single()
-                if (profile?.role === 'ADMIN') setIsAdmin(true)
-            }
-
-            // Fetch Attendance
+            const supabase = createClient()
             const { data: attData, error: attError } = await supabase
                 .from('attendance')
                 .select('status, preferred_time')
@@ -62,8 +47,8 @@ export default function Dashboard() {
             }
             setIsLoadingAttendance(false)
         }
-        checkUser()
-    }, [targetDate])
+        fetchAttendance()
+    }, [user, targetDate])
 
     const handleAttendance = async (status: string, time?: string) => {
         const supabase = createClient()
@@ -258,7 +243,7 @@ export default function Dashboard() {
             </div>
 
             {/* Admin Action */}
-            {isAdmin && (
+            {isAnyStaff && (
                 <div className="space-y-3">
                     <h3 className="font-bold text-[18px] px-1 text-[#333D4B]">관리자 전용</h3>
 

@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
@@ -17,36 +18,44 @@ import {
     Settings,
     User as UserIcon,
     Calendar,
-    CreditCard
+    CreditCard,
+    Shield
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function SettlementPage() {
-    const { user } = useAuth()
+    const {
+        user,
+        profile,
+        isLoading: isAuthLoading,
+        isStaff,
+        isPresident,
+        isAdmin: isSuperAdmin
+    } = useAuth()
+
     const supabase = createClient()
+    const router = useRouter()
     const [loading, setLoading] = useState(true)
     const [balance, setBalance] = useState(0)
     const [settlements, setSettlements] = useState<any[]>([])
-    const [isAdmin, setIsAdmin] = useState(false)
     const [activeTab, setActiveTab] = useState<'status' | 'history' | 'expenses'>('status')
+
+    useEffect(() => {
+        // Removed aggressive redirect to prevent race conditions for President
+        if (!isAuthLoading && user && !isStaff) {
+            console.log('Warning: Not a staff member.')
+        }
+    }, [user, isStaff, isAuthLoading])
 
     useEffect(() => {
         fetchData()
     }, [user])
 
     const fetchData = async () => {
-        if (!user) return
+        if (!user || !isStaff) return
         setLoading(true)
         try {
-            // 1. Check Admin Role
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single()
-            setIsAdmin(profile?.role === 'ADMIN')
-
-            // 2. Fetch Settlements (Simplified for now)
+            // 1. Fetch Settlements (Simplified for now)
             const { data: stlData } = await supabase
                 .from('settlements')
                 .select(`
@@ -56,7 +65,7 @@ export default function SettlementPage() {
                 .order('created_at', { ascending: false })
             setSettlements(stlData || [])
 
-            // 3. Calculate Balance (Sum of all PAID settlements - Sum of all expenses)
+            // 2. Calculate Balance (Sum of all PAID settlements - Sum of all expenses)
             const { data: paidSums } = await supabase
                 .from('settlements')
                 .select('amount')
@@ -75,6 +84,36 @@ export default function SettlementPage() {
         } finally {
             setLoading(false)
         }
+    }
+
+    if (isAuthLoading || (isStaff && loading)) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-gray-400 font-medium">권한 확인 및 데이터를 불러오는 중...</p>
+            </div>
+        )
+    }
+
+    if (!isStaff) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center space-y-6">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-300">
+                    <Shield size={40} />
+                </div>
+                <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-[#333D4B]">접근 권한이 없습니다</h3>
+                    <p className="text-[#8B95A1] text-sm leading-relaxed">
+                        이 페이지는 운영진 전용 구역입니다.<br />
+                        회장님 계정임에도 이 메시지가 보인다면<br />
+                        로그아웃 후 다시 로그인해 주세요.
+                    </p>
+                </div>
+                <Button onClick={() => router.replace('/')}>홈으로 돌아가기</Button>
+                {/* Visual debug for nickname */}
+                <p className="text-[10px] text-gray-300">Nickname: {profile?.nickname}</p>
+            </div>
+        )
     }
 
     const handleApprove = async (id: string) => {
@@ -106,14 +145,29 @@ export default function SettlementPage() {
                     </h2>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <button className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md py-3 rounded-2xl transition-all font-bold text-sm">
+                        <button
+                            onClick={() => { /* Opene Expense Modal (Not implemented yet) */ }}
+                            className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md py-3 rounded-2xl transition-all font-bold text-sm"
+                        >
                             <Plus size={18} />
                             지출 등록
                         </button>
-                        <button className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md py-3 rounded-2xl transition-all font-bold text-sm">
-                            <Settings size={18} />
-                            회비 관리
+                        <button
+                            onClick={() => router.push('/admin/history')}
+                            className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md py-3 rounded-2xl transition-all font-bold text-sm"
+                        >
+                            <Calendar size={18} />
+                            경기 기록 관리
                         </button>
+                        {isPresident && (
+                            <button
+                                onClick={() => router.push('/admin/staff')}
+                                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md py-3 rounded-2xl transition-all font-bold text-sm col-span-2"
+                            >
+                                <Shield size={18} />
+                                운영진 채용/해고 관리
+                            </button>
+                        )}
                     </div>
                 </div>
             </motion.div>
@@ -136,7 +190,7 @@ export default function SettlementPage() {
 
             {/* Recording Form (Simplified) */}
             <AnimatePresence>
-                {isAdmin && (
+                {isStaff && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
                         <Card className="p-6 space-y-4 border-2 border-blue-100">
                             <h3 className="font-bold text-[#333D4B] flex items-center gap-2">
@@ -242,7 +296,7 @@ export default function SettlementPage() {
                                         <span className="text-[11px] font-bold">완납</span>
                                     </div>
                                 ) : item.status === 'PENDING' ? (
-                                    isAdmin ? (
+                                    isStaff ? (
                                         <button
                                             onClick={() => handleApprove(item.id)}
                                             className="bg-[#0064FF] text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
@@ -268,7 +322,7 @@ export default function SettlementPage() {
             </div>
 
             {/* Quick Membership Summary (For Admin) */}
-            {isAdmin && (
+            {isStaff && (
                 <div className="grid grid-cols-2 gap-4">
                     <Card className="p-5 space-y-2 border-l-4 border-blue-500">
                         <div className="flex items-center justify-between">

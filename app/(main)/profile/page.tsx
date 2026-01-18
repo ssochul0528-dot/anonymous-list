@@ -13,14 +13,19 @@ import SignatureBadges from '@/components/SignatureBadges'
 import PlayerCard from '@/components/PlayerCard'
 
 export default function ProfilePage() {
-    const { user } = useAuth()
+    const { user, isPresident, claimPresident } = useAuth()
     const supabase = createClient()
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [isFlipped, setIsFlipped] = useState(false)
 
+    // ... (rest of profile states)
+
     // Profile State
     const [nickname, setNickname] = useState('')
+    const isEligibleForPresident =
+        user?.email?.toLowerCase().includes('ssochul') ||
+        nickname?.toLowerCase().includes('ssochul')
     const [style, setStyle] = useState('올라운드')
     const [position, setPosition] = useState('무관')
     const [bio, setBio] = useState('')
@@ -37,6 +42,7 @@ export default function ProfilePage() {
     const [prefSlots, setPrefSlots] = useState('아침')
     const [prefEnv, setPrefEnv] = useState('무관')
     const [prefType, setPrefType] = useState('하드')
+    const [prefSide, setPrefSide] = useState('무관')
 
     // Skill Fields
     const [skillServe, setSkillServe] = useState(50)
@@ -87,6 +93,7 @@ export default function ProfilePage() {
                 setPrefSlots(data.pref_time_slots || '아침')
                 setPrefEnv(data.pref_court_env || '무관')
                 setPrefType(data.pref_court_type || '하드')
+                setPrefSide(data.pref_side || '무관')
                 setSkillServe(data.skill_serve || 50)
                 setSkillForehand(data.skill_forehand || 50)
                 setSkillBackhand(data.skill_backhand || 50)
@@ -154,6 +161,7 @@ export default function ProfilePage() {
                 pref_time_slots: prefSlots,
                 pref_court_env: prefEnv,
                 pref_court_type: prefType,
+                pref_side: prefSide,
                 skill_serve: skillServe,
                 skill_forehand: skillForehand,
                 skill_backhand: skillBackhand,
@@ -181,11 +189,22 @@ export default function ProfilePage() {
 
     return (
         <div className="pt-2 pb-20 space-y-6">
-            <div className="flex items-center gap-2 mb-4">
-                <Button variant="ghost" size="sm" onClick={() => router.back()}>
-                    &lt; 뒤로
-                </Button>
-                <h2 className="text-[20px] font-bold">선수 카드 수정</h2>
+            <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => router.back()}>
+                        &lt; 뒤로
+                    </Button>
+                    <h2 className="text-[20px] font-bold">선수 카드 수정</h2>
+                </div>
+                {isEligibleForPresident && !isPresident && (
+                    <Button
+                        size="sm"
+                        onClick={claimPresident}
+                        className="bg-amber-500 hover:bg-amber-600 text-white font-bold animate-bounce"
+                    >
+                        회장 권한 활성화
+                    </Button>
+                )}
             </div>
 
             {/* Game Card Preview with 3D Flip */}
@@ -205,7 +224,8 @@ export default function ProfilePage() {
                     skill_stamina: skillStamina,
                     skill_manner: skillManner,
                     pref_time_days: prefDays,
-                    pref_time_slots: prefSlots
+                    pref_time_slots: prefSlots,
+                    pref_side: prefSide
                 }} />
             </div>
 
@@ -271,7 +291,7 @@ export default function ProfilePage() {
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">닉네임 (필수)</label>
+                            <label className="block text-[13px] font-bold text-[#4E5968] mb-2">닉네임 (필수-v2)</label>
                             <input
                                 type="text"
                                 value={nickname}
@@ -288,6 +308,22 @@ export default function ProfilePage() {
                                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                                 </label>
                             </div>
+                        </div>
+                    </div>
+                    {/* 선호 사이드 선택 섹션 - 상단 이동 */}
+                    <div className="bg-[#E6F7FF] p-4 rounded-[16px] border-2 border-[#00D1FF]/30">
+                        <label className="block text-[13px] font-bold text-[#0064FF] mb-2">🏸 최우선: 선호 코트 사이드 (포/백)</label>
+                        <div className="flex gap-2">
+                            {['포사이드', '백사이드', '무관'].map((s) => (
+                                <button
+                                    key={s}
+                                    type="button"
+                                    onClick={() => setPrefSide(s)}
+                                    className={`flex-1 py-4 rounded-[16px] text-[14px] font-bold transition-all ${prefSide === s ? 'bg-[#00D1FF] text-white shadow-lg' : 'bg-white text-[#6B7684]'}`}
+                                >
+                                    {s}
+                                </button>
+                            ))}
                         </div>
                     </div>
                     <div>

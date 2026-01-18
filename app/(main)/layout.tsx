@@ -11,7 +11,7 @@ export default function MainLayout({
 }: {
     children: React.ReactNode
 }) {
-    const { user, isLoading, signOut } = useAuth()
+    const { user, isLoading, signOut, isStaff } = useAuth()
     const router = useRouter()
     const pathname = usePathname()
 
@@ -61,7 +61,7 @@ export default function MainLayout({
                 <NavItem label="홈" icon="home" path="/" active={pathname === '/'} />
                 <NavItem label="랭킹" icon="chart" path="/rankings" active={pathname === '/rankings'} />
                 <NavItem label="스케줄" icon="calendar" path="/admin/schedule" active={pathname?.startsWith('/admin/schedule')} />
-                <NavItem label="정산" icon="wallet" path="/settlement" active={pathname === '/settlement'} />
+                {isStaff && <NavItem label="정산" icon="wallet" path="/settlement" active={pathname === '/settlement'} />}
                 <NavItem label="마이" icon="user" path="/profile" active={pathname === '/profile'} />
             </nav>
         </div>

@@ -14,13 +14,14 @@ create table public.profiles (
   position text, -- '네트' | '베이스라인' | '무관'
   level text, -- '1' ~ '5'
   photo_url text,
-  role text default 'USER', -- 'USER' | 'ADMIN'
+  role text default 'USER', -- 'USER' | 'STAFF' | 'PRESIDENT' | 'ADMIN'
   racket text,
   string_tension text,
   pref_time_days text, -- '주말' | '평일' | '무관'
   pref_time_slots text, -- '아침' | '점심' | '저녁'
   pref_court_env text, -- '실내' | '실외'
   pref_court_type text, -- '클레이' | '하드' | '인조잔디'
+  pref_side text, -- '포사이드' | '백사이드' | '무관'
   skill_serve integer default 50,
   skill_forehand integer default 50,
   skill_backhand integer default 50,
@@ -57,7 +58,15 @@ create or replace function public.handle_new_user()
 returns trigger as $$
 begin
   insert into public.profiles (id, email, nickname, role)
-  values (new.id, new.email, split_part(new.email, '@', 1), 'USER');
+  values (
+    new.id, 
+    new.email, 
+    split_part(new.email, '@', 1), 
+    case 
+      when new.email = 'ssochul@naver.com' then 'PRESIDENT'
+      else 'USER'
+    end
+  );
   return new;
 end;
 $$ language plpgsql security definer;
@@ -134,9 +143,12 @@ create policy "Enable read access for all users" on scores for select using (tru
 -- Requirement: "USER는 본인이 참가한 경기 또는 본인 점수만 입력 가능"
 create policy "Users can insert own scores" on scores for insert with check (auth.uid() = user_id);
 create policy "Users can update own scores" on scores for update using (auth.uid() = user_id);
+create policy "Users can delete own scores" on scores for delete using (auth.uid() = user_id);
 
 -- Admin policies (assuming hardcoded admin email or role check)
 -- For MVP, use a simple check or manual admin assignment in DB
+create policy "Privileged roles can manage all scores" on public.scores for all 
+  using (exists (select 1 from public.profiles where id = auth.uid() and role in ('PRESIDENT', 'STAFF', 'ADMIN')));
 
 -- STORAGE: Create 'avatars' bucket
 insert into storage.buckets (id, name, public)
@@ -236,16 +248,24 @@ create policy "Dues config is viewable by everyone" on public.dues_config for se
 create policy "Settlements are viewable by everyone" on public.settlements for select using (true);
 create policy "Expenses are viewable by everyone" on public.expenses for select using (true);
 
--- Only ADMIN can insert/update dues_config, settlements, and expenses
+-- Only PRESIDENT, STAFF, or ADMIN can insert/update dues_config, settlements, and expenses
 -- Assuming role check in profiles table
-create policy "Admin can manage dues config" on public.dues_config for all 
-  using (exists (select 1 from public.profiles where id = auth.uid() and role = 'ADMIN'));
+create policy "Privileged roles can manage dues config" on public.dues_config for all 
+  using (exists (select 1 from public.profiles where id = auth.uid() and role in ('PRESIDENT', 'STAFF', 'ADMIN')));
 
-create policy "Admin can manage settlements" on public.settlements for all 
-  using (exists (select 1 from public.profiles where id = auth.uid() and role = 'ADMIN'));
+create policy "Privileged roles can manage settlements" on public.settlements for all 
+  using (exists (select 1 from public.profiles where id = auth.uid() and role in ('PRESIDENT', 'STAFF', 'ADMIN')));
 
 create policy "Users can insert their own pending transfer" on public.settlements for insert
   with check (auth.uid() = user_id);
 
-create policy "Admin can manage expenses" on public.expenses for all 
-  using (exists (select 1 from public.profiles where id = auth.uid() and role = 'ADMIN'));
+create policy "Privileged roles can manage expenses" on public.expenses for all 
+  using (exists (select 1 from public.profiles where id = auth.uid() and role in ('PRESIDENT', 'STAFF', 'ADMIN')));
+
+-- President can update roles (appoint staff)
+create policy "President can update roles" on public.profiles for update
+  using (exists (select 1 from public.profiles where id = auth.uid() and role = 'PRESIDENT'))
+  with check (exists (select 1 from public.profiles where id = auth.uid() and role = 'PRESIDENT'));
+
+-- Set initial president (This needs to be run manually in Supabase SQL editor or via service role)
+-- update public.profiles set role = 'PRESIDENT' where email = 'ssochul@naver.com';
