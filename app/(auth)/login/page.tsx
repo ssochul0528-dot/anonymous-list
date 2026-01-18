@@ -59,31 +59,48 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F2F4F6] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#0A0E17] flex items-center justify-center p-4 selection:bg-[#CCFF00] selection:text-[#0A0E17]">
             <div className="w-full max-w-[400px] flex flex-col items-center">
-                <div className="mb-8 text-center">
-                    <h1 className="text-[28px] font-bold text-[#333D4B] mb-2">무명리스트</h1>
-                    <p className="text-[#6B7684]">테니스 클럽 운영의 새로운 기준</p>
+                <div className="mb-10 text-center">
+                    <h1 className="text-[42px] font-black italic text-white tracking-tighter uppercase mb-2">
+                        MatchUp <span className="text-[#CCFF00]">Pro</span>
+                    </h1>
+                    <div className="space-y-1">
+                        <p className="text-[#CCFF00] font-bold text-[14px] uppercase tracking-wider">
+                            경기를 관리하면, 동호회가 굴러갑니다
+                        </p>
+                        <p className="text-white/40 text-[12px] font-medium leading-relaxed max-w-[280px] mx-auto">
+                            경기 기록·랭킹·운영을 하나로 관리하는 테니스 경기 관리 앱
+                        </p>
+                    </div>
                 </div>
 
-                <Card className="w-full space-y-6">
+                <Card className="w-full space-y-6 bg-[#121826] border-white/5 shadow-2xl p-8 rounded-[32px]">
                     {/* Email Login Form */}
                     <form onSubmit={handleEmailAuth} className="space-y-4">
-                        <div className="space-y-2">
-                            <Input
-                                type="email"
-                                placeholder="이메일을 입력해주세요"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                disabled={loading}
-                            />
-                            <Input
-                                type="password"
-                                placeholder="비밀번호를 입력해주세요"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                disabled={loading}
-                            />
+                        <div className="space-y-4">
+                            <div className="space-y-1">
+                                <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Email Address</label>
+                                <Input
+                                    type="email"
+                                    placeholder="이메일을 입력해주세요"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    disabled={loading}
+                                    className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:border-[#CCFF00]/50 transition-all"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Password</label>
+                                <Input
+                                    type="password"
+                                    placeholder="비밀번호를 입력해주세요"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    disabled={loading}
+                                    className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-14 rounded-2xl focus:border-[#CCFF00]/50 transition-all"
+                                />
+                            </div>
                         </div>
 
                         <Button
@@ -92,23 +109,24 @@ export default function LoginPage() {
                             size="lg"
                             type="submit"
                             disabled={loading}
+                            className="bg-[#CCFF00] hover:bg-[#AACC00] text-[#0A0E17] font-black text-[15px] h-14 rounded-2xl shadow-[0_8px_20px_rgba(204,255,0,0.2)] transition-all active:scale-95"
                         >
-                            {loading ? '처리중...' : (isSignUp ? '이메일로 회원가입' : '이메일로 로그인')}
+                            {loading ? 'PROCESSING...' : (isSignUp ? 'JOIN WITH EMAIL' : 'LOGIN WITH EMAIL')}
                         </Button>
                     </form>
 
-                    <div className="text-center">
+                    <div className="text-center pt-2">
                         <button
                             type="button"
                             onClick={() => setIsSignUp(!isSignUp)}
-                            className="text-[14px] text-[#4E5968] hover:text-[#333D4B] underline underline-offset-4"
+                            className="text-[13px] text-white/40 hover:text-[#CCFF00] font-bold transition-colors"
                         >
-                            {isSignUp ? '이미 계정이 있으신가요? 로그인' : '계정이 없으신가요? 회원가입'}
+                            {isSignUp ? '이미 계정이 있으신가요? 로그인' : '계정이 없으신가요? 1초 회원가입'}
                         </button>
                     </div>
 
-                    <div className="mt-6 text-center">
-                        <p className="text-[13px] text-[#8B95A1]">
+                    <div className="text-center">
+                        <p className="text-[11px] opacity-20 font-medium leading-relaxed">
                             로그인 시 이용약관 및 개인정보처리방침에 동의하게 됩니다.
                         </p>
                     </div>

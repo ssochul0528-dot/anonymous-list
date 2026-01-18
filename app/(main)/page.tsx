@@ -82,11 +82,15 @@ export default function Dashboard() {
     return (
         <div className="space-y-6 pt-2">
             {/* Top Summary */}
-            <section className="flex justify-between items-end px-1">
-                <div>
-                    <h2 className="text-[24px] font-bold mb-1">이번 주 {currentWeek}</h2>
-                    <p className="text-[#6B7684]">오늘도 즐거운 테니스 되세요!</p>
-                </div>
+            <section className="flex flex-col gap-1 px-1">
+                <h2 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-wider">PRE-SEASON • {currentWeek}</h2>
+                <h1 className="text-[28px] font-black leading-tight tracking-tighter">
+                    경기를 관리하면,<br />
+                    <span className="text-[#CCFF00]">동호회가 굴러갑니다.</span>
+                </h1>
+                <p className="text-white/40 text-[12px] font-medium leading-relaxed mt-1">
+                    경기 기록·랭킹·운영을 하나로 관리하는 테니스 경기 관리 앱
+                </p>
             </section>
 
             {/* Attendance Section */}
@@ -95,17 +99,17 @@ export default function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
-                    <Card className="bg-[#191F28] text-white border-none shadow-xl relative overflow-hidden">
-                        {/* Background Pattern */}
-                        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                    <Card className="bg-[#121826]/80 backdrop-blur-xl border border-white/5 text-white shadow-2xl relative overflow-hidden group">
+                        {/* Shimmer Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-[#CCFF00]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                         <div className="relative z-10">
                             <div className="flex justify-between items-center mb-5">
                                 <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <h3 className="font-bold text-[17px] tracking-tight">{formatDate(targetDate)} 정기 출석</h3>
+                                    <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse" />
+                                    <h3 className="font-black text-[15px] tracking-tight uppercase italic">{formatDate(targetDate)} ATTENDANCE</h3>
                                 </div>
-                                <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest italic tracking-tighter">화요일 18:00 마감</span>
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest bg-white/5 px-2 py-1 rounded">D-DAY</span>
                             </div>
 
                             <div className="space-y-3">
@@ -113,27 +117,28 @@ export default function Dashboard() {
                                     <button
                                         onClick={() => {
                                             if (attendanceStatus === 'ATTEND' && selectedTime) {
-                                                // If already attended with time, clicking 'Attend' again does nothing
                                             } else {
                                                 setAttendanceStatus('ATTEND');
                                                 setSelectedTime(null);
                                             }
                                         }}
-                                        className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ATTEND'
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                        className={`h-14 rounded-xl font-black transition-all flex flex-col items-center justify-center border-2 ${attendanceStatus === 'ATTEND'
+                                            ? 'bg-[#CCFF00] text-[#0A0E17] border-[#CCFF00] shadow-[0_0_20px_rgba(204,255,0,0.4)]'
+                                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
                                             }`}
                                     >
-                                        참석
+                                        <span className="text-[16px]">참석</span>
+                                        <span className="text-[10px] opacity-70">JOIN</span>
                                     </button>
                                     <button
                                         onClick={() => handleAttendance('ABSENT')}
-                                        className={`h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${attendanceStatus === 'ABSENT'
-                                            ? 'bg-red-500/80 text-white shadow-lg shadow-red-500/30'
-                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                        className={`h-14 rounded-xl font-black transition-all flex flex-col items-center justify-center border-2 ${attendanceStatus === 'ABSENT'
+                                            ? 'bg-red-500 text-white border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]'
+                                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
                                             }`}
                                     >
-                                        참석불가
+                                        <span className="text-[16px]">참석불가</span>
+                                        <span className="text-[10px] opacity-70">SKIP</span>
                                     </button>
                                 </div>
 
@@ -186,94 +191,80 @@ export default function Dashboard() {
                 </motion.div>
             )}
 
-            {/* My Rank Card */}
-            <Card className="bg-[#0064FF] text-white border-none shadow-blue-500/30 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 blur-3xl" />
+            <Card className="bg-gradient-to-br from-[#121826] to-[#0A0E17] text-white border border-white/5 shadow-2xl relative overflow-hidden p-6">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-[#CCFF00]/10 rounded-full -translate-y-24 translate-x-24 blur-[80px]" />
                 <div className="flex justify-between items-start mb-6 relative z-10">
                     <div>
-                        <p className="opacity-80 text-[14px] mb-1">내 랭킹</p>
-                        <h3 className="text-[32px] font-black italic">{myRank}위</h3>
+                        <p className="text-[#CCFF00] text-[10px] font-black uppercase tracking-[0.2em] mb-1">Current Ranking</p>
+                        <h3 className="text-[42px] font-black italic tracking-tighter leading-none">{myRank}<span className="text-[18px] ml-1 not-italic opacity-50">ST</span></h3>
                     </div>
                     <div className="text-right">
-                        <p className="opacity-80 text-[14px] mb-1">누적 포인트</p>
-                        <h3 className="text-[24px] font-bold">{myPoints.toFixed(1)}</h3>
+                        <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total Points</p>
+                        <h3 className="text-[28px] font-bold text-[#00D1FF]">{myPoints.toFixed(1)}</h3>
                     </div>
                 </div>
-                <div className="h-1.5 bg-white/20 rounded-full w-full overflow-hidden relative z-10">
+                <div className="h-1 bg-white/5 rounded-full w-full overflow-hidden relative z-10">
                     <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: '70%' }}
-                        transition={{ duration: 1, ease: 'easeOut' }}
-                        className="h-full bg-white rounded-full"
+                        animate={{ width: '85%' }}
+                        transition={{ duration: 1.2, ease: 'easeOut' }}
+                        className="h-full bg-[#CCFF00] shadow-[0_0_10px_#CCFF00]"
                     />
                 </div>
-                <p className="text-[12px] opacity-70 mt-2 text-right relative z-10 font-bold tracking-tight">TOP 10% PRE-SEASON</p>
+                <div className="flex justify-between items-center mt-3 relative z-10">
+                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Global Percentile</p>
+                    <p className="text-[11px] text-[#CCFF00] font-black tracking-tighter italic">TOP 10% PRE-SEASON</p>
+                </div>
             </Card>
 
-            {/* Action Grid */}
             <div className="grid grid-cols-2 gap-3">
                 <ActionCard
-                    title="경기 스케줄"
-                    desc="오늘의 대진표"
-                    color="bg-orange-50"
-                    textColor="text-orange-600"
+                    title="SCHEDULE"
+                    desc="경기 스케줄"
+                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>}
                     onClick={() => router.push('/schedule')}
                 />
                 <ActionCard
-                    title="점수 입력"
-                    desc="경기 결과 기록"
-                    color="bg-green-50"
-                    textColor="text-green-600"
+                    title="SCORE"
+                    desc="결과 입력"
+                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>}
                     onClick={() => router.push('/score')}
                 />
                 <ActionCard
-                    title="선수 랭킹"
+                    title="RANKING"
                     desc="실시간 순위"
-                    color="bg-purple-50"
-                    textColor="text-purple-600"
+                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="20" x2="12" y2="10" /><line x1="18" y1="20" x2="18" y2="4" /><line x1="6" y1="20" x2="6" y2="16" /></svg>}
                     onClick={() => router.push('/rankings')}
                 />
                 <ActionCard
-                    title="선수 카드"
-                    desc="프로필 관리"
-                    color="bg-blue-50"
-                    textColor="text-blue-600"
+                    title="PROFILE"
+                    desc="플레이어 카드"
+                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
                     onClick={() => router.push('/profile')}
                 />
             </div>
 
-            {/* Admin Action */}
             {isAnyStaff && (
                 <div className="space-y-3">
-                    <h3 className="font-bold text-[18px] px-1 text-[#333D4B]">관리자 전용</h3>
+                    <h3 className="font-black text-[14px] px-1 text-white/40 tracking-[0.2em] uppercase">Club Management</h3>
 
-                    <Card className="flex items-center justify-between border-none shadow-sm hover:shadow-md transition-shadow bg-[#191F28] text-white">
+                    <Card className="flex items-center justify-between border border-white/5 shadow-sm hover:border-[#CCFF00]/30 transition-all bg-[#121826] text-white p-4">
                         <div>
-                            <h4 className="font-bold text-[16px]">경기 결과 관리</h4>
-                            <p className="text-white/50 text-[13px]">지난 게임 수정 및 삭제</p>
+                            <h4 className="font-black text-[15px] uppercase italic">Match History</h4>
+                            <p className="text-white/40 text-[12px]">전체 경기 내역 기록 및 수정</p>
                         </div>
-                        <Button size="sm" onClick={() => router.push('/admin/history')}>
+                        <Button size="sm" className="bg-white/10 hover:bg-[#CCFF00] hover:text-[#0A0E17] font-black text-[11px] rounded transition-colors" onClick={() => router.push('/admin/history')}>
                             MANAGE
                         </Button>
                     </Card>
 
-                    <Card className="flex items-center justify-between border-none shadow-sm hover:shadow-md transition-shadow">
+                    <Card className="flex items-center justify-between border border-white/5 shadow-sm hover:border-[#CCFF00]/30 transition-all bg-[#121826] text-white p-4">
                         <div>
-                            <h4 className="font-bold text-[16px] text-[#333D4B]">스케줄 생성</h4>
-                            <p className="text-[#8B95A1] text-[13px]">라운드별 랜덤 대진표</p>
+                            <h4 className="font-black text-[15px] uppercase italic">Season Schedule</h4>
+                            <p className="text-white/40 text-[12px]">라운드별 대진표 랜덤 생성</p>
                         </div>
-                        <Button size="sm" variant="secondary" onClick={() => router.push('/admin/schedule')}>
+                        <Button size="sm" className="bg-white/10 hover:bg-[#CCFF00] hover:text-[#0A0E17] font-black text-[11px] rounded transition-colors" onClick={() => router.push('/admin/schedule')}>
                             START
-                        </Button>
-                    </Card>
-
-                    <Card className="flex items-center justify-between border-none shadow-sm hover:shadow-md transition-shadow">
-                        <div>
-                            <h4 className="font-bold text-[16px] text-[#333D4B]">복식 토너먼트</h4>
-                            <p className="text-[#8B95A1] text-[13px]">승자 진출방식 대진표</p>
-                        </div>
-                        <Button size="sm" variant="secondary" onClick={() => router.push('/admin/tournament')}>
-                            CREATE
                         </Button>
                     </Card>
                 </div>
@@ -295,32 +286,39 @@ export default function Dashboard() {
     )
 }
 
-function ActionCard({ title, desc, color, textColor, onClick }: any) {
+function ActionCard({ title, desc, icon, onClick }: any) {
     return (
         <motion.div
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.96 }}
+            whileHover={{ y: -2 }}
             onClick={onClick}
-            className={`${color} p-5 rounded-[24px] cursor-pointer transition-all shadow-sm hover:shadow-md`}
+            className="bg-[#121826] border border-white/5 p-5 rounded-2xl cursor-pointer transition-all shadow-xl hover:border-[#CCFF00]/30 group"
         >
-            <h4 className={`font-bold text-[16px] ${textColor} mb-1 tracking-tight`}>{title}</h4>
-            <p className={`text-[13px] opacity-70 ${textColor} font-medium`}>{desc}</p>
+            <div className="mb-4 text-[#CCFF00] group-hover:scale-110 transition-transform">
+                {icon}
+            </div>
+            <h4 className="font-black text-[14px] text-white tracking-widest uppercase italic">{title}</h4>
+            <p className="text-[11px] text-white/40 font-bold mt-1">{desc}</p>
         </motion.div>
     )
 }
 
 function MatchResultItem({ win }: { win?: boolean }) {
     return (
-        <div className="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
+        <div className="p-4 flex items-center justify-between border-b border-white/5 hover:bg-white/5 transition-all group">
             <div className="flex items-center gap-4">
-                <div className={`w-1.5 h-10 rounded-full ${win ? 'bg-[#0064FF]' : 'bg-[#E5E8EB]'}`} />
+                <div className={`w-1 h-8 rounded-full ${win ? 'bg-[#CCFF00] shadow-[0_0_10px_#CCFF00]' : 'bg-white/10'}`} />
                 <div>
-                    <p className="font-bold text-[15px] text-[#333D4B]">1라운드 vs 김철수/이영희</p>
-                    <p className="text-[13px] text-[#8B95A1]">1월 3일 • A코트</p>
+                    <p className="font-black text-[14px] text-white italic uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">1R • VS RED STORM</p>
+                    <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest">JAN 18 • COURT A</p>
                 </div>
             </div>
-            <span className={`font-black text-[14px] ${win ? 'text-[#0064FF]' : 'text-[#8B95A1]'}`}>
-                {win ? '+3.0' : '+0.5'}
-            </span>
+            <div className="text-right">
+                <span className={`font-black text-[16px] italic ${win ? 'text-[#00D1FF]' : 'text-white/20'}`}>
+                    {win ? '+3.0' : '+0.5'}
+                </span>
+                <p className="text-[9px] font-black text-white/30 uppercase tracking-tighter">Match Pts</p>
+            </div>
         </div>
     )
 }

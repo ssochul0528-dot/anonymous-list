@@ -36,10 +36,10 @@ export default function MainLayout({
     // if (!user) return null
 
     return (
-        <div className="min-h-screen pb-20 max-w-[600px] mx-auto bg-[#F2F4F6] min-[600px]:border-x border-gray-100">
+        <div className="min-h-screen pb-20 max-w-[600px] mx-auto bg-[#0A0E17] min-[600px]:border-x border-white/5 text-white">
             {/* Main Header Area - sticky top */}
-            <header className="sticky top-0 z-10 bg-[#F2F4F6]/80 backdrop-blur-md px-5 py-4 flex items-center justify-between">
-                <h1 className="text-[20px] font-bold text-[#333D4B]">무명리스트</h1>
+            <header className="sticky top-0 z-10 bg-[#0A0E17]/80 backdrop-blur-md px-5 py-4 flex items-center justify-between border-b border-white/5">
+                <h1 className="text-[22px] font-black italic text-white tracking-tighter uppercase">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
                 <div className="flex gap-2 items-center">
                     <button
                         onClick={() => signOut()}
