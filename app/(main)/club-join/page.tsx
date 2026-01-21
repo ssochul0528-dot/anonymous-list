@@ -130,8 +130,8 @@ function ClubJoinForm() {
             // Clear saved data on success
             localStorage.removeItem('club_join_form')
 
-            alert('신청이 완료되었습니다! 검토 후 연락드리겠습니다.')
-            router.push('/')
+            // Redirect to the new club's page with a 'new' query param
+            router.push(`/clubs/${slug}?new=true`)
 
         } catch (error: any) {
             console.error('Error creating club:', error)
