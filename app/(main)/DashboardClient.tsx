@@ -103,9 +103,9 @@ export default function DashboardClient() {
     }
 
     return (
-        <div className="space-y-6 pt-2">
-            {/* Navigation */}
-            <div className="flex items-center justify-between px-1 mb-4">
+        <div className="space-y-6 pt-6 px-1">
+            {/* Navigation & Actions */}
+            <div className="flex items-center justify-between mb-4">
                 <Button
                     variant="outline"
                     size="sm"
@@ -115,8 +115,18 @@ export default function DashboardClient() {
                     <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-[#CCFF00] group-hover:text-black transition-colors">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 18l-6-6 6-6" /></svg>
                     </div>
-                    <span className="font-bold text-[13px]">메인으로 나가기</span>
+                    <span className="font-bold text-[13px]">메인으로</span>
                 </Button>
+
+                {myClub && (
+                    <Button
+                        size="sm"
+                        className="h-10 px-4 rounded-full bg-[#CCFF00] text-black font-bold text-[12px] hover:bg-[#b3e600] flex items-center gap-2 shadow-[0_0_15px_rgba(204,255,0,0.3)] animate-pulse"
+                        onClick={handleCopyInvite}
+                    >
+                        <span>🔗 초대 링크 복사</span>
+                    </Button>
+                )}
             </div>
 
             {/* Top Summary */}
