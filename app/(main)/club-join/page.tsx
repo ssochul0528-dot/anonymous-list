@@ -41,6 +41,31 @@ function ClubJoinForm() {
         file: null as any
     })
 
+    // Load saved data on mount
+    React.useEffect(() => {
+        const savedData = localStorage.getItem('club_join_form')
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData)
+                setFormData(prev => ({ ...prev, ...parsed, file: null })) // File cannot be saved
+            } catch (e) {
+                console.error('Failed to parse saved form data')
+            }
+        }
+    }, [])
+
+    // Save data on change
+    React.useEffect(() => {
+        const dataToSave = {
+            name: formData.name,
+            region1: formData.region1,
+            region2: formData.region2,
+            description: formData.description,
+            memberCount: formData.memberCount
+        }
+        localStorage.setItem('club_join_form', JSON.stringify(dataToSave))
+    }, [formData.name, formData.region1, formData.region2, formData.description, formData.memberCount])
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setFormData({ ...formData, file: e.target.files[0] })
@@ -51,6 +76,7 @@ function ClubJoinForm() {
         e.preventDefault()
         if (!user) {
             alert('로그인이 필요한 서비스입니다.')
+            // Redirect to login page with explicit redirect back here
             router.push('/login?redirect=/club-join')
             return
         }
@@ -85,7 +111,6 @@ function ClubJoinForm() {
             // 2. Insert Request
             const slug = formData.name.trim().toLowerCase().replace(/\s+/g, '-') + '-' + Math.floor(Math.random() * 1000)
             const fullRegion = `${formData.region1} ${formData.region2}`
-            // Append member count to description for now (since DB schema update is complex on the fly)
             const fullDescription = `[현재 인원: ${formData.memberCount}명]\n\n${formData.description}`
 
             const { error: insertError } = await supabase
@@ -93,7 +118,7 @@ function ClubJoinForm() {
                 .insert({
                     name: formData.name,
                     slug: slug,
-                    description: fullDescription, // Storing member count here temporarily
+                    description: fullDescription,
                     region: fullRegion,
                     logo_url: logoUrl,
                     owner_id: user.id,
@@ -101,6 +126,9 @@ function ClubJoinForm() {
                 })
 
             if (insertError) throw insertError
+
+            // Clear saved data on success
+            localStorage.removeItem('club_join_form')
 
             alert('신청이 완료되었습니다! 검토 후 연락드리겠습니다.')
             router.push('/')
