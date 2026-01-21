@@ -186,7 +186,7 @@ export default function CreateClubPage() {
                         className="bg-[#CCFF00] text-black font-black mt-4 h-14 text-[16px] shadow-[0_0_20px_rgba(204,255,0,0.2)]"
                         isLoading={loading}
                     >
-                        {loading ? '신청 중...' : (user ? '클럽 개설 신청하기' : '로그인 후 신청하기')}
+                        {loading ? '신청 중...' : (user ? '클럽 개설 신청하기' : '로그인하고 신청하기')}
                     </Button>
                 </form>
             </main>
