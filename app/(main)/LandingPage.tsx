@@ -1,0 +1,117 @@
+'use client'
+
+import React from 'react'
+import { Button } from '@/components/ui/Button'
+import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+
+export default function LandingPage() {
+    const router = useRouter()
+
+    return (
+        <div className="min-h-screen bg-[#0A0E17] text-white flex flex-col relative overflow-hidden">
+            {/* Background Effects */}
+            <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#121826] to-transparent z-0" />
+            <div className="absolute top-[-100px] right-[-100px] w-[300px] h-[300px] bg-[#CCFF00]/10 rounded-full blur-[100px]" />
+
+            {/* Header */}
+            <header className="relative z-10 px-6 py-6 flex justify-between items-center">
+                <h1 className="text-[20px] font-black italic tracking-tighter uppercase">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
+                <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full px-5 text-[12px] font-bold border-white/20 hover:bg-white/10"
+                    onClick={() => router.push('/login')}
+                >
+                    LOGIN
+                </Button>
+            </header>
+
+            {/* Main Content Scroll Area */}
+            <main className="relative z-10 flex-1 flex flex-col px-6 pt-4 pb-12 overflow-y-auto">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="mb-8"
+                >
+                    <div className="inline-block px-3 py-1 bg-[#CCFF00]/10 rounded-full border border-[#CCFF00]/20 mb-3">
+                        <span className="text-[#CCFF00] text-[10px] font-black tracking-widest uppercase">BETA • SEASON 2026</span>
+                    </div>
+                    <h2 className="text-[42px] font-black leading-[0.95] tracking-tighter mb-3">
+                        UNLEASH<br />
+                        YOUR<br />
+                        <span className="text-[#CCFF00] italic">COURT.</span>
+                    </h2>
+                    <p className="text-white/40 font-medium text-[14px] leading-relaxed max-w-[280px]">
+                        테니스 동호회 운영의 모든 것.<br />
+                        경기 기록부터 랭킹까지 한번에.
+                    </p>
+                </motion.div>
+
+                {/* Club List Carousel */}
+                <div className="space-y-4 mb-8">
+                    <div className="flex justify-between items-end mb-2">
+                        <h3 className="font-bold text-[16px]">Trending Clubs 🔥</h3>
+                        <span className="text-[12px] text-white/40 font-bold">ALL CLUBS &gt;</span>
+                    </div>
+
+                    <div className="flex gap-4 overflow-x-auto pb-4 snap-x no-scrollbar -mx-6 px-6">
+                        {/* Mock Club Card 1 */}
+                        <div className="min-w-[260px] snap-center bg-[#191F28] p-5 rounded-[24px] border border-white/5 relative overflow-hidden group shadow-lg">
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#CCFF00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-black italic text-xl">M</div>
+                                <div>
+                                    <h4 className="font-bold text-[15px] text-white">무명 클럽</h4>
+                                    <p className="text-[11px] text-white/40">서울 강남구 • 32 Members</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2 mb-4">
+                                <span className="px-2 py-1 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-bold rounded">#빡테</span>
+                                <span className="px-2 py-1 bg-white/5 text-white/40 text-[10px] font-bold rounded">#매주수요일</span>
+                            </div>
+                            <Button
+                                fullWidth
+                                size="sm"
+                                className="bg-white/10 hover:bg-[#CCFF00] hover:text-black hover:font-black font-bold h-10 rounded-xl transition-all border border-white/5"
+                                onClick={() => router.push('/clubs/anonymous')}
+                            >
+                                둘러보기
+                            </Button>
+                        </div>
+
+                        {/* Mock Club Card 2 */}
+                        <div className="min-w-[260px] snap-center bg-[#191F28] p-5 rounded-[24px] border border-white/5 relative overflow-hidden shadow-lg">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-black italic text-xl">A</div>
+                                <div>
+                                    <h4 className="font-bold text-[15px] text-white">에이스 클럽</h4>
+                                    <p className="text-[11px] text-white/40">경기 성남시 • 15 Members</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2 mb-4">
+                                <span className="px-2 py-1 bg-white/5 text-white/40 text-[10px] font-bold rounded">#친목</span>
+                                <span className="px-2 py-1 bg-white/5 text-white/40 text-[10px] font-bold rounded">#초보환영</span>
+                            </div>
+                            <Button
+                                fullWidth
+                                size="sm"
+                                className="bg-white/10 hover:bg-[#CCFF00] hover:text-black hover:font-black font-bold h-10 rounded-xl transition-all border border-white/5"
+                                onClick={() => router.push('/clubs/ace')}
+                            >
+                                둘러보기
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-6 border-t border-white/5 text-center">
+                    <p className="text-[11px] text-white/30 font-medium">
+                        운영진이신가요? <span className="text-white underline cursor-pointer hover:text-[#CCFF00]" onClick={() => alert('준비중입니다!')}>클럽 등록 신청하기</span>
+                    </p>
+                </div>
+            </main>
+        </div>
+    )
+}

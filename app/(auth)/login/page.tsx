@@ -39,9 +39,11 @@ export default function LoginPage() {
                 if (data.session) {
                     alert('회원가입이 완료되었습니다. 프로필을 설정해주세요.')
                     router.push('/profile')
+                    // Don't set loading to false here, as we are navigating
                 } else {
                     alert('인증 메일이 발송되었습니다. 이메일을 확인해주세요.')
                     setIsSignUp(false)
+                    setLoading(false)
                 }
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
@@ -49,11 +51,13 @@ export default function LoginPage() {
                     password,
                 })
                 if (error) throw error
-                router.push('/profile')
+
+                // Use window.location.href to force a full page reload and ensure cookies are sent to server properly
+                // This resolves issues where middleware redirects back to login due to stale client state
+                window.location.href = '/profile'
             }
         } catch (err: any) {
             alert(err.message)
-        } finally {
             setLoading(false)
         }
     }
@@ -108,10 +112,10 @@ export default function LoginPage() {
                             fullWidth
                             size="lg"
                             type="submit"
-                            disabled={loading}
+                            isLoading={loading}
                             className="bg-[#CCFF00] hover:bg-[#AACC00] text-[#0A0E17] font-black text-[15px] h-14 rounded-2xl shadow-[0_8px_20px_rgba(204,255,0,0.2)] transition-all active:scale-95"
                         >
-                            {loading ? 'PROCESSING...' : (isSignUp ? 'JOIN WITH EMAIL' : 'LOGIN WITH EMAIL')}
+                            {isSignUp ? 'JOIN WITH EMAIL' : 'LOGIN WITH EMAIL'}
                         </Button>
                     </form>
 

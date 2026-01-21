@@ -37,54 +37,91 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter()
 
     useEffect(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
-                setSession(session)
-                const currentUser = session?.user ?? null
-                setUser(currentUser)
+        let mounted = true
 
-                if (currentUser) {
-                    let { data } = await supabase
-                        .from('profiles')
-                        .select('id, role, email, nickname, real_name')
-                        .eq('id', currentUser.id)
-                        .single()
+        const fetchProfileInBackground = async (userId: string, currentUserEmail: string | undefined) => {
+            try {
+                let { data, error } = await supabase
+                    .from('profiles')
+                    .select('id, role, email, nickname, real_name')
+                    .eq('id', userId)
+                    .single()
 
-                    // Auto-promote ssochul@naver.com OR nickname 'ssochul' to PRESIDENT
-                    const isTargetUser =
-                        currentUser.email?.toLowerCase().trim() === 'ssochul@naver.com' ||
-                        data?.nickname?.toLowerCase().trim() === 'ssochul' ||
-                        data?.real_name?.toLowerCase().trim() === 'ssochul'
-
-                    if (isTargetUser && data?.role !== 'PRESIDENT') {
-                        const { data: updatedData } = await supabase
-                            .from('profiles')
-                            .update({ role: 'PRESIDENT' })
-                            .eq('id', currentUser.id)
-                            .select()
-                            .single()
-                        if (updatedData) {
-                            data = updatedData
-                        } else {
-                            data = { ...data, role: 'PRESIDENT' } as any
-                        }
-                    }
-
-                    setProfile(data)
-                } else {
-                    setProfile(null)
+                if (error) {
+                    // console.warn('Profile fetch warning:', error.message)
                 }
 
-                setIsLoading(false)
+                // Auto-promote ssochul@naver.com OR nickname 'ssochul' to PRESIDENT
+                const isTargetUser =
+                    currentUserEmail?.toLowerCase().trim() === 'ssochul@naver.com' ||
+                    data?.nickname?.toLowerCase().trim() === 'ssochul' ||
+                    data?.real_name?.toLowerCase().trim() === 'ssochul'
 
-                if (event === 'SIGNED_OUT') {
-                    // Optionally redirect
-                    // router.push('/login')
+                if (isTargetUser && data?.role !== 'PRESIDENT') {
+                    const { data: updatedData } = await supabase
+                        .from('profiles')
+                        .update({ role: 'PRESIDENT' })
+                        .eq('id', userId)
+                        .select()
+                        .single()
+                    if (updatedData) {
+                        data = updatedData
+                    } else {
+                        // If update fails (e.g., RLS), manually set role for local state
+                        data = { ...data, role: 'PRESIDENT' } as Profile
+                    }
+                }
+
+                if (mounted) setProfile(data)
+            } catch (e) {
+                console.error('Error fetching profile in background:', e)
+                if (mounted) setProfile(null)
+            }
+        }
+
+        const initializeAuth = async () => {
+            // 1. Get initial session
+            const { data: { session } } = await supabase.auth.getSession()
+
+            if (!mounted) return
+
+            // 2. Set distinct auth state derived from session
+            const currentUser = session?.user ?? null
+            setUser(currentUser)
+            setSession(session)
+
+            // 3. Unblock UI immediately - The user is "Authenticated" enough to render the app
+            setIsLoading(false)
+
+            // 4. Fetch extra profile data in background
+            if (currentUser) {
+                fetchProfileInBackground(currentUser.id, currentUser.email)
+            } else {
+                setProfile(null)
+            }
+        }
+
+        initializeAuth()
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+                if (!mounted) return
+
+                const currentUser = session?.user ?? null
+                setUser(currentUser)
+                setSession(session)
+                setIsLoading(false) // Ensure loading is off on change too
+
+                if (currentUser) {
+                    fetchProfileInBackground(currentUser.id, currentUser.email)
+                } else {
+                    setProfile(null)
                 }
             }
         )
 
         return () => {
+            mounted = false
             subscription.unsubscribe()
         }
     }, [supabase, router])
@@ -115,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const signOut = async () => {
         await supabase.auth.signOut()
-        router.refresh()
+        router.push('/')
     }
 
     const isSystemPresident = !!(

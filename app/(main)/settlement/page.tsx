@@ -130,7 +130,7 @@ export default function SettlementPage() {
     }
 
     return (
-        <div className="pb-10 space-y-6">
+        <div className="pb-10 space-y-6 bg-[#0A0E17] min-h-screen text-white">
             {/* Balance Card */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -173,14 +173,14 @@ export default function SettlementPage() {
             </motion.div>
 
             {/* Quick Actions / Tabs */}
-            <div className="flex p-1 bg-gray-100 rounded-2xl">
+            <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5">
                 {(['status', 'history', 'expenses'] as const).map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${activeTab === tab
-                            ? 'bg-white text-[#333D4B] shadow-sm'
-                            : 'text-[#8B95A1]'
+                            ? 'bg-[#CCFF00] text-[#0A0E17] shadow-sm'
+                            : 'text-white/40'
                             }`}
                     >
                         {tab === 'status' ? '결제 현황' : tab === 'history' ? '수입 내역' : '지출 내역'}
@@ -192,22 +192,22 @@ export default function SettlementPage() {
             <AnimatePresence>
                 {isStaff && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                        <Card className="p-6 space-y-4 border-2 border-blue-100">
-                            <h3 className="font-bold text-[#333D4B] flex items-center gap-2">
-                                <Plus size={18} className="text-blue-500" />
+                        <Card className="p-6 space-y-4 border-2 border-white/10 bg-[#121826]">
+                            <h3 className="font-bold text-white flex items-center gap-2">
+                                <Plus size={18} className="text-[#CCFF00]" />
                                 정산 내역 추가
                             </h3>
                             <div className="grid grid-cols-2 gap-3">
-                                <input id="p_name" placeholder="이름 (또는 입금자명)" className="p-3 bg-gray-50 rounded-xl text-sm border-none focus:ring-2 focus:ring-blue-500" />
-                                <input id="p_amount" type="number" placeholder="금액" className="p-3 bg-gray-50 rounded-xl text-sm border-none focus:ring-2 focus:ring-blue-500" />
+                                <input id="p_name" placeholder="이름 (또는 입금자명)" className="p-3 bg-white/5 rounded-xl text-sm border-none focus:ring-2 focus:ring-[#CCFF00] text-white placeholder:text-white/20" />
+                                <input id="p_amount" type="number" placeholder="금액" className="p-3 bg-white/5 rounded-xl text-sm border-none focus:ring-2 focus:ring-[#CCFF00] text-white placeholder:text-white/20" />
                             </div>
                             <div className="flex gap-2">
-                                <select id="p_type" className="flex-1 p-3 bg-gray-50 rounded-xl text-sm border-none focus:ring-2 focus:ring-blue-500 font-medium">
+                                <select id="p_type" className="flex-1 p-3 bg-white/5 rounded-xl text-sm border-none focus:ring-2 focus:ring-[#CCFF00] font-medium text-white">
                                     <option value="GUEST">게스트비</option>
                                     <option value="DUES">월납/연납 회비</option>
                                     <option value="OTHER">기타 수입</option>
                                 </select>
-                                <select id="p_method" className="flex-1 p-3 bg-gray-50 rounded-xl text-sm border-none focus:ring-2 focus:ring-blue-500 font-medium">
+                                <select id="p_method" className="flex-1 p-3 bg-white/5 rounded-xl text-sm border-none focus:ring-2 focus:ring-[#CCFF00] font-medium text-white">
                                     <option value="CASH">현금 수납</option>
                                     <option value="TRANSFER">계좌 이체</option>
                                 </select>
@@ -250,8 +250,8 @@ export default function SettlementPage() {
             {/* List Content */}
             <div className="space-y-3">
                 <div className="flex items-center justify-between px-1">
-                    <h3 className="font-bold text-[#333D4B]">오늘의 정산 내역</h3>
-                    <span className="text-[12px] text-blue-500 font-bold bg-blue-50 px-2 py-1 rounded-lg">전체 {settlements.length}건</span>
+                    <h3 className="font-bold text-white">오늘의 정산 내역</h3>
+                    <span className="text-[12px] text-[#CCFF00] font-bold bg-[#CCFF00]/10 px-2 py-1 rounded-lg">전체 {settlements.length}건</span>
                 </div>
 
                 {loading ? (
@@ -263,9 +263,9 @@ export default function SettlementPage() {
                     </Card>
                 ) : (
                     settlements.map((item) => (
-                        <Card key={item.id} className="p-4 flex items-center justify-between hover:scale-[1.02] transition-transform cursor-pointer">
+                        <Card key={item.id} className="p-4 flex items-center justify-between hover:scale-[1.02] transition-transform cursor-pointer bg-[#121826] border-white/5">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-[#B0B8C1]">
+                                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/20">
                                     {item.profiles?.photo_url ? (
                                         <img src={item.profiles.photo_url} className="w-full h-full object-cover rounded-2xl" />
                                     ) : (
@@ -274,7 +274,7 @@ export default function SettlementPage() {
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <span className="font-bold text-[#333D4B]">{item.payer_name}</span>
+                                        <span className="font-bold text-white">{item.payer_name}</span>
                                         <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${item.method === 'CASH' ? 'bg-orange-50 text-orange-500' : 'bg-blue-50 text-blue-500'
                                             }`}>
                                             {item.method === 'CASH' ? '현금' : '이체'}
@@ -287,7 +287,7 @@ export default function SettlementPage() {
                             </div>
 
                             <div className="text-right flex flex-col items-end gap-1">
-                                <span className="font-black text-[#333D4B]">
+                                <span className="font-black text-white">
                                     {Number(item.amount).toLocaleString()}원
                                 </span>
                                 {item.status === 'PAID' ? (
@@ -299,7 +299,7 @@ export default function SettlementPage() {
                                     isStaff ? (
                                         <button
                                             onClick={() => handleApprove(item.id)}
-                                            className="bg-[#0064FF] text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+                                            className="bg-[#CCFF00] text-[#0A0E17] text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-lg active:scale-95 transition-all"
                                         >
                                             승인하기
                                         </button>
@@ -324,19 +324,19 @@ export default function SettlementPage() {
             {/* Quick Membership Summary (For Admin) */}
             {isStaff && (
                 <div className="grid grid-cols-2 gap-4">
-                    <Card className="p-5 space-y-2 border-l-4 border-blue-500">
+                    <Card className="p-5 space-y-2 border-l-4 border-[#CCFF00] bg-[#121826] border-white/5">
                         <div className="flex items-center justify-between">
-                            <span className="text-[12px] font-bold text-[#8B95A1]">연납 회원</span>
-                            <CreditCard size={16} className="text-blue-500" />
+                            <span className="text-[12px] font-bold text-white/40">연납 회원</span>
+                            <CreditCard size={16} className="text-[#CCFF00]" />
                         </div>
-                        <p className="text-2xl font-black text-[#333D4B]">12명</p>
+                        <p className="text-2xl font-black text-white">12명</p>
                     </Card>
-                    <Card className="p-5 space-y-2 border-l-4 border-purple-500">
+                    <Card className="p-5 space-y-2 border-l-4 border-[#00D1FF] bg-[#121826] border-white/5">
                         <div className="flex items-center justify-between">
-                            <span className="text-[12px] font-bold text-[#8B95A1]">월납 회원</span>
-                            <Calendar size={16} className="text-purple-500" />
+                            <span className="text-[12px] font-bold text-white/40">월납 회원</span>
+                            <Calendar size={16} className="text-[#00D1FF]" />
                         </div>
-                        <p className="text-2xl font-black text-[#333D4B]">48명</p>
+                        <p className="text-2xl font-black text-white">48명</p>
                     </Card>
                 </div>
             )}

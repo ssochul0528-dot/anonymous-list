@@ -140,7 +140,7 @@ export default function ScheduleGeneratorPage() {
     }
 
     return (
-        <div className="pt-2 pb-10 space-y-6 bg-[#F2F4F6] min-h-screen px-4 font-sans text-[#191F28]">
+        <div className="pt-2 pb-10 space-y-6 bg-[#0A0E17] min-h-screen px-4 font-sans text-white">
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -164,15 +164,15 @@ export default function ScheduleGeneratorPage() {
 
             {!schedule ? (
                 <div className="space-y-6">
-                    <Card className="border-none shadow-sm">
-                        <h3 className="font-bold mb-6 text-[#333D4B]">1. 경기 환경 설정</h3>
+                    <Card className="bg-[#121826] border-white/5 shadow-sm">
+                        <h3 className="font-bold mb-6 text-white">1. 경기 환경 설정</h3>
                         <div className="space-y-8">
                             <div>
-                                <label className="block text-[12px] font-bold text-[#8B95A1] mb-3 uppercase tracking-wider">코트 수</label>
+                                <label className="block text-[12px] font-bold text-white/40 mb-3 uppercase tracking-wider">코트 수</label>
                                 <div className="flex items-center gap-4">
                                     <button
                                         onClick={() => setCourtCount(Math.max(1, courtCount - 1))}
-                                        className="w-12 h-12 rounded-2xl bg-[#F2F4F6] flex items-center justify-center text-xl font-bold text-[#4E5968] active:scale-90 transition-transform"
+                                        className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-xl font-bold text-white active:scale-90 transition-transform border border-white/10"
                                     >-</button>
                                     <span className="text-[24px] font-bold w-10 text-center">{courtCount}</span>
                                     <button
@@ -183,11 +183,11 @@ export default function ScheduleGeneratorPage() {
                             </div>
 
                             <div>
-                                <label className="block text-[12px] font-bold text-[#8B95A1] mb-3 uppercase tracking-wider">라운드 수</label>
+                                <label className="block text-[12px] font-bold text-white/40 mb-3 uppercase tracking-wider">라운드 수</label>
                                 <div className="flex items-center gap-4">
                                     <button
                                         onClick={() => setRoundCount(Math.max(1, roundCount - 1))}
-                                        className="w-12 h-12 rounded-2xl bg-[#F2F4F6] flex items-center justify-center text-xl font-bold text-[#4E5968] active:scale-90 transition-transform"
+                                        className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-xl font-bold text-white active:scale-90 transition-transform border border-white/10"
                                     >-</button>
                                     <span className="text-[24px] font-bold w-10 text-center">{roundCount}</span>
                                     <button
@@ -199,9 +199,9 @@ export default function ScheduleGeneratorPage() {
                         </div>
                     </Card>
 
-                    <Card className="border-none shadow-sm">
+                    <Card className="bg-[#121826] border-white/5 shadow-sm">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-[#333D4B]">2. 참가 선수 <span className="text-[#0062FF] ml-1">{participants.length}</span></h3>
+                            <h3 className="font-bold text-white">2. 참가 선수 <span className="text-[#CCFF00] ml-1">{participants.length}</span></h3>
                             {allPlayers.length === 0 && (
                                 <button onClick={addMockPlayers} className="text-[12px] text-[#0064FF] font-bold">
                                     MOCK 불러오기
@@ -211,8 +211,8 @@ export default function ScheduleGeneratorPage() {
 
                         {allPlayers.length > 0 && (
                             <div className="mb-8">
-                                <label className="block text-[12px] font-bold text-[#8B95A1] mb-4 uppercase tracking-wider">Registered Selection</label>
-                                <div className="flex flex-wrap gap-2 max-h-80 overflow-y-auto p-5 bg-[#F9FAFB] rounded-[28px] border border-[#F2F4F6]">
+                                <label className="block text-[12px] font-bold text-white/40 mb-4 uppercase tracking-wider">Registered Selection</label>
+                                <div className="flex flex-wrap gap-2 max-h-80 overflow-y-auto p-5 bg-white/5 rounded-[28px] border border-white/5">
                                     {allPlayers.map((player: any) => {
                                         const isSelected = participants.includes(player.name)
                                         return (
@@ -220,8 +220,8 @@ export default function ScheduleGeneratorPage() {
                                                 key={player.id}
                                                 onClick={() => togglePlayer(player.name)}
                                                 className={`text-[14px] px-5 py-2.5 rounded-full border transition-all duration-300 flex items-center gap-2 ${isSelected
-                                                        ? "bg-[#0064FF] text-white border-[#0064FF] font-black shadow-lg scale-105"
-                                                        : "bg-white text-[#4E5968] border-[#E5E8EB] hover:border-[#0064FF]/30"
+                                                    ? "bg-[#CCFF00] text-[#0A0E17] border-[#CCFF00] font-black shadow-lg scale-105"
+                                                    : "bg-white/5 text-white/60 border-white/10 hover:border-[#CCFF00]/30"
                                                     }`}
                                             >
                                                 {player.name}
@@ -239,14 +239,14 @@ export default function ScheduleGeneratorPage() {
                         )}
 
                         <div className="flex flex-col gap-3">
-                            <label className="block text-[12px] font-bold text-[#8B95A1] uppercase tracking-wider">Add Guest</label>
+                            <label className="block text-[12px] font-bold text-white/40 uppercase tracking-wider">Add Guest</label>
                             <div className="flex gap-2">
                                 <input
                                     value={newPlayerName}
                                     onChange={(e) => setNewPlayerName(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
                                     placeholder="이름 입력"
-                                    className="flex-1 bg-[#F9FAFB] h-14 px-5 rounded-[18px] outline-none border-2 border-transparent focus:border-[#0064FF] transition-all text-[16px]"
+                                    className="flex-1 bg-white/5 h-14 px-5 rounded-[18px] outline-none border-2 border-transparent focus:border-[#CCFF00] transition-all text-[16px] text-white placeholder:text-white/20"
                                 />
                                 <Button size="lg" onClick={addPlayer} className="px-8 rounded-[18px]">추가</Button>
                             </div>
@@ -344,4 +344,3 @@ export default function ScheduleGeneratorPage() {
         </div>
     )
 }
-

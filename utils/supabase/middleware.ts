@@ -38,16 +38,18 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
+    /*
     if (
         !user &&
         !request.nextUrl.pathname.startsWith('/login') &&
         !request.nextUrl.pathname.startsWith('/auth')
     ) {
-        // no user, potentially redirect to login
-        // for now, let's just allow access but we will enforce this in layout or page
-        // actually, for this app, almost everything requires login except maybe landing
-        // but we will handle redirects inside pages or middleware later
+        // no user, redirect to login page
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        return NextResponse.redirect(url)
     }
+    */
 
     return supabaseResponse
 }

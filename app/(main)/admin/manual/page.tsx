@@ -97,7 +97,7 @@ export default function ManualMatchPage() {
     }
 
     return (
-        <div className="pt-2 pb-20 space-y-6">
+        <div className="pt-2 pb-20 space-y-6 bg-[#0A0E17] min-h-screen text-white">
             <div className="flex items-center gap-2 mb-4">
                 <Button variant="ghost" size="sm" onClick={() => router.back()}>
                     &lt; 뒤로
@@ -105,9 +105,9 @@ export default function ManualMatchPage() {
                 <h2 className="text-[20px] font-bold">수기 경기 입력</h2>
             </div>
 
-            <Card className="space-y-6">
+            <Card className="space-y-6 bg-[#121826] border-white/5 shadow-xl">
                 <div>
-                    <h3 className="font-bold text-[#333D4B] mb-4 text-center">Team A</h3>
+                    <h3 className="font-bold text-white mb-4 text-center">Team A</h3>
                     <div className="space-y-3">
                         <PlayerSelect
                             value={teamA1}
@@ -125,12 +125,12 @@ export default function ManualMatchPage() {
                 </div>
 
                 <div className="flex items-center justify-center py-2 relative">
-                    <div className="w-full h-[1px] bg-gray-200 absolute" />
-                    <span className="bg-white px-3 relative text-gray-400 text-sm font-bold">VS</span>
+                    <div className="w-full h-[1px] bg-white/5 absolute" />
+                    <span className="bg-[#121826] px-3 relative text-white/40 text-sm font-bold">VS</span>
                 </div>
 
                 <div>
-                    <h3 className="font-bold text-[#333D4B] mb-4 text-center">Team B</h3>
+                    <h3 className="font-bold text-white mb-4 text-center">Team B</h3>
                     <div className="space-y-3">
                         <PlayerSelect
                             value={teamB1}
@@ -148,13 +148,13 @@ export default function ManualMatchPage() {
                 </div>
 
                 <div className="pt-4 space-y-3">
-                    <label className="block text-[13px] font-bold text-[#333D4B] text-center">경기 결과</label>
+                    <label className="block text-[13px] font-bold text-white/40 text-center">경기 결과</label>
                     <div className="flex gap-2">
                         <button
                             onClick={() => setResult('A_WIN')}
                             className={`flex-1 py-3 rounded-[12px] font-bold transition-all ${result === 'A_WIN'
-                                    ? 'bg-[#0064FF] text-white shadow-lg shadow-blue-200'
-                                    : 'bg-[#F2F4F6] text-[#6B7684]'
+                                ? 'bg-[#0064FF] text-white shadow-lg shadow-blue-500/20'
+                                : 'bg-white/5 text-white/40'
                                 }`}
                         >
                             A팀 승리
@@ -162,8 +162,8 @@ export default function ManualMatchPage() {
                         <button
                             onClick={() => setResult('DRAW')}
                             className={`flex-1 py-3 rounded-[12px] font-bold transition-all ${result === 'DRAW'
-                                    ? 'bg-[#333D4B] text-white shadow-lg'
-                                    : 'bg-[#F2F4F6] text-[#6B7684]'
+                                ? 'bg-white text-[#121826] shadow-lg'
+                                : 'bg-white/5 text-white/40'
                                 }`}
                         >
                             무승부
@@ -171,8 +171,8 @@ export default function ManualMatchPage() {
                         <button
                             onClick={() => setResult('B_WIN')}
                             className={`flex-1 py-3 rounded-[12px] font-bold transition-all ${result === 'B_WIN'
-                                    ? 'bg-[#F04452] text-white shadow-lg shadow-red-200'
-                                    : 'bg-[#F2F4F6] text-[#6B7684]'
+                                ? 'bg-[#F04452] text-white shadow-lg shadow-red-500/20'
+                                : 'bg-white/5 text-white/40'
                                 }`}
                         >
                             B팀 승리
@@ -193,7 +193,7 @@ function PlayerSelect({ value, onChange, profiles, placeholder }: any) {
         <select
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full p-3 bg-[#F9FAFB] rounded-[12px] border-none outline-none focus:ring-2 focus:ring-[#0064FF] text-[#333D4B]"
+            className="w-full p-3 bg-white/5 rounded-[12px] border-none outline-none focus:ring-2 focus:ring-[#CCFF00] text-white appearance-none"
         >
             <option value="">{placeholder}</option>
             {profiles.map((p: any) => (
