@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState } from 'react'
@@ -16,11 +15,15 @@ export default function LoginPage() {
 
     const [loading, setLoading] = useState(false)
     const [email, setEmail] = useState('')
-    // ... (rest of state)
+    const [password, setPassword] = useState('')
+    const [isSignUp, setIsSignUp] = useState(false)
 
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault()
-        // ... (validation)
+        if (!email || !password) {
+            alert('이메일과 비밀번호를 입력해주세요.')
+            return
+        }
 
         setLoading(true)
         try {
@@ -57,7 +60,6 @@ export default function LoginPage() {
                 window.location.href = redirectUrl
             }
         } catch (err: any) {
-            // ...
             alert(err.message)
             setLoading(false)
         }
