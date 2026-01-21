@@ -59,22 +59,22 @@ export default function LandingPage() {
                     <div className="flex gap-4 overflow-x-auto pb-4 snap-x no-scrollbar -mx-6 px-6">
                         {/* Mock Club Card 1 */}
                         <div className="min-w-[260px] snap-center bg-[#191F28] p-5 rounded-[24px] border border-white/5 relative overflow-hidden group shadow-lg">
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#CCFF00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <div className="flex items-center gap-3 mb-4">
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#CCFF00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                            <div className="flex items-center gap-3 mb-4 relative z-10">
                                 <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-black italic text-xl">M</div>
                                 <div>
                                     <h4 className="font-bold text-[15px] text-white">무명 클럽</h4>
                                     <p className="text-[11px] text-white/40">서울 강남구 • 32 Members</p>
                                 </div>
                             </div>
-                            <div className="flex gap-2 mb-4">
+                            <div className="flex gap-2 mb-4 relative z-10">
                                 <span className="px-2 py-1 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-bold rounded">#빡테</span>
                                 <span className="px-2 py-1 bg-white/5 text-white/40 text-[10px] font-bold rounded">#매주수요일</span>
                             </div>
                             <Button
                                 fullWidth
                                 size="sm"
-                                className="bg-white/10 hover:bg-[#CCFF00] hover:text-black hover:font-black font-bold h-10 rounded-xl transition-all border border-white/5"
+                                className="relative z-10 bg-white/10 hover:bg-[#CCFF00] hover:text-black hover:font-black font-bold h-10 rounded-xl transition-all border border-white/5"
                                 onClick={() => router.push('/clubs/anonymous')}
                             >
                                 둘러보기
