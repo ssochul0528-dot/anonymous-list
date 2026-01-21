@@ -6,22 +6,21 @@ import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
     const supabase = createClient()
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const redirectUrl = searchParams.get('redirect') || '/profile'
+
     const [loading, setLoading] = useState(false)
     const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [isSignUp, setIsSignUp] = useState(false)
+    // ... (rest of state)
 
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!email || !password) {
-            alert('이메일과 비밀번호를 입력해주세요.')
-            return
-        }
+        // ... (validation)
 
         setLoading(true)
         try {
@@ -30,7 +29,7 @@ export default function LoginPage() {
                     email,
                     password,
                     options: {
-                        emailRedirectTo: `${location.origin}/auth/callback`,
+                        emailRedirectTo: `${location.origin}/auth/callback?redirect=${encodeURIComponent(redirectUrl)}`,
                     },
                 })
                 if (error) throw error
@@ -38,7 +37,8 @@ export default function LoginPage() {
                 // If email confirmation is disabled in Supabase, data.session will be present immediately
                 if (data.session) {
                     alert('회원가입이 완료되었습니다. 프로필을 설정해주세요.')
-                    router.push('/profile')
+                    // Use window.location.href for consistency
+                    window.location.href = redirectUrl
                     // Don't set loading to false here, as we are navigating
                 } else {
                     alert('인증 메일이 발송되었습니다. 이메일을 확인해주세요.')
@@ -54,9 +54,10 @@ export default function LoginPage() {
 
                 // Use window.location.href to force a full page reload and ensure cookies are sent to server properly
                 // This resolves issues where middleware redirects back to login due to stale client state
-                window.location.href = '/profile'
+                window.location.href = redirectUrl
             }
         } catch (err: any) {
+            // ...
             alert(err.message)
             setLoading(false)
         }
