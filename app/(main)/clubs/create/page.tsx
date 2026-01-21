@@ -29,7 +29,8 @@ export default function CreateClubPage() {
         e.preventDefault()
         if (!user) {
             alert('로그인이 필요한 서비스입니다.')
-            router.push('/login')
+            // Redirect to login page with explicit redirect back here
+            router.push('/login?redirect=/clubs/create')
             return
         }
 
@@ -94,17 +95,8 @@ export default function CreateClubPage() {
         }
     }
 
-    // If not logged in, show login prompt UI
-    if (!user) {
-        return (
-            <div className="min-h-screen bg-[#0A0E17] flex flex-col items-center justify-center p-6 text-center">
-                <h2 className="text-2xl font-bold text-white mb-4">로그인이 필요합니다</h2>
-                <p className="text-white/50 mb-8">클럽을 개설하려면 먼저 로그인을 해주세요.</p>
-                <Button onClick={() => router.push('/login')} fullWidth className="max-w-xs bg-[#CCFF00] text-black font-bold">로그인하러 가기</Button>
-                <Button onClick={() => router.back()} variant="ghost" className="mt-4 text-white/40">뒤로가기</Button>
-            </div>
-        )
-    }
+    // Removed the "if (!user) return login_prompt" block to allow public viewing.
+    // Auth check is now only on submit.
 
     return (
         <div className="min-h-screen bg-[#0A0E17] text-white pb-20">
@@ -194,7 +186,7 @@ export default function CreateClubPage() {
                         className="bg-[#CCFF00] text-black font-black mt-4 h-14 text-[16px] shadow-[0_0_20px_rgba(204,255,0,0.2)]"
                         isLoading={loading}
                     >
-                        {loading ? '신청 중...' : '클럽 개설 신청하기'}
+                        {loading ? '신청 중...' : (user ? '클럽 개설 신청하기' : '로그인 후 신청하기')}
                     </Button>
                 </form>
             </main>
