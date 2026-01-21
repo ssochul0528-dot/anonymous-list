@@ -103,9 +103,9 @@ export default function DashboardClient() {
     }
 
     return (
-        <div className="space-y-6 pt-4 pb-20">
+        <div className="space-y-6 pt-8 pb-20 relative z-0">
             {/* Navigation & Actions */}
-            <div className="flex items-center justify-between px-1">
+            <div className="sticky top-20 z-40 flex items-center justify-between px-1 mb-6">
                 <Button
                     variant="outline"
                     size="sm"
