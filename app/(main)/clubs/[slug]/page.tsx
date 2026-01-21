@@ -92,7 +92,7 @@ export default function ClubDetailPage() {
             </div>
 
             {/* Club Identity */}
-            <div className="flex flex-col items-center text-center mb-8">
+            <div className="flex flex-col items-center text-center mb-6">
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -119,22 +119,75 @@ export default function ClubDetailPage() {
                         {memberCount} Members
                     </span>
                 </div>
+            </div>
 
-                <div className="w-full max-w-xs">
-                    {user ? (
-                        <Button fullWidth className="h-12 text-[14px] font-bold bg-[#CCFF00] text-black hover:bg-[#b3e600]" disabled>
-                            이미 로그인 상태입니다
-                        </Button>
-                    ) : (
-                        <Button
-                            fullWidth
-                            className="h-12 text-[14px] font-bold bg-[#CCFF00] text-black hover:bg-[#b3e600] shadow-[0_0_20px_rgba(204,255,0,0.3)] animate-pulse"
-                            onClick={() => router.push('/login')}
-                        >
-                            가입 신청하기
-                        </Button>
-                    )}
-                </div>
+            {/* 🔥 Club Activity Index (New) */}
+            <div className="px-5 mb-8">
+                <Card className="bg-gradient-to-br from-[#191F28] to-[#0A0E17] border border-white/10 p-6 relative overflow-hidden">
+                    {/* Background Glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-[#CCFF00]/10 blur-[50px] rounded-full" />
+
+                    <div className="relative z-10 flex flex-col items-center">
+                        <h3 className="text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.2em] mb-4">Club Activity Index</h3>
+
+                        {/* Circular Gauge */}
+                        <div className="relative w-40 h-40 flex items-center justify-center mb-4">
+                            {/* Outer Ring */}
+                            <svg className="w-full h-full -rotate-90">
+                                <circle cx="80" cy="80" r="70" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
+                                <circle
+                                    cx="80" cy="80" r="70"
+                                    stroke="#CCFF00"
+                                    strokeWidth="8"
+                                    fill="none"
+                                    strokeDasharray="440"
+                                    strokeDashoffset="110" // 75% filled mock
+                                    strokeLinecap="round"
+                                    className="drop-shadow-[0_0_10px_rgba(204,255,0,0.5)]"
+                                />
+                            </svg>
+                            {/* Inner Info */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-[32px] font-black italic text-white tracking-tighter">1,240</span>
+                                <span className="text-[10px] font-bold text-white/40 uppercase">Total Points</span>
+                            </div>
+                        </div>
+
+                        {/* Detailed Stats */}
+                        <div className="grid grid-cols-3 gap-4 w-full pt-4 border-t border-white/5">
+                            <div className="text-center">
+                                <p className="text-[10px] font-bold text-white/30 uppercase mb-1">Total Games</p>
+                                <p className="text-[14px] font-black text-white">124</p>
+                            </div>
+                            <div className="text-center mb-1 relative">
+                                <div className="absolute inset-y-2 -left-2 w-[1px] bg-white/5" />
+                                <p className="text-[10px] font-bold text-white/30 uppercase mb-1">Win Rate</p>
+                                <p className="text-[14px] font-black text-[#CCFF00]">56%</p>
+                                <div className="absolute inset-y-2 -right-2 w-[1px] bg-white/5" />
+                            </div>
+                            <div className="text-center">
+                                <p className="text-[10px] font-bold text-white/30 uppercase mb-1">Active</p>
+                                <p className="text-[14px] font-black text-white">82%</p>
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+
+            <div className="w-full max-w-xs mx-auto px-5 mb-8">
+                {user ? (
+                    <Button fullWidth className="h-12 text-[14px] font-bold bg-[#CCFF00] text-black hover:bg-[#b3e600]" disabled>
+                        이미 로그인 상태입니다
+                    </Button>
+                ) : (
+                    <Button
+                        fullWidth
+                        className="h-12 text-[14px] font-bold bg-[#CCFF00] text-black hover:bg-[#b3e600] shadow-[0_0_20px_rgba(204,255,0,0.3)] animate-pulse"
+                        onClick={() => router.push('/login')}
+                    >
+                        가입 신청하기
+                    </Button>
+                )}
             </div>
 
             {/* Club Info Cards */}
