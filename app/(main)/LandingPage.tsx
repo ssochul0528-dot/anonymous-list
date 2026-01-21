@@ -7,8 +7,11 @@ import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+import { useAuth } from '@/contexts/AuthContext'
+
 export default function LandingPage() {
     const router = useRouter()
+    const { user } = useAuth()
     const [trendingClubs, setTrendingClubs] = useState<any[]>([])
     const [loadingClubs, setLoadingClubs] = useState(true)
 
@@ -37,14 +40,24 @@ export default function LandingPage() {
             {/* Header */}
             <header className="relative z-10 px-6 py-6 flex justify-between items-center">
                 <h1 className="text-[20px] font-black italic tracking-tighter uppercase">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
-                <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-full px-5 text-[12px] font-bold border-white/20 hover:bg-white/10"
-                    onClick={() => router.push('/login')}
-                >
-                    LOGIN
-                </Button>
+                {user ? (
+                    <Button
+                        size="sm"
+                        className="rounded-full px-5 text-[12px] font-bold bg-[#CCFF00] text-black hover:bg-[#b3e600]"
+                        onClick={() => router.push('/my-club')}
+                    >
+                        MY CLUB &gt;
+                    </Button>
+                ) : (
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full px-5 text-[12px] font-bold border-white/20 hover:bg-white/10"
+                        onClick={() => router.push('/login')}
+                    >
+                        LOGIN
+                    </Button>
+                )}
             </header>
 
             {/* Main Content Scroll Area */}
