@@ -30,7 +30,7 @@ export default function CreateClubPage() {
         if (!user) {
             alert('로그인이 필요한 서비스입니다.')
             // Redirect to login page with explicit redirect back here
-            router.push('/login?redirect=/club-register')
+            router.push('/login?redirect=/club-join')
             return
         }
 

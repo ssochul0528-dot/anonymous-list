@@ -108,7 +108,7 @@ export default function LandingPage() {
 
                 <div className="pt-6 border-t border-white/5 text-center">
                     <p className="text-[11px] text-white/30 font-medium">
-                        운영진이신가요? <span className="text-white underline cursor-pointer hover:text-[#CCFF00]" onClick={() => router.push('/club-register')}>클럽 등록 신청하기</span>
+                        운영진이신가요? <span className="text-white underline cursor-pointer hover:text-[#CCFF00]" onClick={() => router.push('/club-join')}>클럽 등록 신청하기</span>
                     </p>
                 </div>
             </main>
