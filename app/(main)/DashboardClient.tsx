@@ -11,8 +11,28 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function DashboardClient() {
-    const { user, isAdmin: isSuperAdmin, isStaff: isAnyStaff } = useAuth()
+    const { user, isAdmin: isSuperAdmin, isStaff: isAnyStaff, profile } = useAuth()
     const router = useRouter()
+    const [myClub, setMyClub] = useState<any>(null)
+
+    // Fetch My Club Info
+    useEffect(() => {
+        const fetchMyClub = async () => {
+            if (profile?.club_id) {
+                const supabase = createClient()
+                const { data } = await supabase.from('clubs').select('*').eq('id', profile.club_id).single()
+                setMyClub(data)
+            }
+        }
+        fetchMyClub()
+    }, [profile?.club_id])
+
+    const handleCopyInvite = () => {
+        if (!myClub) return
+        const link = `${window.location.origin}/clubs/${myClub.slug}?code=${myClub.invite_code}`
+        navigator.clipboard.writeText(link)
+        alert('초대 링크가 복사되었습니다!\n클럽 카톡방에 공유하세요.')
+    }
 
     // Dashboard is now rendered only when user exists by parent page.tsx
     // So we don't need redirect logic here.
