@@ -30,7 +30,7 @@ const KOREA_REGIONS: { [key: string]: string[] } = {
 
 function ClubJoinForm() {
     const router = useRouter()
-    const { user } = useAuth()
+    const { user, isLoading } = useAuth()
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         name: '',
@@ -40,6 +40,19 @@ function ClubJoinForm() {
         memberCount: '', // New field
         file: null as any
     })
+
+    // Auth Protection
+    React.useEffect(() => {
+        if (!isLoading && !user) {
+            router.replace('/login?redirect=/club-join')
+        }
+    }, [user, isLoading, router])
+
+    if (isLoading) {
+        return <div className="min-h-screen bg-[#0A0E17]" />
+    }
+
+    if (!user) return null
 
     // Load saved data on mount
     React.useEffect(() => {

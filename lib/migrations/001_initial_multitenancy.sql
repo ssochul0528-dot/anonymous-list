@@ -1,7 +1,7 @@
--- Phase 1 Migration: Multi-tenancy Architecture
+-- Phase 1 Migration: Multi-tenancy Architecture (Idempotent Version)
 
--- 1. Create CLUBS table
-create table public.clubs (
+-- 1. Create CLUBS table (Safe check)
+create table if not exists public.clubs (
   id uuid default uuid_generate_v4() primary key,
   name text not null,
   slug text unique, -- for url friendly access like /clubs/mumeong
@@ -13,14 +13,39 @@ create table public.clubs (
   created_at timestamp with time zone default now()
 );
 
+-- Ensure owner_id column exists (It was missing in previous version)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'clubs' AND column_name = 'owner_id') THEN
+        ALTER TABLE public.clubs ADD COLUMN owner_id uuid references public.profiles(id);
+    END IF;
+END $$;
+
 -- RLS for clubs
 alter table public.clubs enable row level security;
+
+-- Policies (Drop and Recreate to allow re-running)
+drop policy if exists "Active clubs are viewable by everyone" on public.clubs;
 create policy "Active clubs are viewable by everyone" on public.clubs for select using (status = 'ACTIVE');
+
+drop policy if exists "Authenticated users can create clubs" on public.clubs;
 create policy "Authenticated users can create clubs" on public.clubs for insert with check (auth.role() = 'authenticated');
--- Only super admin can update (for now, will refine later)
+
+drop policy if exists "Owners can view pending clubs" on public.clubs;
+create policy "Owners can view pending clubs" on public.clubs for select using (auth.uid() = owner_id);
+
+drop policy if exists "Super admin full access" on public.clubs;
+-- Assuming super admin can bypass RLS or needs specific policy. For now we can assume service role usage or add specific policy if needed.
+-- But for client side super admin page:
+create policy "Super admin full access" on public.clubs for all using (
+  exists (
+    select 1 from public.profiles
+    where profiles.id = auth.uid() and profiles.role = 'PRESIDENT' 
+    -- Note: Ideally we should use a stronger check or a separate admin role, but this matches AuthContext logic
+  )
+);
 
 -- 2. Insert the Default Club (Current "Anonymous Club")
--- We need to capture this ID to migrate existing data
 DO $$
 DECLARE
   default_club_id uuid;
@@ -38,9 +63,7 @@ BEGIN
   -- PROFILES
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'club_id') THEN
       ALTER TABLE public.profiles ADD COLUMN club_id uuid references public.clubs(id);
-      -- Migrate existing profiles to default club
       UPDATE public.profiles SET club_id = default_club_id WHERE club_id IS NULL;
-      -- Add index
       CREATE INDEX idx_profiles_club_id ON public.profiles(club_id);
   END IF;
 
@@ -78,8 +101,3 @@ BEGIN
   END IF;
 
 END $$;
-
--- 4. Update Policies (Example for basic read/write, will need refinement for multi-tenant isolation)
--- For now, we allow access if the user belongs to the club or if data is public
--- This is a simplified migration step. Full isolation policies will be applied in Step 2 of Phase 1.
-

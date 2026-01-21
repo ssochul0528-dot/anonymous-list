@@ -86,7 +86,19 @@ export default function DashboardClient() {
         <div className="space-y-6 pt-2">
             {/* Top Summary */}
             <section className="flex flex-col gap-1 px-1">
-                <h2 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-wider">PRE-SEASON • {currentWeek}</h2>
+                <div className="flex justify-between items-start">
+                    <h2 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-wider">PRE-SEASON • {currentWeek}</h2>
+                    {isSuperAdmin && (
+                        <Button
+                            size="sm"
+                            variant="primary"
+                            className="h-7 px-3 text-[10px] font-black bg-white/10 hover:bg-[#CCFF00] hover:text-black border border-white/10"
+                            onClick={() => router.push('/super')}
+                        >
+                            SUPER MASTER
+                        </Button>
+                    )}
+                </div>
                 <h1 className="text-[28px] font-black leading-tight tracking-tighter">
                     경기를 관리하면,<br />
                     <span className="text-[#CCFF00]">동호회가 굴러갑니다.</span>
