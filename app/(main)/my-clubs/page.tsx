@@ -57,7 +57,7 @@ export default function SwitchClubPage() {
 
             // Navigate to the explicit CLUB URL which is proven to work
             const targetUrl = `/clubs/${slug}`
-            alert(`클럽으로 이동합니다: ${targetUrl}`)
+            alert(`[DEBUG v2] Target: ${targetUrl}`)
             window.location.href = targetUrl
         } catch (e: any) {
             console.error(e)
@@ -80,7 +80,10 @@ export default function SwitchClubPage() {
 
             <header className="mb-8">
                 <Link href="/" className="text-white/40 hover:text-white mb-4 block">&lt; 메인으로</Link>
-                <h1 className="text-[28px] font-black italic tracking-tighter uppercase">My Clubs</h1>
+                <div className="flex items-center gap-2">
+                    <h1 className="text-[28px] font-black italic tracking-tighter uppercase">My Clubs</h1>
+                    <span className="text-xs bg-red-600 px-2 py-0.5 rounded font-bold">NEW PAGE v2</span>
+                </div>
                 <p className="text-white/40 text-[14px]">활동 중인 클럽을 선택하세요.</p>
             </header>
 

@@ -75,7 +75,7 @@ export default function LandingPage() {
                     </p>
                     {user && (
                         <a
-                            href="/switch-club"
+                            href="/my-clubs"
                             className="inline-flex items-center justify-center bg-[#CCFF00] text-black font-black italic tracking-tight rounded-2xl px-8 h-14 text-[16px] hover:bg-[#b3e600] shadow-[0_0_30px_rgba(204,255,0,0.2)] transition-all group relative z-50 pointer-events-auto"
                         >
                             내 클럽으로 이동
