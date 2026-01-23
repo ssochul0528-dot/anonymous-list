@@ -147,17 +147,21 @@ export default function DashboardClient() {
             }
         } else {
             console.error('Attendance error:', error)
-            alert('출석체크 실패 [V3]: ' + (error.message || JSON.stringify(error)))
+            alert('출석체크 실패 [V4]: ' + (error.message || JSON.stringify(error)))
         }
     }
 
     const attendanceOptions = React.useMemo(() => {
-        if (!myClub?.attendance_options) return [] // Default empty if loading, or fallback. Actually default to something?
-        // Fallback handled in rendering if empty? 
-        // Let's default to hardcoded if really nothing, but DB has default.
+        const defaults = ["08:00", "09:00", "10:00", "11:00", "12:00"]
+        if (!myClub) return defaults
+        if (!myClub.attendance_options) return defaults
+
         const opts = myClub.attendance_options
-        if (Array.isArray(opts)) return opts
-        try { return JSON.parse(opts) } catch { return [] }
+        if (Array.isArray(opts) && opts.length > 0) return opts
+        try {
+            const parsed = JSON.parse(opts)
+            return parsed.length > 0 ? parsed : defaults
+        } catch { return defaults }
     }, [myClub])
 
     const formatTimeOption = (t: string) => {
@@ -251,12 +255,18 @@ export default function DashboardClient() {
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         onClick={() => {
-                                            if (attendanceStatus === 'ATTEND' && selectedTime) {
-                                            } else {
-                                                setAttendanceStatus('ATTEND');
+                                            // Optimistic update
+                                            if (attendanceStatus !== 'ATTEND') {
                                                 setSelectedTime(null);
                                             }
+                                            setAttendanceStatus('ATTEND');
+
+                                            // Persist to DB immediately (Intention to Attend)
+                                            // This fixes the issue where switching from Absent -> Attend didn't save
+                                            // until a time was picked.
+                                            handleAttendance('ATTEND');
                                         }}
+                                        type="button"
                                         className={`h-14 rounded-xl font-black transition-all flex flex-col items-center justify-center border-2 ${attendanceStatus === 'ATTEND'
                                             ? 'bg-[#CCFF00] text-[#0A0E17] border-[#CCFF00] shadow-[0_0_20px_rgba(204,255,0,0.4)]'
                                             : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
@@ -289,24 +299,21 @@ export default function DashboardClient() {
                                             className="overflow-hidden"
                                         >
                                             <div className="pt-2 grid grid-cols-2 gap-3 border-t border-white/5 mt-2">
-                                                {attendanceOptions.length > 0 ? (
-                                                    attendanceOptions.map((time: string) => (
-                                                        <button
-                                                            key={time}
-                                                            onClick={() => handleAttendance('ATTEND', time)}
-                                                            className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border-2 ${selectedTime === time
-                                                                ? 'bg-white text-[#191F28] border-white shadow-lg'
-                                                                : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
-                                                                }`}
-                                                        >
-                                                            {formatTimeOption(time)}
-                                                        </button>
-                                                    ))
-                                                ) : (
-                                                    <div className="col-span-2 text-center text-white/40 text-[12px] py-2">
-                                                        설정된 시간이 없습니다.
-                                                    </div>
-                                                )}
+                                                {attendanceOptions.map((time: string) => (
+                                                    <button
+                                                        key={time}
+                                                        onClick={() => {
+                                                            setSelectedTime(time)
+                                                            handleAttendance('ATTEND', time)
+                                                        }}
+                                                        className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border-2 ${selectedTime === time
+                                                            ? 'bg-white text-[#191F28] border-white shadow-lg'
+                                                            : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
+                                                            }`}
+                                                    >
+                                                        {formatTimeOption(time)}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </motion.div>
                                     )}
