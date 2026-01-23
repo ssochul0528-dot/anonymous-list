@@ -74,13 +74,13 @@ export default function LandingPage() {
                         경기 기록부터 랭킹까지 한번에.
                     </p>
                     {user && (
-                        <Link
+                        <a
                             href="/my-club"
                             className="inline-flex items-center justify-center bg-[#CCFF00] text-black font-black italic tracking-tight rounded-2xl px-8 h-14 text-[16px] hover:bg-[#b3e600] shadow-[0_0_30px_rgba(204,255,0,0.2)] transition-all group relative z-50 pointer-events-auto"
                         >
-                            내 클럽으로 이동
+                            내 클럽으로 이동 (v1.1)
                             <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M9 18l6-6-6-6" /></svg>
-                        </Link>
+                        </a>
                     )}
                 </motion.div>
 
