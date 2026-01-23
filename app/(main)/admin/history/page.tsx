@@ -23,7 +23,7 @@ interface ScoreRecord {
 }
 
 export default function AdminHistoryPage() {
-    const { user, isStaff, isPresident } = useAuth()
+    const { user, isStaff, isPresident, profile } = useAuth()
     const supabase = createClient()
     const router = useRouter()
     const [scores, setScores] = useState<ScoreRecord[]>([])
@@ -40,11 +40,15 @@ export default function AdminHistoryPage() {
             router.push('/')
             return
         }
-        fetchScores()
-    }, [user, isStaff, loading])
+        if (profile?.club_id) {
+            fetchScores()
+        }
+    }, [user, isStaff, loading, profile?.club_id])
 
     const fetchScores = async () => {
         setLoading(true)
+        if (!profile?.club_id) return
+
         const { data, error } = await supabase
             .from('scores')
             .select(`
@@ -58,6 +62,7 @@ export default function AdminHistoryPage() {
                     nickname
                 )
             `)
+            .eq('club_id', profile.club_id)
             .order('created_at', { ascending: false })
 
         if (!error && data) {
