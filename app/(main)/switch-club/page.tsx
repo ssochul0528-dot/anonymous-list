@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
-import { Plus, Check, ArrowRight, Shield } from 'lucide-react'
+import { Plus, Check, ArrowRight, Shield, Loader2 } from 'lucide-react'
 
 export default function SwitchClubPage() {
     const { user, profile } = useAuth()
@@ -14,13 +14,14 @@ export default function SwitchClubPage() {
     const router = useRouter()
     const [memberships, setMemberships] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-
     const [switching, setSwitching] = useState(false)
 
     useEffect(() => {
+        router.prefetch('/my-club')
+
         const fetchClubs = async () => {
             if (!user) return
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from('club_members')
                 .select('*, clubs(*)')
                 .eq('user_id', user.id)
@@ -29,7 +30,7 @@ export default function SwitchClubPage() {
             setLoading(false)
         }
         fetchClubs()
-    }, [user])
+    }, [user, router])
 
     const handleSwitch = async (clubId: string, role: string) => {
         if (switching) return
@@ -38,7 +39,6 @@ export default function SwitchClubPage() {
         try {
             // Map 'MEMBER' role to 'USER' for profile compatibility if needed 
             // (Assuming profiles use 'USER' for standard members)
-            // But let's keep STAFF/PRESIDENT as is.
             const profileRole = role === 'MEMBER' ? 'USER' : role
 
             const { error } = await supabase
@@ -51,7 +51,17 @@ export default function SwitchClubPage() {
 
             if (error) throw error
 
-            // Use assign for a hard navigation to ensure context is refreshed.
+            // Verify update to prevent race conditions (Replication Lag Check)
+            // We poll the database until the chang is reflected
+            let attempts = 0
+            while (attempts < 10) {
+                const { data } = await supabase.from('profiles').select('club_id').eq('id', user?.id).single()
+                if (data?.club_id === clubId) break
+                await new Promise(r => setTimeout(r, 400))
+                attempts++
+            }
+
+            // Use assign for a hard navigation to ensure context is fully refreshed.
             window.location.assign('/my-club')
         } catch (e: any) {
             console.error(e)
@@ -63,7 +73,15 @@ export default function SwitchClubPage() {
     if (loading) return <div className="p-10 text-center text-white/50">로딩중...</div>
 
     return (
-        <div className="min-h-screen bg-[#0A0E17] text-white p-5 pb-20">
+        <div className="min-h-screen bg-[#0A0E17] text-white p-5 pb-20 relative">
+            {switching && (
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
+                    <Loader2 className="w-10 h-10 text-[#CCFF00] animate-spin mb-4" />
+                    <p className="text-[#CCFF00] font-bold text-[16px] animate-pulse">클럽 접속 중...</p>
+                    <p className="text-white/40 text-[12px] mt-2">잠시만 기다려주세요</p>
+                </div>
+            )}
+
             <header className="mb-8">
                 <Link href="/" className="text-white/40 hover:text-white mb-4 block">&lt; 메인으로</Link>
                 <h1 className="text-[28px] font-black italic tracking-tighter uppercase">My Clubs</h1>
