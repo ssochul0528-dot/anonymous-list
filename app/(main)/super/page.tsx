@@ -93,87 +93,87 @@ export default function SuperAdminPage() {
             alert('오류 발생: ' + e.message)
         }
     }
-}
 
-const handleReject = async (clubId: string) => {
-    if (!confirm('정말 거절하시겠습니까?')) return
-    const supabase = createClient()
-    const { error } = await supabase.from('clubs').update({ status: 'REJECTED' }).eq('id', clubId)
-    if (!error) {
-        setClubs(prev => prev.filter(c => c.id !== clubId))
-    } else {
-        alert('오류 발생')
+
+    const handleReject = async (clubId: string) => {
+        if (!confirm('정말 거절하시겠습니까?')) return
+        const supabase = createClient()
+        const { error } = await supabase.from('clubs').update({ status: 'REJECTED' }).eq('id', clubId)
+        if (!error) {
+            setClubs(prev => prev.filter(c => c.id !== clubId))
+        } else {
+            alert('오류 발생')
+        }
     }
-}
 
-if (loading) return <div className="min-h-screen bg-[#0A0E17] flex items-center justify-center text-white/30">Loading...</div>
+    if (loading) return <div className="min-h-screen bg-[#0A0E17] flex items-center justify-center text-white/30">Loading...</div>
 
-return (
-    <div className="min-h-screen bg-[#0A0E17] text-white p-6 pb-24">
-        <header className="mb-8 flex justify-between items-center">
-            <div>
-                <h1 className="text-[24px] font-black italic">SUPER <span className="text-[#CCFF00]">MASTER</span></h1>
-                <p className="text-[12px] text-white/40 font-bold">클럽 개설 신청 관리</p>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => router.push('/')}>
-                EXIT
-            </Button>
-        </header>
+    return (
+        <div className="min-h-screen bg-[#0A0E17] text-white p-6 pb-24">
+            <header className="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 className="text-[24px] font-black italic">SUPER <span className="text-[#CCFF00]">MASTER</span></h1>
+                    <p className="text-[12px] text-white/40 font-bold">클럽 개설 신청 관리</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => router.push('/')}>
+                    EXIT
+                </Button>
+            </header>
 
-        {clubs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-[300px] text-white/20 border border-white/5 rounded-[32px] bg-[#121826]">
-                <p className="font-bold">대기 중인 신청이 없습니다.</p>
-            </div>
-        ) : (
-            <div className="space-y-4">
-                {clubs.map(club => (
-                    <motion.div
-                        key={club.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-[#121826] p-6 rounded-[24px] border border-white/5 space-y-4"
-                    >
-                        <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-4">
-                                {club.logo_url ? (
-                                    <img src={club.logo_url} alt={club.name} className="w-16 h-16 rounded-[20px] object-cover bg-black/20" />
-                                ) : (
-                                    <div className="w-16 h-16 rounded-[20px] bg-white/10 flex items-center justify-center text-[24px] font-black italic">
-                                        {club.name[0]}
-                                    </div>
-                                )}
-                                <div>
-                                    <h3 className="text-[18px] font-bold text-white leading-tight">{club.name}</h3>
-                                    <p className="text-[12px] text-white/40 font-medium">{club.region}</p>
-                                    <div className="flex gap-2 mt-1">
-                                        <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-bold rounded">신청자: {club.owner?.nickname || 'Unknown'}</span>
+            {clubs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[300px] text-white/20 border border-white/5 rounded-[32px] bg-[#121826]">
+                    <p className="font-bold">대기 중인 신청이 없습니다.</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {clubs.map(club => (
+                        <motion.div
+                            key={club.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-[#121826] p-6 rounded-[24px] border border-white/5 space-y-4"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-4">
+                                    {club.logo_url ? (
+                                        <img src={club.logo_url} alt={club.name} className="w-16 h-16 rounded-[20px] object-cover bg-black/20" />
+                                    ) : (
+                                        <div className="w-16 h-16 rounded-[20px] bg-white/10 flex items-center justify-center text-[24px] font-black italic">
+                                            {club.name[0]}
+                                        </div>
+                                    )}
+                                    <div>
+                                        <h3 className="text-[18px] font-bold text-white leading-tight">{club.name}</h3>
+                                        <p className="text-[12px] text-white/40 font-medium">{club.region}</p>
+                                        <div className="flex gap-2 mt-1">
+                                            <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-bold rounded">신청자: {club.owner?.nickname || 'Unknown'}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="bg-black/20 p-4 rounded-xl">
-                            <p className="text-[13px] text-white/70 leading-relaxed whitespace-pre-wrap">{club.description}</p>
-                        </div>
+                            <div className="bg-black/20 p-4 rounded-xl">
+                                <p className="text-[13px] text-white/70 leading-relaxed whitespace-pre-wrap">{club.description}</p>
+                            </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <Button
-                                className="bg-white/5 hover:bg-red-500/20 hover:text-red-500 text-white/40 font-bold h-12"
-                                onClick={() => handleReject(club.id)}
-                            >
-                                REJECT
-                            </Button>
-                            <Button
-                                className="bg-[#CCFF00] hover:bg-[#b3ff00] text-black font-black h-12 shadow-[0_0_15px_rgba(204,255,0,0.3)]"
-                                onClick={() => handleApprove(club.id, club.owner_id)}
-                            >
-                                APPROVE
-                            </Button>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
-        )}
-    </div>
-)
-    }
+                            <div className="grid grid-cols-2 gap-3">
+                                <Button
+                                    className="bg-white/5 hover:bg-red-500/20 hover:text-red-500 text-white/40 font-bold h-12"
+                                    onClick={() => handleReject(club.id)}
+                                >
+                                    REJECT
+                                </Button>
+                                <Button
+                                    className="bg-[#CCFF00] hover:bg-[#b3ff00] text-black font-black h-12 shadow-[0_0_15px_rgba(204,255,0,0.3)]"
+                                    onClick={() => handleApprove(club.id, club.owner_id)}
+                                >
+                                    APPROVE
+                                </Button>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
