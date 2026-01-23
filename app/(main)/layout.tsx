@@ -37,15 +37,27 @@ export default function MainLayout({
 
             {user && (
                 <header className="sticky top-0 z-50 bg-[#0A0E17]/80 backdrop-blur-md px-5 py-4 flex items-center justify-between border-b border-white/5">
-                    <h1 className="text-[22px] font-black italic text-white tracking-tighter uppercase">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
-                    <div className="flex gap-3 items-center">
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
+                        <h1 className="text-[22px] font-black italic text-white tracking-tighter uppercase">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                        {pathname !== '/my-club' && (
+                            <Button
+                                size="sm"
+                                className="h-8 px-3 rounded-lg bg-[#CCFF00] text-black font-extrabold text-[11px] hover:bg-[#b3e600] transition-all"
+                                onClick={() => router.push('/my-club')}
+                                type="button"
+                            >
+                                MY CLUB
+                            </Button>
+                        )}
                         <button
                             onClick={() => signOut()}
-                            className="text-[11px] text-white/40 font-black uppercase tracking-widest px-3 py-1.5 hover:bg-white/5 rounded-lg transition-colors border border-white/5"
+                            className="text-[10px] text-white/40 font-black uppercase tracking-widest px-2 py-1.5 hover:bg-white/5 rounded-lg transition-colors border border-white/5"
                         >
                             LOGOUT
                         </button>
-                        <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#CCFF00]/50 transition-all" onClick={() => router.push('/profile')}>
+                        <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#CCFF00]/50 transition-all ml-1" onClick={() => router.push('/profile')}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/40"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                         </div>
                     </div>

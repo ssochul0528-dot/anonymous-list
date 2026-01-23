@@ -132,7 +132,7 @@ export default function ClubDetailPage() {
             <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
                 <div className="text-[40px]">🤔</div>
                 <h2 className="text-xl font-bold text-white">클럽을 찾을 수 없습니다.</h2>
-                <Button onClick={() => router.push('/')} variant="outline" size="sm">메인으로 돌아가기</Button>
+                <Button onClick={() => router.push('/')} variant="outline" size="sm" type="button">메인으로 돌아가기</Button>
             </div>
         )
     }
@@ -145,7 +145,7 @@ export default function ClubDetailPage() {
 
             {/* Navigation */}
             <div className="flex items-center mb-6 px-1">
-                <button onClick={() => router.push('/')} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:bg-white/10 transition-colors">
+                <button onClick={() => router.push('/')} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:bg-white/10 transition-colors" type="button">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
                 </button>
             </div>

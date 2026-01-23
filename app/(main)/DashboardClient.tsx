@@ -11,9 +11,16 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function DashboardClient() {
-    const { user, isAdmin: isSuperAdmin, isStaff: isAnyStaff, profile } = useAuth()
+    const { user, isAdmin: isSuperAdmin, isStaff: isAnyStaff, profile, isLoading } = useAuth()
     const router = useRouter()
     const [myClub, setMyClub] = useState<any>(null)
+
+    // Auth Protection
+    useEffect(() => {
+        if (!isLoading && !user) {
+            router.push('/login')
+        }
+    }, [user, isLoading, router])
 
     // Fetch My Club Info
     useEffect(() => {
@@ -111,6 +118,7 @@ export default function DashboardClient() {
                     size="sm"
                     className="h-10 pl-2 pr-4 rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 flex items-center gap-2 transition-all group"
                     onClick={() => router.push('/')}
+                    type="button"
                 >
                     <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-[#CCFF00] group-hover:text-black transition-colors">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 18l-6-6 6-6" /></svg>

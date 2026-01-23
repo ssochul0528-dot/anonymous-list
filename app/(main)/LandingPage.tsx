@@ -37,18 +37,10 @@ export default function LandingPage() {
             <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#121826] to-transparent z-0" />
             <div className="absolute top-[-100px] right-[-100px] w-[300px] h-[300px] bg-[#CCFF00]/10 rounded-full blur-[100px]" />
 
-            {/* Header */}
-            <header className="relative z-10 px-6 py-6 flex justify-between items-center">
-                <h1 className="text-[20px] font-black italic tracking-tighter uppercase">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
-                {user ? (
-                    <Button
-                        size="sm"
-                        className="rounded-full px-5 text-[12px] font-bold bg-[#CCFF00] text-black hover:bg-[#b3e600]"
-                        onClick={() => router.push('/my-club')}
-                    >
-                        MY CLUB &gt;
-                    </Button>
-                ) : (
+            {/* Header - Only show for Guest */}
+            {!user && (
+                <header className="relative z-10 px-6 py-6 flex justify-between items-center">
+                    <h1 className="text-[20px] font-black italic tracking-tighter uppercase">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
                     <Button
                         size="sm"
                         variant="outline"
@@ -57,8 +49,8 @@ export default function LandingPage() {
                     >
                         LOGIN
                     </Button>
-                )}
-            </header>
+                </header>
+            )}
 
             {/* Main Content Scroll Area */}
             <main className="relative z-10 flex-1 flex flex-col px-6 pt-4 pb-12 overflow-y-auto">
@@ -76,10 +68,21 @@ export default function LandingPage() {
                         YOUR<br />
                         <span className="text-[#CCFF00] italic">COURT.</span>
                     </h2>
-                    <p className="text-white/40 font-medium text-[14px] leading-relaxed max-w-[280px]">
+                    <p className="text-white/40 font-medium text-[14px] leading-relaxed max-w-[280px] mb-6">
                         테니스 동호회 운영의 모든 것.<br />
                         경기 기록부터 랭킹까지 한번에.
                     </p>
+                    {user && (
+                        <Button
+                            size="lg"
+                            className="bg-[#CCFF00] text-black font-black italic tracking-tight rounded-2xl px-8 h-14 text-[16px] hover:bg-[#b3e600] shadow-[0_0_30px_rgba(204,255,0,0.2)] transition-all group"
+                            onClick={() => router.push('/my-club')}
+                            type="button"
+                        >
+                            내 클럽으로 이동
+                            <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M9 18l6-6-6-6" /></svg>
+                        </Button>
+                    )}
                 </motion.div>
 
                 {/* Club List Carousel */}
