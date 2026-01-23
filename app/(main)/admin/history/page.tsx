@@ -136,7 +136,7 @@ export default function AdminHistoryPage() {
                         <Button variant="ghost" size="sm" onClick={() => router.back()} className="-ml-2">
                             &lt; 뒤로
                         </Button>
-                        <h2 className="text-[22px] font-bold">경기 결과 관리</h2>
+                        <h2 className="text-[22px] font-bold">경기 결과 관리 [V5]</h2>
                     </div>
                     {isPresident && (
                         <span className="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded-full">PRESIDENT</span>
