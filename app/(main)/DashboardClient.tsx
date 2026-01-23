@@ -117,7 +117,10 @@ export default function DashboardClient() {
                     variant="outline"
                     size="sm"
                     className="h-10 pl-2 pr-4 rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 flex items-center gap-2 transition-all group"
-                    onClick={() => router.push('/')}
+                    onClick={() => {
+                        // alert('메인으로 이동합니다.') // Removed alert, just let it push
+                        router.push('/')
+                    }}
                     type="button"
                 >
                     <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-[#CCFF00] group-hover:text-black transition-colors">
