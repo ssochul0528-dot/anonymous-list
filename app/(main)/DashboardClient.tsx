@@ -353,31 +353,7 @@ export default function DashboardClient() {
                 </motion.div>
             )}
 
-            <Card className="bg-gradient-to-br from-[#121826] to-[#0A0E17] text-white border border-white/5 shadow-2xl relative overflow-hidden p-6">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-[#CCFF00]/10 rounded-full -translate-y-24 translate-x-24 blur-[80px]" />
-                <div className="flex justify-between items-start mb-6 relative z-10">
-                    <div>
-                        <p className="text-[#CCFF00] text-[10px] font-black uppercase tracking-[0.2em] mb-1">Current Ranking</p>
-                        <h3 className="text-[42px] font-black italic tracking-tighter leading-none">{myRank}<span className="text-[18px] ml-1 not-italic opacity-50">ST</span></h3>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total Points</p>
-                        <h3 className="text-[28px] font-bold text-[#00D1FF]">{myPoints.toFixed(1)}</h3>
-                    </div>
-                </div>
-                <div className="h-1 bg-white/5 rounded-full w-full overflow-hidden relative z-10">
-                    <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: '85%' }}
-                        transition={{ duration: 1.2, ease: 'easeOut' }}
-                        className="h-full bg-[#CCFF00] shadow-[0_0_10px_#CCFF00]"
-                    />
-                </div>
-                <div className="flex justify-between items-center mt-3 relative z-10">
-                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Global Percentile</p>
-                    <p className="text-[11px] text-[#CCFF00] font-black tracking-tighter italic">TOP 10% PRE-SEASON</p>
-                </div>
-            </Card>
+
 
             <div className="grid grid-cols-2 gap-3">
                 <ActionCard
