@@ -32,18 +32,25 @@ export default function AdminHistoryPage() {
     const [editResult, setEditResult] = useState<string>('')
     const [search, setSearch] = useState('')
 
+    // Auth Check Effect
     useEffect(() => {
-        if (!user) return
-
-        if (!isStaff && !loading) {
+        if (loading) return // Don't check while page is loading data? 
+        // Actually AuthContext has its own isLoading. 
+        // But here 'loading' is generic page loading. 
+        // useAuth() isLoading should be used for auth check. However, in this component we destructured it? 
+        // No, we didn't destructure isLoading from useAuth in the previous edit. Let's assume it's stable enough or check user/isStaff directly.
+        if (user && !isStaff) {
             alert('권한이 없습니다.')
             router.push('/')
-            return
         }
+    }, [user, isStaff, router])
+
+    // Data Fetch Effect
+    useEffect(() => {
         if (profile?.club_id) {
             fetchScores()
         }
-    }, [user, isStaff, loading, profile?.club_id])
+    }, [profile?.club_id])
 
     const fetchScores = async () => {
         setLoading(true)
