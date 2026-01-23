@@ -11,7 +11,11 @@ import { getAttendanceTargetDate, isAttendanceWindowOpen, formatDate } from '@/u
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext'
 
-export default function DashboardClient() {
+interface DashboardClientProps {
+    clubSlug?: string
+}
+
+export default function DashboardClient({ clubSlug }: DashboardClientProps = {}) {
     const { user, isAdmin: isSuperAdmin, isStaff: isAnyStaff, profile, isLoading } = useAuth()
     const router = useRouter()
     const [myClub, setMyClub] = useState<any>(null)
@@ -26,20 +30,32 @@ export default function DashboardClient() {
     // Fetch My Club Info
     useEffect(() => {
         const fetchMyClub = async () => {
-            // Priority: URL Param > Profile > Null
-            // This handles the case where DB is lagging after a switch
-            const searchParams = new URLSearchParams(window.location.search)
-            const paramCid = searchParams.get('cid')
-            const targetId = paramCid || profile?.club_id
+            const supabase = createClient()
+            let data = null;
 
-            if (targetId) {
-                const supabase = createClient()
-                const { data } = await supabase.from('clubs').select('*').eq('id', targetId).single()
+            // Priority 1: Direct Slug Prop (from /clubs/[slug])
+            if (clubSlug) {
+                const response = await supabase.from('clubs').select('*').eq('slug', clubSlug).single()
+                data = response.data
+            }
+            // Priority 2: URL Param (cid)
+            else {
+                const searchParams = new URLSearchParams(window.location.search)
+                const paramCid = searchParams.get('cid')
+                const targetId = paramCid || profile?.club_id
+
+                if (targetId) {
+                    const response = await supabase.from('clubs').select('*').eq('id', targetId).single()
+                    data = response.data
+                }
+            }
+
+            if (data) {
                 setMyClub(data)
             }
         }
         fetchMyClub()
-    }, [profile?.club_id])
+    }, [profile?.club_id, clubSlug])
 
     const handleCopyInvite = () => {
         if (!myClub) return
