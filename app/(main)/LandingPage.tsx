@@ -77,8 +77,7 @@ export default function LandingPage() {
                             size="lg"
                             className="bg-[#CCFF00] text-black font-black italic tracking-tight rounded-2xl px-8 h-14 text-[16px] hover:bg-[#b3e600] shadow-[0_0_30px_rgba(204,255,0,0.2)] transition-all group"
                             onClick={() => {
-                                // alert('내 클럽으로 이동합니다.')
-                                router.push('/my-club')
+                                window.location.href = '/my-club'
                             }}
                             type="button"
                         >
