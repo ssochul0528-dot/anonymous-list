@@ -65,21 +65,28 @@ export default function DashboardClient() {
             }
 
             const supabase = createClient()
+            if (!myClub?.id) return
+
             const { data: attData, error: attError } = await supabase
                 .from('attendance')
                 .select('status, preferred_time')
                 .eq('user_id', user.id)
                 .eq('target_date', targetDate.toISOString().split('T')[0])
+                .eq('club_id', myClub.id)
                 .maybeSingle()
 
             if (!attError && attData) {
                 setAttendanceStatus(attData.status)
                 setSelectedTime(attData.preferred_time)
+            } else {
+                // Reset if no data found for this club/date
+                setAttendanceStatus(null)
+                setSelectedTime(null)
             }
             setIsLoadingAttendance(false)
         }
-        fetchAttendance()
-    }, [user, targetDate])
+        if (myClub?.id) fetchAttendance()
+    }, [user, targetDate, myClub?.id])
 
     const handleAttendance = async (status: string, time?: string) => {
         const supabase = createClient()
@@ -90,23 +97,57 @@ export default function DashboardClient() {
             return
         }
 
-        const { error } = await supabase
+        if (!myClub?.id) {
+            alert('클럽 정보를 불러오지 못했습니다.')
+            return
+        }
+
+        // Manual Upsert to avoid Constraint issues
+        // 1. Check if exists
+        const { data: existing } = await supabase
             .from('attendance')
-            .upsert({
-                user_id: user.id,
-                target_date: targetDate.toISOString().split('T')[0],
-                status,
-                preferred_time: time || null,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id,target_date' })
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('target_date', targetDate.toISOString().split('T')[0])
+            .eq('club_id', myClub.id)
+            .maybeSingle()
+
+        let error
+        if (existing) {
+            // 2. Update
+            const { error: updateError } = await supabase
+                .from('attendance')
+                .update({
+                    status,
+                    preferred_time: time || null,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existing.id)
+            error = updateError
+        } else {
+            // 3. Insert
+            const { error: insertError } = await supabase
+                .from('attendance')
+                .insert({
+                    user_id: user.id,
+                    target_date: targetDate.toISOString().split('T')[0],
+                    club_id: myClub.id,
+                    status,
+                    preferred_time: time || null
+                })
+            error = insertError
+        }
 
         if (!error) {
             setAttendanceStatus(status)
-            if (time) setSelectedTime(time)
-            if (status === 'ABSENT') setSelectedTime(null)
+            if (status === 'ATTEND' && time) {
+                setSelectedTime(time)
+            } else if (status === 'ABSENT') {
+                setSelectedTime(null)
+            }
         } else {
             console.error('Attendance error:', error)
-            alert('출석체크 실패: ' + (error.message || JSON.stringify(error)))
+            alert('출석체크 실패 [V3]: ' + (error.message || JSON.stringify(error)))
         }
     }
 
@@ -225,7 +266,10 @@ export default function DashboardClient() {
                                         <span className="text-[10px] opacity-70">JOIN</span>
                                     </button>
                                     <button
-                                        onClick={() => handleAttendance('ABSENT')}
+                                        onClick={() => {
+                                            setSelectedTime(null)
+                                            handleAttendance('ABSENT')
+                                        }}
                                         className={`h-14 rounded-xl font-black transition-all flex flex-col items-center justify-center border-2 ${attendanceStatus === 'ABSENT'
                                             ? 'bg-red-500 text-white border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]'
                                             : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
