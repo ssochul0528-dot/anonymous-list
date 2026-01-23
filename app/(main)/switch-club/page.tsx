@@ -61,8 +61,9 @@ export default function SwitchClubPage() {
                 attempts++
             }
 
-            // Use assign for a hard navigation to ensure context is fully refreshed.
-            window.location.assign(`/my-club?cid=${clubId}`)
+            // Navigate immediately using router (Client Side)
+            // DashboardClient will read ?cid=... to show correct data even if global context is stale
+            router.push(`/my-club?cid=${clubId}`)
         } catch (e: any) {
             console.error(e)
             alert('클럽 전환 실패: ' + e.message)
