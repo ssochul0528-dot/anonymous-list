@@ -28,15 +28,13 @@ export default function SwitchClubPage() {
             setLoading(false)
         }
         fetchClubs()
-    }, [user, router])
+    }, [user])
 
-    const handleSwitch = async (clubId: string, role: string) => {
+    const handleSwitch = async (clubId: string, role: string, slug: string) => {
         if (switching) return
         setSwitching(true)
 
         try {
-            // Map 'MEMBER' role to 'USER' for profile compatibility if needed 
-            // (Assuming profiles use 'USER' for standard members)
             const profileRole = role === 'MEMBER' ? 'USER' : role
 
             const { error } = await supabase
@@ -49,8 +47,6 @@ export default function SwitchClubPage() {
 
             if (error) throw error
 
-            // Verify update to prevent race conditions (Replication Lag Check)
-            // We poll the database until the chang is reflected
             let attempts = 0
             while (attempts < 10) {
                 const { data } = await supabase.from('profiles').select('club_id').eq('id', user?.id).single()
@@ -59,8 +55,8 @@ export default function SwitchClubPage() {
                 attempts++
             }
 
-            // Navigate using href to force full reload and avoid router cache issues
-            window.location.href = `/dashboard?cid=${clubId}`
+            // Navigate to the explicit CLUB URL which is proven to work
+            window.location.href = `/clubs/${slug}`
         } catch (e: any) {
             console.error(e)
             alert('클럽 전환 실패: ' + e.message)
@@ -97,7 +93,7 @@ export default function SwitchClubPage() {
                                 ? 'border-[#CCFF00] bg-[#CCFF00]/5 shadow-[0_0_20px_rgba(204,255,0,0.1)]'
                                 : 'border-white/10 bg-[#121826] hover:border-white/30'
                                 }`}
-                            onClick={() => handleSwitch(m.club_id, m.role)}
+                            onClick={() => handleSwitch(m.club_id, m.role, club.slug)}
                         >
                             <div className="flex items-center gap-4">
                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-[20px] uppercase ${isActive ? 'bg-[#CCFF00] text-black' : 'bg-white/10 text-white/40'
