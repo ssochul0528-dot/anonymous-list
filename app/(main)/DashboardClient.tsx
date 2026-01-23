@@ -217,7 +217,9 @@ export default function DashboardClient() {
             {/* Top Summary */}
             <section className="flex flex-col gap-1 px-1">
                 <div className="flex justify-between items-start">
-                    <h2 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-wider">PRE-SEASON • {currentWeek}</h2>
+                    <h2 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-wider">
+                        {myClub ? myClub.name : 'LOADING CLUB...'} • {currentWeek}
+                    </h2>
                     {isSuperAdmin && (
                         <Button
                             size="sm"
@@ -230,8 +232,17 @@ export default function DashboardClient() {
                     )}
                 </div>
                 <h1 className="text-[28px] font-black leading-tight tracking-tighter">
-                    경기를 관리하면,<br />
-                    <span className="text-[#CCFF00]">동호회가 굴러갑니다.</span>
+                    {myClub ? (
+                        <>
+                            {myClub.name}에서<br />
+                            <span className="text-[#CCFF00]">테니스 한 게임?</span>
+                        </>
+                    ) : (
+                        <>
+                            경기를 관리하면,<br />
+                            <span className="text-[#CCFF00]">동호회가 굴러갑니다.</span>
+                        </>
+                    )}
                 </h1>
                 <p className="text-white/40 text-[12px] font-medium leading-relaxed mt-1">
                     경기 기록·랭킹·운영을 하나로 관리하는 테니스 경기 관리 앱
