@@ -110,6 +110,25 @@ export default function DashboardClient() {
         }
     }
 
+    const attendanceOptions = React.useMemo(() => {
+        if (!myClub?.attendance_options) return [] // Default empty if loading, or fallback. Actually default to something?
+        // Fallback handled in rendering if empty? 
+        // Let's default to hardcoded if really nothing, but DB has default.
+        const opts = myClub.attendance_options
+        if (Array.isArray(opts)) return opts
+        try { return JSON.parse(opts) } catch { return [] }
+    }, [myClub])
+
+    const formatTimeOption = (t: string) => {
+        if (!t.includes(':')) return t;
+        const [h, m] = t.split(':');
+        const hour = parseInt(h, 10);
+        if (isNaN(hour)) return t;
+        const ampm = hour >= 12 ? '오후' : '오전';
+        const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+        return `${ampm} ${String(displayHour).padStart(2, '0')}:${m}`;
+    }
+
     return (
         <div className="space-y-6 pt-24 pb-20 relative z-0">
             {/* Navigation & Actions */}
@@ -217,24 +236,24 @@ export default function DashboardClient() {
                                             className="overflow-hidden"
                                         >
                                             <div className="pt-2 grid grid-cols-2 gap-3 border-t border-white/5 mt-2">
-                                                <button
-                                                    onClick={() => handleAttendance('ATTEND', '08:00')}
-                                                    className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border-2 ${selectedTime === '08:00'
-                                                        ? 'bg-white text-[#191F28] border-white shadow-lg'
-                                                        : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
-                                                        }`}
-                                                >
-                                                    오전 08:00
-                                                </button>
-                                                <button
-                                                    onClick={() => handleAttendance('ATTEND', '09:00')}
-                                                    className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border-2 ${selectedTime === '09:00'
-                                                        ? 'bg-white text-[#191F28] border-white shadow-lg'
-                                                        : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
-                                                        }`}
-                                                >
-                                                    오전 09:00
-                                                </button>
+                                                {attendanceOptions.length > 0 ? (
+                                                    attendanceOptions.map((time: string) => (
+                                                        <button
+                                                            key={time}
+                                                            onClick={() => handleAttendance('ATTEND', time)}
+                                                            className={`h-12 rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border-2 ${selectedTime === time
+                                                                ? 'bg-white text-[#191F28] border-white shadow-lg'
+                                                                : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
+                                                                }`}
+                                                        >
+                                                            {formatTimeOption(time)}
+                                                        </button>
+                                                    ))
+                                                ) : (
+                                                    <div className="col-span-2 text-center text-white/40 text-[12px] py-2">
+                                                        설정된 시간이 없습니다.
+                                                    </div>
+                                                )}
                                             </div>
                                         </motion.div>
                                     )}
@@ -331,6 +350,16 @@ export default function DashboardClient() {
                         </div>
                         <Button size="sm" className="bg-white/10 hover:bg-[#CCFF00] hover:text-[#0A0E17] font-black text-[11px] rounded transition-colors" onClick={() => router.push('/admin/schedule')}>
                             START
+                        </Button>
+                    </Card>
+
+                    <Card className="flex items-center justify-between border border-white/5 shadow-sm hover:border-[#CCFF00]/30 transition-all bg-[#121826] text-white p-4">
+                        <div>
+                            <h4 className="font-black text-[15px] uppercase italic">Club Settings</h4>
+                            <p className="text-white/40 text-[12px]">출석 시간 및 클럽 설정 관리</p>
+                        </div>
+                        <Button size="sm" className="bg-white/10 hover:bg-[#CCFF00] hover:text-[#0A0E17] font-black text-[11px] rounded transition-colors" onClick={() => router.push('/admin/settings')}>
+                            SETUP
                         </Button>
                     </Card>
                 </div>
