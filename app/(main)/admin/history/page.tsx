@@ -23,7 +23,7 @@ interface ScoreRecord {
 }
 
 export default function AdminHistoryPage() {
-    const { user, isStaff, isPresident, profile } = useAuth()
+    const { user, isStaff, isPresident, profile, isLoading: isAuthLoading } = useAuth()
     const supabase = createClient()
     const router = useRouter()
     const [scores, setScores] = useState<ScoreRecord[]>([])
@@ -32,28 +32,33 @@ export default function AdminHistoryPage() {
     const [editResult, setEditResult] = useState<string>('')
     const [search, setSearch] = useState('')
 
-    // Auth Check Effect
     useEffect(() => {
-        if (loading) return // Don't check while page is loading data? 
-        // Actually AuthContext has its own isLoading. 
-        // But here 'loading' is generic page loading. 
-        // useAuth() isLoading should be used for auth check. However, in this component we destructured it? 
-        // No, we didn't destructure isLoading from useAuth in the previous edit. Let's assume it's stable enough or check user/isStaff directly.
-        if (user && !isStaff) {
-            alert('권한이 없습니다.')
-            router.push('/')
-        }
-    }, [user, isStaff, router])
+        // Wait for Auth to settle
+        if (isAuthLoading) return
 
-    // Data Fetch Effect
-    useEffect(() => {
+        if (!user) {
+            router.replace('/')
+            return
+        }
+
+        if (!isStaff) {
+            alert('권한이 없습니다.')
+            router.replace('/')
+            return
+        }
+
         if (profile?.club_id) {
             fetchScores()
+        } else {
+            // User logged in, is staff, but no club ID? Stop loading.
+            setLoading(false)
         }
-    }, [profile?.club_id])
+    }, [user, isStaff, isAuthLoading, profile?.club_id, router])
 
     const fetchScores = async () => {
-        setLoading(true)
+        // Do NOT setLoading(true) here to avoid infinite loops if this is called repeats.
+        // We rely on the initial state 'loading=true'.
+
         if (!profile?.club_id) return
 
         const { data, error } = await supabase
