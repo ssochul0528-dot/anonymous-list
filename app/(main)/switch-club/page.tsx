@@ -43,7 +43,7 @@ export default function SwitchClubPage() {
         if (!error) {
             router.push('/my-club')
             // Force reload to refresh context
-            setTimeout(() => window.location.href = '/my-club', 100)
+            setTimeout(() => window.location.replace('/my-club'), 300)
         }
     }
 
