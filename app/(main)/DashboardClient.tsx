@@ -239,8 +239,8 @@ export default function DashboardClient() {
                         </>
                     ) : (
                         <>
-                            경기를 관리하면,<br />
-                            <span className="text-[#CCFF00]">동호회가 굴러갑니다.</span>
+                            선택된 클럽이 없습니다.<br />
+                            <span className="text-[#CCFF00] cursor-pointer hover:underline" onClick={() => router.push('/switch-club')}>클럽을 선택해주세요 &gt;</span>
                         </>
                     )}
                 </h1>
