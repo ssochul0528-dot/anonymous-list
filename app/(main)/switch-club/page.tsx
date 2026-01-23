@@ -41,9 +41,11 @@ export default function SwitchClubPage() {
             .eq('id', user?.id)
 
         if (!error) {
-            router.push('/my-club')
-            // Force reload to refresh context
-            setTimeout(() => window.location.replace('/my-club'), 300)
+            // Use assign for a hard navigation to ensure context is refreshed.
+            // Avoid router.push to prevent race conditions.
+            window.location.assign('/my-club')
+        } else {
+            alert('클럽 전환에 실패했습니다. 다시 시도해주세요.')
         }
     }
 
