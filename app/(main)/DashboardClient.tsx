@@ -17,18 +17,24 @@ export default function DashboardClient() {
     const [myClub, setMyClub] = useState<any>(null)
 
     // Auth Protection
-    useEffect(() => {
-        if (!isLoading && !user) {
-            router.push('/login')
-        }
-    }, [user, isLoading, router])
+    // useEffect(() => {
+    //     if (!isLoading && !user) {
+    //         router.push('/login')
+    //     }
+    // }, [user, isLoading, router])
 
     // Fetch My Club Info
     useEffect(() => {
         const fetchMyClub = async () => {
-            if (profile?.club_id) {
+            // Priority: URL Param > Profile > Null
+            // This handles the case where DB is lagging after a switch
+            const searchParams = new URLSearchParams(window.location.search)
+            const paramCid = searchParams.get('cid')
+            const targetId = paramCid || profile?.club_id
+
+            if (targetId) {
                 const supabase = createClient()
-                const { data } = await supabase.from('clubs').select('*').eq('id', profile.club_id).single()
+                const { data } = await supabase.from('clubs').select('*').eq('id', targetId).single()
                 setMyClub(data)
             }
         }

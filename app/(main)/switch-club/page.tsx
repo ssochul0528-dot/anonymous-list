@@ -62,7 +62,7 @@ export default function SwitchClubPage() {
             }
 
             // Use assign for a hard navigation to ensure context is fully refreshed.
-            window.location.assign('/my-club')
+            window.location.assign(`/my-club?cid=${clubId}`)
         } catch (e: any) {
             console.error(e)
             alert('클럽 전환 실패: ' + e.message)
