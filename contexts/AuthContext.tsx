@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         data = updatedData
                     } else {
                         // If update fails (e.g., RLS), manually set role for local state
-                        data = { ...data, role: 'PRESIDENT' } as unknown as Profile
+                        data = { ...data, role: 'PRESIDENT' } as any
                     }
                 }
 
