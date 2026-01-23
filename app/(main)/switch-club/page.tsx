@@ -41,10 +41,9 @@ export default function SwitchClubPage() {
             .eq('id', user?.id)
 
         if (!error) {
-            router.push('/my-club')
-            // Force reload to refresh context? 
-            // Better to let context subscription handle it or manual reload
-            setTimeout(() => window.location.href = '/my-club', 100)
+            router.push('/')
+            // Force reload to refresh context
+            setTimeout(() => window.location.href = '/', 100)
         }
     }
 
@@ -66,8 +65,8 @@ export default function SwitchClubPage() {
                         <Card
                             key={m.id}
                             className={`p-5 border flex items-center justify-between transition-all cursor-pointer ${isActive
-                                    ? 'border-[#CCFF00] bg-[#CCFF00]/5 shadow-[0_0_20px_rgba(204,255,0,0.1)]'
-                                    : 'border-white/10 bg-[#121826] hover:border-white/30'
+                                ? 'border-[#CCFF00] bg-[#CCFF00]/5 shadow-[0_0_20px_rgba(204,255,0,0.1)]'
+                                : 'border-white/10 bg-[#121826] hover:border-white/30'
                                 }`}
                             onClick={() => handleSwitch(m.club_id, m.role)}
                         >
