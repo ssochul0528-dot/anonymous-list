@@ -106,7 +106,7 @@ export default function DashboardClient() {
             if (status === 'ABSENT') setSelectedTime(null)
         } else {
             console.error('Attendance error:', error)
-            alert('출석체크 중 오류가 발생했습니다.')
+            alert('출석체크 실패: ' + (error.message || JSON.stringify(error)))
         }
     }
 
