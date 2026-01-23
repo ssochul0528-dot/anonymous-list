@@ -121,7 +121,7 @@ export default function DashboardClient() {
                     <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-[#CCFF00] group-hover:text-black transition-colors">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 18l-6-6 6-6" /></svg>
                     </div>
-                    <span className="font-bold text-[13px]">메인으로 (v1.1)</span>
+                    <span className="font-bold text-[13px]">메인으로</span>
                 </a>
 
                 {myClub && (
