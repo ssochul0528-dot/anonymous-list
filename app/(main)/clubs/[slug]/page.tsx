@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
+import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext'
@@ -132,7 +133,7 @@ export default function ClubDetailPage() {
             <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
                 <div className="text-[40px]">🤔</div>
                 <h2 className="text-xl font-bold text-white">클럽을 찾을 수 없습니다.</h2>
-                <Button onClick={() => window.location.href = '/'} variant="outline" size="sm" type="button">메인으로 돌아가기</Button>
+                <Link href="/" className="inline-flex items-center justify-center text-[12px] px-3 py-1.5 rounded-lg font-black italic tracking-tighter uppercase border border-white/20 text-white bg-transparent hover:bg-white/5 pointer-events-auto z-50">메인으로 돌아가기</Link>
             </div>
         )
     }
@@ -145,7 +146,7 @@ export default function ClubDetailPage() {
 
             {/* Navigation */}
             <div className="flex items-center mb-6 px-1 relative z-50 pointer-events-auto">
-                <button onClick={() => window.location.href = '/'} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:bg-white/10 transition-colors" type="button">
+                <Link href="/" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:bg-white/10 transition-colors pointer-events-auto z-50">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
                 </button>
             </div>

@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { getAttendanceTargetDate, isAttendanceWindowOpen, formatDate } from '@/utils/attendance'
@@ -113,18 +114,15 @@ export default function DashboardClient() {
         <div className="space-y-6 pt-24 pb-20 relative z-0">
             {/* Navigation & Actions */}
             <div className="flex items-center justify-between px-1 mb-6 relative z-50 pointer-events-auto">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-10 pl-2 pr-4 rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 flex items-center gap-2 transition-all group"
-                    onClick={() => window.location.href = '/'}
-                    type="button"
+                <Link
+                    href="/"
+                    className="h-10 pl-2 pr-4 rounded-full border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 flex items-center gap-2 transition-all group pointer-events-auto z-50"
                 >
                     <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-[#CCFF00] group-hover:text-black transition-colors">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 18l-6-6 6-6" /></svg>
                     </div>
                     <span className="font-bold text-[13px]">메인으로</span>
-                </Button>
+                </Link>
 
                 {myClub && (
                     <Button
