@@ -112,7 +112,7 @@ export default function DashboardClient() {
     return (
         <div className="space-y-6 pt-24 pb-20 relative z-0">
             {/* Navigation & Actions */}
-            <div className="flex items-center justify-between px-1 mb-6">
+            <div className="flex items-center justify-between px-1 mb-6 relative z-50 pointer-events-auto">
                 <Button
                     variant="outline"
                     size="sm"
