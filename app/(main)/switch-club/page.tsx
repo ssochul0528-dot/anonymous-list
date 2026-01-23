@@ -60,7 +60,7 @@ export default function SwitchClubPage() {
             }
 
             // Navigate using href to force full reload and avoid router cache issues
-            window.location.href = `/my-club?cid=${clubId}`
+            window.location.href = `/dashboard?cid=${clubId}`
         } catch (e: any) {
             console.error(e)
             alert('클럽 전환 실패: ' + e.message)
