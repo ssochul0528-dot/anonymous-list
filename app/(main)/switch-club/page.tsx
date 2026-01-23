@@ -15,6 +15,8 @@ export default function SwitchClubPage() {
     const [memberships, setMemberships] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
+    const [switching, setSwitching] = useState(false)
+
     useEffect(() => {
         const fetchClubs = async () => {
             if (!user) return
@@ -30,22 +32,31 @@ export default function SwitchClubPage() {
     }, [user])
 
     const handleSwitch = async (clubId: string, role: string) => {
-        // Update profile current club_id to switch context
-        // We do this so the rest of the app (Dashboard, etc) knows which club is "Active"
-        const { error } = await supabase
-            .from('profiles')
-            .update({
-                club_id: clubId,
-                role: role // Sync the cached role in profile to the selected club's role
-            })
-            .eq('id', user?.id)
+        if (switching) return
+        setSwitching(true)
 
-        if (!error) {
+        try {
+            // Map 'MEMBER' role to 'USER' for profile compatibility if needed 
+            // (Assuming profiles use 'USER' for standard members)
+            // But let's keep STAFF/PRESIDENT as is.
+            const profileRole = role === 'MEMBER' ? 'USER' : role
+
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    club_id: clubId,
+                    role: profileRole
+                })
+                .eq('id', user?.id)
+
+            if (error) throw error
+
             // Use assign for a hard navigation to ensure context is refreshed.
-            // Avoid router.push to prevent race conditions.
             window.location.assign('/my-club')
-        } else {
-            alert('클럽 전환에 실패했습니다. 다시 시도해주세요.')
+        } catch (e: any) {
+            console.error(e)
+            alert('클럽 전환 실패: ' + e.message)
+            setSwitching(false)
         }
     }
 
