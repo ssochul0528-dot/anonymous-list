@@ -56,7 +56,9 @@ export default function SwitchClubPage() {
             }
 
             // Navigate to the explicit CLUB URL which is proven to work
-            window.location.href = `/clubs/${slug}`
+            const targetUrl = `/clubs/${slug}`
+            alert(`클럽으로 이동합니다: ${targetUrl}`)
+            window.location.href = targetUrl
         } catch (e: any) {
             console.error(e)
             alert('클럽 전환 실패: ' + e.message)
