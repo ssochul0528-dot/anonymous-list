@@ -35,8 +35,8 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
 
             // Priority 1: Direct Slug Prop (from /clubs/[slug])
             if (clubSlug) {
-                const response = await supabase.from('clubs').select('*').eq('slug', clubSlug).single()
-                data = response.data
+                const { data: clubData } = await supabase.from('clubs').select('*').eq('slug', clubSlug).maybeSingle()
+                data = clubData
             }
             // Priority 2: URL Param (cid)
             else {
@@ -45,8 +45,8 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                 const targetId = paramCid || profile?.club_id
 
                 if (targetId) {
-                    const response = await supabase.from('clubs').select('*').eq('id', targetId).single()
-                    data = response.data
+                    const { data: clubData } = await supabase.from('clubs').select('*').eq('id', targetId).maybeSingle()
+                    data = clubData
                 }
             }
 

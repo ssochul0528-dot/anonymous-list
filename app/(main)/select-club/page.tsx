@@ -56,9 +56,8 @@ export default function SwitchClubPage() {
             }
 
             // Navigate to the explicit CLUB URL which is proven to work
-            const targetUrl = `/clubs/${slug}`
-            alert(`[DEBUG v3] Target: ${targetUrl}`)
-            window.location.href = targetUrl
+            const targetUrl = slug === 'non' ? '/dashboard' : `/clubs/${slug}`
+            router.push(targetUrl)
         } catch (e: any) {
             console.error(e)
             alert('클럽 전환 실패: ' + e.message)
