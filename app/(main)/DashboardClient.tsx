@@ -256,7 +256,7 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                     ) : (
                         <>
                             선택된 클럽이 없습니다.<br />
-                            <span className="text-[#CCFF00] cursor-pointer hover:underline" onClick={() => router.push('/switch-club')}>클럽을 선택해주세요 &gt;</span>
+                            <span className="text-[#CCFF00] cursor-pointer hover:underline" onClick={() => router.push('/select-club')}>클럽을 선택해주세요 &gt;</span>
                         </>
                     )}
                 </h1>
