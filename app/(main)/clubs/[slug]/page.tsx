@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/app/(main)/DashboardClient'
 
-export default function ClubDashboardPage({ params }: { params: { slug: string } }) {
+export default async function ClubDashboardPage(props: { params: Promise<{ slug: string }> }) {
+    const params = await props.params;
     if (params.slug === 'non') {
         redirect('/dashboard')
     }
