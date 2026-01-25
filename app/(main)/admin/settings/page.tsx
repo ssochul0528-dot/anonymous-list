@@ -323,17 +323,20 @@ export default function ClubSettingsPage() {
                 </div>
             </Card>
 
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0A0E17] to-transparent pb-safe z-20 max-w-[600px] mx-auto">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0A0E17] to-transparent pb-safe z-20 max-w-[600px] mx-auto flex flex-col gap-2">
                 <Button
                     fullWidth
                     size="lg"
                     onClick={handleSave}
                     isLoading={saving}
-                    className="h-14 text-[16px] shadow-2xl shadow-[#CCFF00]/20"
+                    className="h-14 text-[16px] shadow-2xl shadow-[#CCFF00]/20 bg-[#CCFF00] text-black font-black"
                 >
                     <Save size={18} className="mr-2" />
-                    설정 저장하기
+                    전체 설정 완료 및 저장
                 </Button>
+                <p className="text-[10px] text-center text-white/10 uppercase tracking-widest">
+                    V.1.0.8-STABLE • AUTO_SYNC_ENABLED
+                </p>
             </div>
         </div>
     )
