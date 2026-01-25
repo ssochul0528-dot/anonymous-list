@@ -67,10 +67,83 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
     // Dashboard is now rendered only when user exists by parent page.tsx
     // So we don't need redirect logic here.
 
-    // Mock Data
+    // Real Data States
+    const [topRankings, setTopRankings] = useState<any[]>([])
+    const [recentMatchesData, setRecentMatchesData] = useState<any[]>([])
+    const [memberCount, setMemberCount] = useState(0)
+    const [isLoadingData, setIsLoadingData] = useState(true)
+
+    // Data Fetching
+    useEffect(() => {
+        const fetchClubData = async () => {
+            if (!myClub?.id) {
+                setIsLoadingData(false)
+                return
+            }
+            setIsLoadingData(true)
+            const supabase = createClient()
+
+            try {
+                // 1. Fetch Member Count
+                const { count } = await supabase
+                    .from('club_members')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('club_id', myClub.id)
+                setMemberCount(count || 0)
+
+                // 2. Fetch Rankings (Top 3)
+                const { data: scores } = await supabase
+                    .from('scores')
+                    .select('*, profiles(id, nickname, photo_url)')
+                    .eq('club_id', myClub.id)
+
+                if (scores) {
+                    const stats = new Map()
+                    scores.forEach(s => {
+                        const pid = s.profiles?.id
+                        if (!pid) return
+                        if (!stats.has(pid)) {
+                            stats.set(pid, { ...s.profiles, points: 0 })
+                        }
+                        stats.get(pid).points += Number(s.points)
+                    })
+                    const sorted = Array.from(stats.values())
+                        .sort((a: any, b: any) => b.points - a.points)
+                        .slice(0, 3)
+                    setTopRankings(sorted)
+                }
+
+                // 3. Fetch Recent Matches
+                const { data: matches } = await supabase
+                    .from('matches')
+                    .select(`
+                        id, 
+                        round_number, 
+                        court_label, 
+                        created_at,
+                        weeks (
+                            id, 
+                            label,
+                            seasons (id, club_id)
+                        )
+                    `)
+                    .order('created_at', { ascending: false })
+                    .limit(10)
+
+                const filteredMatches = matches?.filter((m: any) => m.weeks?.seasons?.club_id === myClub.id).slice(0, 3) || []
+                setRecentMatchesData(filteredMatches)
+
+            } catch (e) {
+                console.error("Error fetching club data:", e)
+            } finally {
+                setIsLoadingData(false)
+            }
+        }
+        fetchClubData()
+    }, [myClub?.id])
+
+    // Mock Data (Legacy)
     const currentWeek = "1월 2주차"
-    const myRank = 1
-    const myPoints = 12.5
 
     // Attendance State
     const [attendanceStatus, setAttendanceStatus] = useState<string | null>(null)
@@ -259,11 +332,15 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
             <div className="grid grid-cols-2 gap-3 px-1">
                 <Card className="bg-[#121826]/50 border-white/5 p-5 text-center">
                     <p className="text-white/30 text-[10px] font-black mb-1 uppercase tracking-widest">Members</p>
-                    <p className="text-[24px] font-black italic text-white">48+</p>
+                    <p className="text-[24px] font-black italic text-white">
+                        {isLoadingData ? "..." : `${memberCount}+`}
+                    </p>
                 </Card>
                 <Card className="bg-[#121826]/50 border-white/5 p-5 text-center">
                     <p className="text-white/30 text-[10px] font-black mb-1 uppercase tracking-widest">Active Level</p>
-                    <p className="text-[24px] font-black italic text-[#CCFF00]">TOP</p>
+                    <p className="text-[24px] font-black italic text-[#CCFF00]">
+                        {myClub?.level || "MID"}
+                    </p>
                 </Card>
             </div>
 
@@ -274,16 +351,30 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                     <button className="text-[12px] text-white/40 font-bold" onClick={() => router.push('/rankings')}>VIEW ALL &gt;</button>
                 </div>
                 <Card className="bg-[#121826] border-white/5 overflow-hidden">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className={`p-4 flex items-center justify-between ${i !== 3 ? 'border-b border-white/5' : ''}`}>
-                            <div className="flex items-center gap-3">
-                                <span className="font-black italic text-[#CCFF00] w-4 text-[16px]">{i}</span>
-                                <div className="w-8 h-8 rounded-full bg-white/10" />
-                                <span className="font-bold text-[14px]">Player {i}</span>
+                    {isLoadingData ? (
+                        <div className="p-8 text-center text-white/10 italic font-bold">LOADING...</div>
+                    ) : topRankings.length > 0 ? (
+                        topRankings.map((player, i) => (
+                            <div key={player.id} className={`p-4 flex items-center justify-between ${i !== topRankings.length - 1 ? 'border-b border-white/5' : ''}`}>
+                                <div className="flex items-center gap-3">
+                                    <span className="font-black italic text-[#CCFF00] w-4 text-[16px]">{i + 1}</span>
+                                    <div className="w-8 h-8 rounded-full bg-white/10 overflow-hidden">
+                                        {player.photo_url ? (
+                                            <img src={player.photo_url} alt={player.nickname} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-[10px] font-bold">{player.nickname[0]}</div>
+                                        )}
+                                    </div>
+                                    <span className="font-bold text-[14px]">{player.nickname}</span>
+                                </div>
+                                <span className="text-[13px] font-black italic text-white/40">{Number(player.points).toFixed(1)} Pts</span>
                             </div>
-                            <span className="text-[13px] font-black italic text-white/40">{(150 - i * 10).toFixed(1)} Pts</span>
+                        ))
+                    ) : (
+                        <div className="p-8 text-center text-white/20 text-[13px] italic font-bold uppercase tracking-widest">
+                            No rankings recorded yet
                         </div>
-                    ))}
+                    )}
                 </Card>
             </section>
 
@@ -293,8 +384,17 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                     <h3 className="font-bold text-[18px] text-white italic tracking-tighter">RECENT MATCHES</h3>
                 </div>
                 <Card padding="none" className="divide-y divide-white/5 border-none shadow-sm overflow-hidden bg-[#121826]/30">
-                    <MatchResultItem win />
-                    <MatchResultItem />
+                    {isLoadingData ? (
+                        <div className="p-8 text-center text-white/10 italic">LOADING...</div>
+                    ) : recentMatchesData.length > 0 ? (
+                        recentMatchesData.map(m => (
+                            <MatchResultItem key={m.id} match={m} />
+                        ))
+                    ) : (
+                        <div className="p-8 text-center text-white/20 text-[13px] font-bold italic uppercase tracking-widest">
+                            No match history
+                        </div>
+                    )}
                 </Card>
             </section>
         </div>
@@ -546,10 +646,19 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                     <h3 className="font-bold text-[18px] text-[#333D4B]">최근 경기 결과</h3>
                     <button className="text-[13px] text-[#8B95A1] font-bold">더보기 &gt;</button>
                 </div>
-                <Card padding="none" className="divide-y divide-[#F2F4F6] border-none shadow-sm overflow-hidden">
-                    <MatchResultItem win />
-                    <MatchResultItem />
-                    <MatchResultItem />
+                <Card padding="none" className="divide-y divide-[#F2F4F6] border-none shadow-sm overflow-hidden bg-white/5">
+                    {isLoadingData ? (
+                        <div className="p-8 text-center text-white/10 italic font-bold">LOADING MATCHES...</div>
+                    ) : recentMatchesData.length > 0 ? (
+                        recentMatchesData.map(m => (
+                            <MatchResultItem key={m.id} match={m} />
+                        ))
+                    ) : (
+                        <div className="p-8 text-center text-white/20 text-[13px] font-bold italic uppercase tracking-widest leading-relaxed">
+                            아직 진행된 경기가 없습니다.<br />
+                            <span className="text-[10px] opacity-50">스케줄을 생성하고 기록을 시작하세요!</span>
+                        </div>
+                    )}
                 </Card>
             </section>
         </div>
@@ -573,21 +682,45 @@ function ActionCard({ title, desc, icon, onClick }: any) {
     )
 }
 
-function MatchResultItem({ win }: { win?: boolean }) {
+function MatchResultItem({ match, win }: { match?: any, win?: boolean }) {
+    if (!match) {
+        return (
+            <div className="p-4 flex items-center justify-between border-b border-white/5 hover:bg-white/5 transition-all group">
+                <div className="flex items-center gap-4">
+                    <div className={`w-1 h-8 rounded-full ${win ? 'bg-[#CCFF00] shadow-[0_0_10px_#CCFF00]' : 'bg-white/10'}`} />
+                    <div>
+                        <p className="font-black text-[14px] text-white italic uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">1R • VS RED STORM</p>
+                        <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest">JAN 18 • COURT A</p>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <span className={`font-black text-[16px] italic ${win ? 'text-[#00D1FF]' : 'text-white/20'}`}>
+                        {win ? '+3.0' : '+0.5'}
+                    </span>
+                    <p className="text-[9px] font-black text-white/30 uppercase tracking-tighter">Match Pts</p>
+                </div>
+            </div>
+        )
+    }
+
+    const dateStr = new Date(match.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }).toUpperCase()
+
     return (
         <div className="p-4 flex items-center justify-between border-b border-white/5 hover:bg-white/5 transition-all group">
             <div className="flex items-center gap-4">
-                <div className={`w-1 h-8 rounded-full ${win ? 'bg-[#CCFF00] shadow-[0_0_10px_#CCFF00]' : 'bg-white/10'}`} />
+                <div className={`w-1 h-8 rounded-full bg-[#CCFF00]/40 shadow-[0_0_10px_#CCFF00]/20`} />
                 <div>
-                    <p className="font-black text-[14px] text-white italic uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">1R • VS RED STORM</p>
-                    <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest">JAN 18 • COURT A</p>
+                    <p className="font-black text-[14px] text-white italic uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">
+                        {match.weeks?.label || `${match.round_number}R`} • COURT {match.court_label}
+                    </p>
+                    <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest">{dateStr}</p>
                 </div>
             </div>
             <div className="text-right">
-                <span className={`font-black text-[16px] italic ${win ? 'text-[#00D1FF]' : 'text-white/20'}`}>
-                    {win ? '+3.0' : '+0.5'}
+                <span className="font-black text-[12px] italic text-[#CCFF00] uppercase tracking-tighter">
+                    Completed
                 </span>
-                <p className="text-[9px] font-black text-white/30 uppercase tracking-tighter">Match Pts</p>
+                <p className="text-[9px] font-black text-white/30 uppercase tracking-tighter">Status</p>
             </div>
         </div>
     )
