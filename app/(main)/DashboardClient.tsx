@@ -94,7 +94,7 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                 // 2. Fetch Rankings (Top 3)
                 const { data: scores } = await supabase
                     .from('scores')
-                    .select('*, profiles(id, nickname, photo_url)')
+                    .select('*, profiles!inner(id, nickname, photo_url)')
                     .eq('club_id', myClub.id)
 
                 if (scores) {
@@ -347,7 +347,7 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
             {/* Public Ranking Section */}
             <section>
                 <div className="flex justify-between items-center mb-3 px-1">
-                    <h3 className="font-bold text-[18px] text-white italic tracking-tighter">CLUB RANKING</h3>
+                    <h3 className="font-bold text-[18px] text-white italic tracking-tighter">CLUB RANKING (REAL)</h3>
                     <button className="text-[12px] text-white/40 font-bold" onClick={() => router.push('/rankings')}>VIEW ALL &gt;</button>
                 </div>
                 <Card className="bg-[#121826] border-white/5 overflow-hidden">

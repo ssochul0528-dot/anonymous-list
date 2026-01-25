@@ -53,8 +53,19 @@ export default function RankingsPage() {
         try {
             // 1 & 2. Fetch Profiles and Scores in parallel for speed
             const currentWeekLabel = "1월 1주차"
+            let profileQuery = supabase.from('profiles').select('*')
+
+            // Only filter if not super admin
+            const { data: { user } } = await supabase.auth.getUser()
+            const { data: myProfile } = await supabase.from('profiles').select('club_id, role').eq('id', user?.id).single()
+            const isGod = myProfile?.role === 'PRESIDENT' // Superadmin check
+
+            if (myProfile?.club_id && !isGod) {
+                profileQuery = profileQuery.eq('club_id', myProfile.club_id)
+            }
+
             const [profilesRes, weekRes] = await Promise.all([
-                supabase.from('profiles').select('*'),
+                profileQuery,
                 filter === 'WEEK'
                     ? supabase.from('weeks').select('id').eq('label', currentWeekLabel).single()
                     : Promise.resolve({ data: null })
