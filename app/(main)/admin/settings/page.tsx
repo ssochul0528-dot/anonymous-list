@@ -143,8 +143,30 @@ export default function ClubSettingsPage() {
             .eq('id', club.id)
 
         if (error) {
-            console.error(error)
-            alert('저장 실패: ' + error.message)
+            console.error('Save Error:', error)
+            // Fallback: If level column missing, try saving without it
+            if (error.message.includes('level')) {
+                const { error: retryError } = await supabase
+                    .from('clubs')
+                    .update({
+                        name: clubName,
+                        region,
+                        description,
+                        logo_url: logoUrl,
+                        invite_code: inviteCode,
+                        attendance_options: timeSlots
+                    })
+                    .eq('id', club.id)
+
+                if (retryError) {
+                    alert('저장 실패: ' + retryError.message)
+                } else {
+                    alert('설정이 저장되었습니다! (참고: level 컬럼이 DB에 없어 해당 필드는 제외됨)')
+                    router.push('/settlement')
+                }
+            } else {
+                alert('저장 실패: ' + error.message)
+            }
         } else {
             alert('설정이 저장되었습니다!')
             router.push('/settlement') // Go back to management hub
@@ -155,10 +177,10 @@ export default function ClubSettingsPage() {
     if (loading) return <div className="p-10 text-center text-white/50">로딩중...</div>
 
     return (
-        <div className="pb-20 space-y-6 pt-4 px-1">
+        <div className="pb-40 space-y-6 pt-4 px-1">
             <header className="flex flex-col gap-2 mb-6">
                 <div className="flex items-center gap-2">
-                    <Link href="/" className="p-2 -ml-2 text-white/60 hover:text-white transition-colors">
+                    <Link href="/settlement" className="p-2 -ml-2 text-white/60 hover:text-white transition-colors">
                         <ArrowLeft size={24} />
                     </Link>
                     <h2 className="text-[22px] font-black tracking-tight text-white uppercase italic">Club Settings</h2>
@@ -323,7 +345,7 @@ export default function ClubSettingsPage() {
                 </div>
             </Card>
 
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0A0E17] to-transparent pb-safe z-20 max-w-[600px] mx-auto flex flex-col gap-2">
+            <div className="fixed bottom-4 left-0 right-0 p-4 bg-gradient-to-t from-[#0A0E17] to-transparent z-20 max-w-[600px] mx-auto flex flex-col gap-2">
                 <Button
                     fullWidth
                     size="lg"
