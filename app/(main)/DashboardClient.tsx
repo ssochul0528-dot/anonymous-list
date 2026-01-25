@@ -19,6 +19,7 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
     const { user, isAdmin: isSuperAdmin, isStaff: isAnyStaff, profile, isLoading } = useAuth()
     const router = useRouter()
     const [myClub, setMyClub] = useState<any>(null)
+    const [myMemberRole, setMyMemberRole] = useState<string | null>(null)
 
     // Auth Protection
     // useEffect(() => {
@@ -27,35 +28,59 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
     //     }
     // }, [user, isLoading, router])
 
-    // Fetch My Club Info
+    // Fetch My Club Info & My Role in it
     useEffect(() => {
         const fetchMyClub = async () => {
             const supabase = createClient()
-            let data = null;
+            let clubDataResult = null;
+            let targetId = null;
 
-            // Priority 1: Direct Slug Prop (from /clubs/[slug])
+            // 1. Get Club Data
             if (clubSlug) {
-                const { data: clubData } = await supabase.from('clubs').select('*').eq('slug', clubSlug).maybeSingle()
-                data = clubData
-            }
-            // Priority 2: URL Param (cid)
-            else {
+                const { data } = await supabase.from('clubs').select('*').eq('slug', clubSlug).maybeSingle()
+                clubDataResult = data
+                targetId = data?.id
+            } else {
                 const searchParams = new URLSearchParams(window.location.search)
                 const paramCid = searchParams.get('cid')
-                const targetId = paramCid || profile?.club_id
+                targetId = paramCid || profile?.club_id
 
                 if (targetId) {
-                    const { data: clubData } = await supabase.from('clubs').select('*').eq('id', targetId).maybeSingle()
-                    data = clubData
+                    const { data } = await supabase.from('clubs').select('*').eq('id', targetId).maybeSingle()
+                    clubDataResult = data
                 }
             }
 
-            if (data) {
-                setMyClub(data)
+            if (clubDataResult) {
+                setMyClub(clubDataResult)
+
+                // 2. Get My Role in this specific club
+                if (user) {
+                    const { data: memberData } = await supabase
+                        .from('club_members')
+                        .select('role')
+                        .eq('club_id', clubDataResult.id)
+                        .eq('user_id', user.id)
+                        .maybeSingle()
+
+                    if (memberData) {
+                        setMyMemberRole(memberData.role)
+
+                        // Sync profile role if different (Self-healing role mismatch)
+                        if (targetId === profile?.club_id && memberData.role !== profile?.role) {
+                            if (memberData.role === 'PRESIDENT' || memberData.role === 'STAFF') {
+                                // Don't await, just background sync
+                                supabase.from('profiles').update({ role: memberData.role === 'MEMBER' ? 'USER' : memberData.role }).eq('id', user.id)
+                            }
+                        }
+                    } else {
+                        setMyMemberRole(null)
+                    }
+                }
             }
         }
         fetchMyClub()
-    }, [profile?.club_id, clubSlug])
+    }, [profile?.club_id, clubSlug, user?.id])
 
     const handleCopyInvite = () => {
         if (!myClub) return
@@ -270,8 +295,10 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
     }
 
     // Determine if user is a member or global staff/admin
-    const isMember = profile?.club_id === myClub?.id
+    const isLocalStaff = myMemberRole === 'STAFF' || myMemberRole === 'PRESIDENT'
+    const isMember = profile?.club_id === myClub?.id || !!myMemberRole
     const canSeePrivateView = isMember || isAnyStaff || isSuperAdmin
+    const hasManagementPower = isLocalStaff || isAnyStaff || isSuperAdmin
 
     if (!myClub && !isLoading) {
         return (
@@ -299,7 +326,7 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
             </div>
 
             {/* Add Management Shortcut for Staff even in public view if they are just visiting */}
-            {isAnyStaff && (
+            {hasManagementPower && (
                 <div className="px-1">
                     <Button
                         variant="primary"
@@ -453,9 +480,17 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
             {/* Top Summary */}
             <section className="flex flex-col gap-1 px-1">
                 <div className="flex justify-between items-start">
-                    <h2 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-wider">
-                        {myClub ? myClub.name : 'LOADING CLUB...'} • {currentWeek}
-                    </h2>
+                    <div className="flex flex-col">
+                        <h2 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-wider">
+                            {myClub ? myClub.name : 'LOADING CLUB...'} • {currentWeek}
+                        </h2>
+                        <div className="flex gap-2 items-center mt-1">
+                            <span className="text-[9px] font-black bg-white/10 px-1.5 py-0.5 rounded text-white/40 uppercase">
+                                My Role: {myMemberRole || 'GUEST'}
+                            </span>
+                            {isAnyStaff && <span className="text-[9px] font-black bg-[#CCFF00]/20 px-1.5 py-0.5 rounded text-[#CCFF00] uppercase">Global Staff</span>}
+                        </div>
+                    </div>
                     {isSuperAdmin && (
                         <Button
                             size="sm"
@@ -618,7 +653,7 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                 />
             </div>
 
-            {isAnyStaff && (
+            {hasManagementPower && (
                 <div className="space-y-3">
                     <h3 className="font-black text-[14px] px-1 text-white/40 tracking-[0.2em] uppercase">Club Management</h3>
 
