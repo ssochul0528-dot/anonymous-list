@@ -147,7 +147,7 @@ export default function ClubSettingsPage() {
             alert('저장 실패: ' + error.message)
         } else {
             alert('설정이 저장되었습니다!')
-            router.refresh()
+            router.push('/settlement') // Go back to management hub
         }
         setSaving(false)
     }
@@ -190,8 +190,10 @@ export default function ClubSettingsPage() {
                                 )}
                             </div>
                             <label className="flex-1">
-                                <span className="inline-block px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[12px] font-bold text-white cursor-pointer hover:bg-white/10">CHANGE LOGO</span>
-                                <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                                <span className="inline-block px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[12px] font-bold text-white cursor-pointer hover:bg-white/10">
+                                    {saving ? 'UPLOADING...' : 'CHANGE LOGO'}
+                                </span>
+                                <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" disabled={saving} />
                             </label>
                         </div>
                     </div>
@@ -259,6 +261,19 @@ export default function ClubSettingsPage() {
                             </button>
                         </div>
                         <p className="text-[10px] text-white/20 mt-2 ml-1">초대 코드가 변경되면 기존 공유된 링크로는 가입이 불가할 수 있습니다.</p>
+                    </div>
+
+                    {/* Quick Save for Profile */}
+                    <div className="pt-2">
+                        <Button
+                            fullWidth
+                            onClick={handleSave}
+                            isLoading={saving}
+                            className="bg-[#CCFF00] text-black font-black"
+                        >
+                            <Save size={18} className="mr-2" />
+                            프로필 정보 저장하기
+                        </Button>
                     </div>
                 </div>
             </Card>
