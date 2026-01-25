@@ -196,15 +196,26 @@ export default function ProfilePage() {
                     </Button>
                     <h2 className="text-[20px] font-bold">선수 카드 수정</h2>
                 </div>
-                {isEligibleForPresident && !isPresident && (
-                    <Button
-                        size="sm"
-                        onClick={claimPresident}
-                        className="bg-amber-500 hover:bg-amber-600 text-white font-bold animate-bounce"
-                    >
-                        회장 권한 활성화
-                    </Button>
-                )}
+                <div className="flex gap-2">
+                    {isPresident && (
+                        <Button
+                            size="sm"
+                            onClick={() => router.push('/admin/settings')}
+                            className="bg-white/10 hover:bg-[#CCFF00] hover:text-black font-bold text-[11px]"
+                        >
+                            클럽 관리
+                        </Button>
+                    )}
+                    {isEligibleForPresident && !isPresident && (
+                        <Button
+                            size="sm"
+                            onClick={claimPresident}
+                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold animate-bounce"
+                        >
+                            회장 권한 활성화
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {/* Game Card Preview with 3D Flip */}
