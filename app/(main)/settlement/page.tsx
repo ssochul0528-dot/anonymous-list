@@ -197,13 +197,22 @@ export default function SettlementPage() {
                             경기 기록 관리
                         </button>
                         {isPresident && (
-                            <button
-                                onClick={() => router.push('/admin/staff')}
-                                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md py-3 rounded-2xl transition-all font-bold text-sm col-span-2"
-                            >
-                                <Shield size={18} />
-                                운영진 채용/해고 관리
-                            </button>
+                            <div className="grid grid-cols-1 gap-2 col-span-2">
+                                <button
+                                    onClick={() => router.push('/admin/settings')}
+                                    className="flex items-center justify-center gap-2 bg-[#CCFF00] text-black py-3 rounded-2xl transition-all font-bold text-sm"
+                                >
+                                    <Settings size={18} />
+                                    클럽 정보/로고 수정
+                                </button>
+                                <button
+                                    onClick={() => router.push('/admin/staff')}
+                                    className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md py-3 rounded-2xl transition-all font-bold text-sm"
+                                >
+                                    <Shield size={18} />
+                                    운영진 채용/해고 관리
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>

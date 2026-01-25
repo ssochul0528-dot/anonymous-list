@@ -677,15 +677,6 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                         </Button>
                     </Card>
 
-                    <Card className="flex items-center justify-between border border-white/5 shadow-sm hover:border-[#CCFF00]/30 transition-all bg-[#121826] text-white p-4">
-                        <div>
-                            <h4 className="font-black text-[15px] uppercase italic">Club Settings</h4>
-                            <p className="text-white/40 text-[12px]">클럽 정보, 로고, 출석 시간 등 관리</p>
-                        </div>
-                        <Button size="sm" className="bg-white/10 hover:bg-[#CCFF00] hover:text-[#0A0E17] font-black text-[11px] rounded transition-colors" onClick={() => router.push('/admin/settings')}>
-                            EDIT
-                        </Button>
-                    </Card>
                 </div>
             )}
 

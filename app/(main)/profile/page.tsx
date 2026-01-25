@@ -197,15 +197,6 @@ export default function ProfilePage() {
                     <h2 className="text-[20px] font-bold">선수 카드 수정</h2>
                 </div>
                 <div className="flex gap-2">
-                    {isPresident && (
-                        <Button
-                            size="sm"
-                            onClick={() => router.push('/admin/settings')}
-                            className="bg-white/10 hover:bg-[#CCFF00] hover:text-black font-bold text-[11px]"
-                        >
-                            클럽 관리
-                        </Button>
-                    )}
                     {isEligibleForPresident && !isPresident && (
                         <Button
                             size="sm"
