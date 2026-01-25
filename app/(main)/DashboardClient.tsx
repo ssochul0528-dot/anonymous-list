@@ -196,6 +196,112 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
         return `${ampm} ${String(displayHour).padStart(2, '0')}:${m}`;
     }
 
+    // Determine if user is a member of this club
+    const isMember = profile?.club_id === myClub?.id || isSuperAdmin
+
+    if (!myClub && !isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
+                <p className="text-white/20 font-bold">🤔 클럽 정보를 찾을 수 없습니다.</p>
+                <Button size="sm" onClick={() => router.push('/')}>메인으로 돌아가기</Button>
+            </div>
+        )
+    }
+
+    // Public Showcase View for Non-Members
+    const renderPublicView = () => (
+        <div className="space-y-8 pt-24 pb-20 relative z-0">
+            {/* Minimal Header */}
+            <div className="flex items-center justify-between px-1 mb-6 relative z-50 pointer-events-auto">
+                <a
+                    href="/clubs"
+                    className="h-10 pl-2 pr-4 rounded-full border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 flex items-center gap-2 transition-all group pointer-events-auto z-50 relative"
+                >
+                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-[#CCFF00] group-hover:text-black transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 18l-6-6 6-6" /></svg>
+                    </div>
+                    <span className="font-bold text-[13px]">클럽 마켓</span>
+                </a>
+            </div>
+
+            {/* Showcase Hero */}
+            <section className="flex flex-col items-center text-center px-4 gap-4">
+                <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-24 h-24 rounded-[32px] bg-[#121826] border border-white/10 flex items-center justify-center overflow-hidden shadow-2xl"
+                >
+                    {myClub?.logo_url ? (
+                        <img src={myClub.logo_url} alt={myClub.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <span className="text-[40px] font-black italic text-white/10">{myClub?.name?.[0]}</span>
+                    )}
+                </motion.div>
+                <div className="space-y-1">
+                    <h1 className="text-[32px] font-black tracking-tighter uppercase italic">{myClub?.name}</h1>
+                    <p className="text-[#CCFF00] font-bold text-[13px] tracking-widest">{myClub?.region} • TENNIS CLUB</p>
+                </div>
+                <p className="text-white/40 text-[14px] leading-relaxed max-w-[300px]">
+                    {myClub?.description || "함께 성장하는 즐거운 테니스 클럽입니다. 지금 바로 참여하세요!"}
+                </p>
+
+                <Button
+                    size="lg"
+                    className="mt-4 h-14 px-10 rounded-2xl bg-[#CCFF00] text-[#0A0E17] font-black text-[16px] hover:bg-[#b3e600] shadow-[0_0_30px_rgba(204,255,0,0.3)] transition-all active:scale-95 flex items-center gap-3"
+                    onClick={() => router.push(`/club-join?cid=${myClub?.id}`)}
+                >
+                    클럽 가입하기
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14m-7-7l7 7-7 7" /></svg>
+                </Button>
+            </section>
+
+            {/* Club Stats Preview */}
+            <div className="grid grid-cols-2 gap-3 px-1">
+                <Card className="bg-[#121826]/50 border-white/5 p-5 text-center">
+                    <p className="text-white/30 text-[10px] font-black mb-1 uppercase tracking-widest">Members</p>
+                    <p className="text-[24px] font-black italic text-white">48+</p>
+                </Card>
+                <Card className="bg-[#121826]/50 border-white/5 p-5 text-center">
+                    <p className="text-white/30 text-[10px] font-black mb-1 uppercase tracking-widest">Active Level</p>
+                    <p className="text-[24px] font-black italic text-[#CCFF00]">TOP</p>
+                </Card>
+            </div>
+
+            {/* Public Ranking Section */}
+            <section>
+                <div className="flex justify-between items-center mb-3 px-1">
+                    <h3 className="font-bold text-[18px] text-white italic tracking-tighter">CLUB RANKING</h3>
+                    <button className="text-[12px] text-white/40 font-bold" onClick={() => router.push('/rankings')}>VIEW ALL &gt;</button>
+                </div>
+                <Card className="bg-[#121826] border-white/5 overflow-hidden">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className={`p-4 flex items-center justify-between ${i !== 3 ? 'border-b border-white/5' : ''}`}>
+                            <div className="flex items-center gap-3">
+                                <span className="font-black italic text-[#CCFF00] w-4 text-[16px]">{i}</span>
+                                <div className="w-8 h-8 rounded-full bg-white/10" />
+                                <span className="font-bold text-[14px]">Player {i}</span>
+                            </div>
+                            <span className="text-[13px] font-black italic text-white/40">{(150 - i * 10).toFixed(1)} Pts</span>
+                        </div>
+                    ))}
+                </Card>
+            </section>
+
+            {/* Recent Match Feed */}
+            <section>
+                <div className="flex justify-between items-center mb-3 px-1">
+                    <h3 className="font-bold text-[18px] text-white italic tracking-tighter">RECENT MATCHES</h3>
+                </div>
+                <Card padding="none" className="divide-y divide-white/5 border-none shadow-sm overflow-hidden bg-[#121826]/30">
+                    <MatchResultItem win />
+                    <MatchResultItem />
+                </Card>
+            </section>
+        </div>
+    )
+
+    if (!isMember) return renderPublicView()
+
     return (
         <div className="space-y-6 pt-24 pb-20 relative z-0">
             {/* Navigation & Actions */}
