@@ -269,8 +269,9 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
         return `${ampm} ${String(displayHour).padStart(2, '0')}:${m}`;
     }
 
-    // Determine if user is a member of this club
-    const isMember = profile?.club_id === myClub?.id || isSuperAdmin
+    // Determine if user is a member or global staff/admin
+    const isMember = profile?.club_id === myClub?.id
+    const canSeePrivateView = isMember || isAnyStaff || isSuperAdmin
 
     if (!myClub && !isLoading) {
         return (
@@ -297,6 +298,19 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                 </a>
             </div>
 
+            {/* Add Management Shortcut for Staff even in public view if they are just visiting */}
+            {isAnyStaff && (
+                <div className="px-1">
+                    <Button
+                        variant="primary"
+                        fullWidth
+                        onClick={() => router.push('/admin/history')}
+                        className="bg-[#CCFF00] text-black font-black"
+                    >
+                        ADMIN TOOLS ACCESS
+                    </Button>
+                </div>
+            )}
             {/* Showcase Hero */}
             <section className="flex flex-col items-center text-center px-4 gap-4">
                 <motion.div
@@ -400,7 +414,7 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
         </div>
     )
 
-    if (!isMember) return renderPublicView()
+    if (!canSeePrivateView) return renderPublicView()
 
     return (
         <div className="space-y-6 pt-24 pb-20 relative z-0">
