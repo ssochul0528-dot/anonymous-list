@@ -39,41 +39,78 @@ export default function SettlementPage() {
     const [balance, setBalance] = useState(0)
     const [settlements, setSettlements] = useState<any[]>([])
     const [activeTab, setActiveTab] = useState<'status' | 'history' | 'expenses'>('status')
+    const [myMemberRole, setMyMemberRole] = useState<string | null>(null)
+    const [myClubId, setMyClubId] = useState<string | null>(null)
 
+    // Security & Role Check
     useEffect(() => {
-        // Removed aggressive redirect to prevent race conditions for President
-        if (!isAuthLoading && user && !isStaff) {
-            console.log('Warning: Not a staff member.')
+        const checkAccess = async () => {
+            if (isAuthLoading) return
+            if (!user) {
+                router.replace('/login')
+                return
+            }
+
+            const clubId = profile?.club_id
+            if (!clubId) {
+                setLoading(false)
+                return
+            }
+            setMyClubId(clubId)
+
+            // Fetch local role
+            const { data: memberData } = await supabase
+                .from('club_members')
+                .select('role')
+                .eq('club_id', clubId)
+                .eq('user_id', user.id)
+                .maybeSingle()
+
+            setMyMemberRole(memberData?.role || null)
+            setLoading(false)
         }
-    }, [user, isStaff, isAuthLoading])
+        checkAccess()
+    }, [user, profile?.club_id, isAuthLoading])
+
+    const hasAccess = !!(
+        myMemberRole === 'STAFF' ||
+        myMemberRole === 'PRESIDENT' ||
+        isStaff || // Global fallback
+        isSuperAdmin
+    )
 
     useEffect(() => {
-        fetchData()
-    }, [user])
+        if (hasAccess && myClubId) {
+            fetchData()
+        }
+    }, [user, hasAccess, myClubId])
 
     const fetchData = async () => {
-        if (!user || !isStaff) return
+        if (!user || !hasAccess || !myClubId) return
         setLoading(true)
         try {
-            // 1. Fetch Settlements (Simplified for now)
+            // 1. Fetch Settlements for current club
             const { data: stlData } = await supabase
                 .from('settlements')
                 .select(`
                     *,
                     profiles:user_id (nickname, photo_url)
                 `)
+                .eq('club_id', myClubId)
                 .order('created_at', { ascending: false })
             setSettlements(stlData || [])
 
-            // 2. Calculate Balance (Sum of all PAID settlements - Sum of all expenses)
+            // 2. Calculate Balance for current club
             const { data: paidSums } = await supabase
                 .from('settlements')
                 .select('amount')
+                .eq('club_id', myClubId)
                 .eq('status', 'PAID')
 
             const { data: expSums } = await supabase
                 .from('expenses')
                 .select('amount')
+                .eq('club_id', myClubId)
 
             const totalIncome = paidSums?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
             const totalExpense = expSums?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
@@ -86,37 +123,36 @@ export default function SettlementPage() {
         }
     }
 
-    if (isAuthLoading || (isStaff && loading)) {
+    if (isAuthLoading || loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                <p className="text-gray-400 font-medium">권한 확인 및 데이터를 불러오는 중...</p>
+                <div className="w-10 h-10 border-4 border-[#CCFF00]/20 border-t-[#CCFF00] rounded-full animate-spin" />
+                <p className="text-white/40 font-medium">권한 확인 중...</p>
             </div>
         )
     }
 
-    if (!isStaff) {
+    if (!hasAccess) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center space-y-6">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-300">
+                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-white/10">
                     <Shield size={40} />
                 </div>
                 <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-[#333D4B]">접근 권한이 없습니다</h3>
-                    <p className="text-[#8B95A1] text-sm leading-relaxed">
-                        이 페이지는 운영진 전용 구역입니다.<br />
-                        회장님 계정임에도 이 메시지가 보인다면<br />
-                        로그아웃 후 다시 로그인해 주세요.
+                    <h3 className="text-xl font-bold text-white uppercase italic">Access Denied</h3>
+                    <p className="text-white/40 text-sm leading-relaxed">
+                        이 페이지는 클럽 운영진 전용 구역입니다.<br />
+                        일반 회원은 접근할 수 없습니다.
                     </p>
                 </div>
                 <Button onClick={() => router.replace('/')}>홈으로 돌아가기</Button>
-                {/* Visual debug for nickname */}
-                <p className="text-[10px] text-gray-300">Nickname: {profile?.nickname}</p>
+                <p className="text-[10px] text-white/10">Role: {myMemberRole || 'MEMBER'}</p>
             </div>
         )
     }
 
     const handleApprove = async (id: string) => {
+        if (!myClubId) return
         const { error } = await supabase
             .from('settlements')
             .update({
@@ -125,6 +161,7 @@ export default function SettlementPage() {
                 confirmed_by: user?.id
             })
             .eq('id', id)
+            .eq('club_id', myClubId)
 
         if (!error) fetchData()
     }
@@ -227,6 +264,7 @@ export default function SettlementPage() {
                                         amount: Number(amount),
                                         type,
                                         method,
+                                        club_id: myClubId,
                                         status: method === 'CASH' ? 'PAID' : 'PENDING',
                                         confirmed_at: method === 'CASH' ? new Date().toISOString() : null,
                                         confirmed_by: method === 'CASH' ? user?.id : null
