@@ -94,16 +94,18 @@ export default function RankingsPage() {
             if (sError) throw sError
 
             const stats = new Map()
-            profiles.forEach(p => stats.set(p.id, { ...p, points: 0, wins: 0, matches: 0 }))
+            profiles.forEach(p => stats.set(p.id, { ...p, points: 0, wins: 0, draws: 0, losses: 0, matches: 0 }))
 
             scores?.forEach(s => {
                 const p = stats.get(s.user_id)
                 if (p) {
                     p.points += Number(s.points || 0)
-                    // Count everything with a result as a match for W/M stats
+                    // Count everything with a result as a match for W-D-L stats
                     if (s.result) {
                         p.matches += 1
                         if (s.result === 'WIN') p.wins += 1
+                        else if (s.result === 'DRAW') p.draws += 1
+                        else if (s.result === 'LOSE') p.losses += 1
                     }
                 }
             })
@@ -377,15 +379,11 @@ function RankingCard({ rank, player, onPhotoClick }: any) {
                         {rank === 1 && <span className="text-[10px] bg-[#CCFF00] text-black font-black px-1.5 py-0.5 rounded italic shadow-[0_0_10px_#CCFF00]/50">CHAMP</span>}
                     </div>
 
-                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/30">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/30 truncate">
                         <div className="flex items-center gap-1">
-                            <span className="text-white/40">W:</span>
-                            <span className="text-white/80">{player.wins || 0}</span>
-                        </div>
-                        <div className="w-[1px] h-2 bg-white/10" />
-                        <div className="flex items-center gap-1">
-                            <span className="text-white/40">M:</span>
-                            <span className="text-white/80">{player.matches || 0}</span>
+                            <span className="text-white/80">{player.wins || 0}W</span>
+                            <span className="text-white/80">{player.draws || 0}D</span>
+                            <span className="text-white/80">{player.losses || 0}L</span>
                         </div>
                         <div className="w-[1px] h-2 bg-white/10" />
                         <div className="flex items-center gap-1">
@@ -397,9 +395,9 @@ function RankingCard({ rank, player, onPhotoClick }: any) {
                 </div>
 
                 {/* 4. Points Section */}
-                <div className="text-right flex flex-col items-end">
-                    <span className="text-[10px] font-black text-white/10 tracking-widest mb-0.5 uppercase mb-1">Points</span>
-                    <div className={`text-[24px] font-black italic leading-none tracking-tighter ${rank === 1 ? 'text-[#CCFF00] drop-shadow-[0_0_5px_rgba(204,255,0,0.3)]' : 'text-white'}`}>
+                <div className="text-right flex flex-col items-end shrink-0 ml-auto">
+                    <span className="text-[9px] font-black text-white/10 tracking-widest uppercase mb-0.5">Points</span>
+                    <div className={`text-[20px] font-black italic leading-none tracking-tighter ${rank === 1 ? 'text-[#CCFF00] drop-shadow-[0_0_5px_rgba(204,255,0,0.3)]' : 'text-white'}`}>
                         {Number(player.points || 0).toFixed(1)}
                     </div>
                 </div>
