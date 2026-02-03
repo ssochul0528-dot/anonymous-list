@@ -162,7 +162,7 @@ export default function ScheduleGeneratorPage() {
                 partnerHistory[m.teamB[0]].add(m.teamB[1])
                 partnerHistory[m.teamB[1]].add(m.teamB[0])
 
-                m.teamA.forEach(ta => m.teamB.forEach(tb => {
+                m.teamA.forEach((ta: string) => m.teamB.forEach((tb: string) => {
                     opponentHistory[ta].add(tb); opponentHistory[tb].add(ta);
                 }))
             })
