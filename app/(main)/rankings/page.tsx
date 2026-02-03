@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import PlayerCard from '@/components/PlayerCard'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import { Settings2 } from 'lucide-react'
+import { Settings2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function RankingsPage() {
     const { isStaff } = useAuth()
@@ -15,7 +15,8 @@ export default function RankingsPage() {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
     const [rankings, setRankings] = useState<any[]>([])
-    const [filter, setFilter] = useState<'WEEK' | 'ALL'>('WEEK')
+    const [filter, setFilter] = useState<'MONTH' | 'ALL'>('ALL')
+    const [selectedDate, setSelectedDate] = useState(new Date())
     const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
     const [playerHistory, setPlayerHistory] = useState<any[]>([])
     const [historyLoading, setHistoryLoading] = useState(false)
@@ -46,62 +47,70 @@ export default function RankingsPage() {
 
     useEffect(() => {
         fetchRankings()
-    }, [filter])
+    }, [filter, selectedDate])
 
     const fetchRankings = async () => {
         setLoading(true)
         try {
-            // 1 & 2. Fetch Profiles and Scores in parallel for speed
-            const currentWeekLabel = "1월 1주차"
-            let profileQuery = supabase.from('profiles').select('*')
+            const { data: { user: authUser } } = await supabase.auth.getUser()
+            if (!authUser) return
 
-            // Only filter if not super admin
-            const { data: { user } } = await supabase.auth.getUser()
-            const { data: myProfile } = await supabase.from('profiles').select('club_id, role').eq('id', user?.id).single()
-            const isGod = myProfile?.role === 'PRESIDENT' // Superadmin check
+            const { data: myProfile } = await supabase
+                .from('profiles')
+                .select('club_id')
+                .eq('id', authUser.id)
+                .single()
 
-            if (myProfile?.club_id && !isGod) {
-                profileQuery = profileQuery.eq('club_id', myProfile.club_id)
+            const targetClubId = myProfile?.club_id
+            if (!targetClubId) {
+                setLoading(false)
+                return
             }
 
-            const [profilesRes, weekRes] = await Promise.all([
-                profileQuery,
-                filter === 'WEEK'
-                    ? supabase.from('weeks').select('id').eq('label', currentWeekLabel).single()
-                    : Promise.resolve({ data: null })
-            ])
+            const { data: profiles, error: pError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('club_id', targetClubId)
 
-            if (profilesRes.error) throw profilesRes.error
-            const profiles = profilesRes.data || []
+            if (pError) throw pError
+            if (!profiles || profiles.length === 0) {
+                setRankings([])
+                setLoading(false)
+                return
+            }
 
-            let scoresQuery = supabase.from('scores').select('*')
-            if (filter === 'WEEK' && weekRes.data) {
-                scoresQuery = scoresQuery.eq('week_id', weekRes.data.id)
+            const clubUserIds = profiles.map(p => p.id)
+            let scoresQuery = supabase.from('scores').select('*').in('user_id', clubUserIds)
+
+            if (filter === 'MONTH') {
+                const year = selectedDate.getFullYear()
+                const month = selectedDate.getMonth()
+                const start = new Date(year, month, 1).toISOString()
+                const end = new Date(year, month + 1, 1).toISOString()
+                scoresQuery = scoresQuery.gte('created_at', start).lt('created_at', end)
             }
 
             const { data: scores, error: sError } = await scoresQuery
             if (sError) throw sError
 
-            // 3. Aggregate (Optimized)
             const stats = new Map()
             profiles.forEach(p => stats.set(p.id, { ...p, points: 0, wins: 0, matches: 0 }))
 
             scores?.forEach(s => {
                 const p = stats.get(s.user_id)
                 if (p) {
-                    p.points += Number(s.points)
-                    p.matches += 1
-                    if (s.result === 'WIN') p.wins += 1
+                    p.points += Number(s.points || 0)
+                    // Count everything with a result as a match for W/M stats
+                    if (s.result) {
+                        p.matches += 1
+                        if (s.result === 'WIN') p.wins += 1
+                    }
                 }
             })
 
             const sorted = Array.from(stats.values())
-                .filter(s => filter === 'ALL' || s.matches > 0)
-                .sort((a, b) => {
-                    if (b.points !== a.points) return b.points - a.points
-                    if (b.wins !== a.wins) return b.wins - a.wins
-                    return b.matches - a.matches
-                })
+                .filter(s => s.points > 0 || filter === 'ALL')
+                .sort((a, b) => b.points - a.points)
 
             setRankings(sorted)
 
@@ -112,55 +121,128 @@ export default function RankingsPage() {
         }
     }
 
+    const changeMonth = (offset: number) => {
+        const newDate = new Date(selectedDate)
+        newDate.setMonth(newDate.getMonth() + offset)
+        setSelectedDate(newDate)
+    }
+
     return (
-        <div className="pt-2 pb-6 space-y-6">
-            <div className="flex justify-between items-center px-1">
-                <div className="flex items-center gap-2">
-                    <h2 className="text-[20px] font-bold">선수 랭킹</h2>
+        <div className="pt-6 pb-20 space-y-8 bg-[#0A0E17] min-h-screen px-4">
+            {/* Header Section */}
+            <div className="flex flex-col gap-6">
+                <div className="flex justify-between items-center">
+                    <div className="flex flex-col">
+                        <h2 className="text-[28px] font-black italic tracking-tighter text-white uppercase leading-none">
+                            Player <span className="text-[#CCFF00]">Ranking</span>
+                        </h2>
+                        <p className="text-white/40 text-[11px] font-bold uppercase tracking-widest mt-1">
+                            선수 개인 랭킹 (기록 기반 합계)
+                        </p>
+                    </div>
                     {isStaff && (
                         <button
                             onClick={() => router.push('/admin/history')}
-                            className="bg-[#F2F4F6] p-2 rounded-full text-[#8B95A1] hover:text-[#0064FF] transition-colors"
+                            className="bg-white/5 p-2.5 rounded-xl text-white/40 hover:text-[#CCFF00] hover:bg-white/10 transition-all border border-white/5"
                             title="기록 수정 (관리자)"
                         >
-                            <Settings2 size={18} />
+                            <Settings2 size={20} />
                         </button>
                     )}
                 </div>
-                <div className="bg-gray-100 p-1 rounded-lg flex text-[13px] font-medium">
+
+                <div className="bg-white/5 p-1 rounded-xl flex text-[13px] font-black border border-white/5">
                     <button
-                        onClick={() => setFilter('WEEK')}
-                        className={`px-3 py-1.5 rounded-md transition-all ${filter === 'WEEK' ? 'bg-white shadow text-[#0064FF]' : 'text-gray-400'}`}
+                        onClick={() => setFilter('MONTH')}
+                        className={`flex-1 py-2.5 rounded-lg transition-all ${filter === 'MONTH' ? 'bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.2)]' : 'text-white/40 hover:text-white/60'}`}
                     >
-                        이번주
+                        월간 랭킹
                     </button>
                     <button
                         onClick={() => setFilter('ALL')}
-                        className={`px-3 py-1.5 rounded-md transition-all ${filter === 'ALL' ? 'bg-white shadow text-[#0064FF]' : 'text-gray-400'}`}
+                        className={`flex-1 py-2.5 rounded-lg transition-all ${filter === 'ALL' ? 'bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.2)]' : 'text-white/40 hover:text-white/60'}`}
                     >
-                        전체
+                        전체 랭킹
                     </button>
                 </div>
+
+                {/* Month Selector UI */}
+                <AnimatePresence>
+                    {filter === 'MONTH' && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/5">
+                                <button
+                                    onClick={() => changeMonth(-1)}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/40 hover:text-white"
+                                >
+                                    <ChevronLeft size={24} />
+                                </button>
+
+                                <div className="text-center">
+                                    <span className="text-[18px] font-black italic text-white tracking-tighter uppercase">
+                                        {selectedDate.getFullYear()}Y {selectedDate.getMonth() + 1}M
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={() => changeMonth(1)}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/40 hover:text-white"
+                                >
+                                    <ChevronRight size={24} />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {loading ? (
                 <div className="space-y-4">
-                    {[1, 2, 3].map(i => <div key={i} className="h-20 bg-gray-100 rounded-[20px] animate-pulse" />)}
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="h-[100px] bg-white/5 rounded-2xl border border-white/5 animate-pulse flex items-center px-4 gap-4">
+                            <div className="w-8 h-8 bg-white/10 rounded-lg" />
+                            <div className="w-14 h-14 bg-white/10 rounded-full" />
+                            <div className="flex-1 space-y-2">
+                                <div className="h-4 bg-white/10 rounded w-1/3" />
+                                <div className="h-3 bg-white/10 rounded w-1/4" />
+                            </div>
+                            <div className="w-12 h-6 bg-white/10 rounded" />
+                        </div>
+                    ))}
                 </div>
             ) : (
-                <div className="space-y-4">
-                    {rankings.map((player, index) => (
-                        <RankingCard
-                            key={player.id}
-                            rank={index + 1}
-                            player={player}
-                            onPhotoClick={() => setSelectedPlayer(player)}
-                        />
-                    ))}
+                <div className="space-y-3 pb-10">
+                    <AnimatePresence mode="popLayout">
+                        {rankings.map((player, index) => (
+                            <motion.div
+                                key={player.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                            >
+                                <RankingCard
+                                    rank={index + 1}
+                                    player={player}
+                                    onPhotoClick={() => setSelectedPlayer(player)}
+                                />
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
 
                     {rankings.length === 0 && (
-                        <div className="text-center py-10 text-gray-400 text-[14px]">
-                            아직 기록된 점수가 없습니다.
+                        <div className="text-center py-20 flex flex-col items-center gap-4">
+                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-white/10">
+                                <Settings2 size={32} />
+                            </div>
+                            <p className="text-white/20 text-[14px] font-bold italic uppercase tracking-widest leading-relaxed">
+                                아직 기록된 데이터가 없습니다.<br />
+                                <span className="text-[10px] opacity-50 font-normal">다른 날짜를 선택하거나 경기를 시작해보세요!</span>
+                            </p>
                         </div>
                     )}
                 </div>
@@ -242,96 +324,89 @@ export default function RankingsPage() {
 
 function RankingCard({ rank, player, onPhotoClick }: any) {
     const isTop3 = rank <= 3
-    const cardColor = player.color || '#D4AF37' // Fallback to gold if no color
+    const cardColor = rank === 1 ? '#CCFF00' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : '#333D4B'
 
-    // Mini Game Card Style
     return (
-        <div className="relative w-full h-[100px] rounded-[16px] overflow-hidden shadow-md transition-transform active:scale-[0.98]">
-            {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#1a1c20] to-[#0f1012]" />
-            <div
-                className="absolute left-0 top-0 bottom-0 w-1.5"
-                style={{ backgroundColor: cardColor }}
-            />
-            {/* Texture */}
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay" />
+        <div className="relative w-full h-[100px] rounded-[24px] overflow-hidden transition-all active:scale-[0.98] border border-white/5 group bg-[#121826]/50 backdrop-blur-sm shadow-xl">
+            {/* Glossy Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-50" />
 
-            <div className="relative h-full flex items-center px-4 gap-4 z-10">
-                {/* 1. Rank */}
-                <div className="w-8 text-center flex flex-col items-center justify-center">
+            {/* Rank Border Accent */}
+            <div
+                className="absolute left-0 top-0 bottom-0 w-1"
+                style={{ backgroundColor: isTop3 ? cardColor : 'rgba(255,255,255,0.05)' }}
+            />
+
+            <div className="relative h-full flex items-center px-5 gap-4 z-10">
+                {/* 1. Rank Display */}
+                <div className="w-10 flex flex-col items-center justify-center">
                     {rank === 1 ? (
-                        <span className="text-[24px]">👑</span>
+                        <div className="relative">
+                            <span className="text-[24px] absolute -top-5 left-1/2 -translate-x-1/2 drop-shadow-[0_0_10px_#CCFF00]">👑</span>
+                            <span className="text-[22px] font-black italic text-[#CCFF00] tracking-tighter">1</span>
+                        </div>
                     ) : (
-                        <span className={`text-[20px] font-black italic ${isTop3 ? 'text-white' : 'text-gray-500'}`}>
+                        <span className={`text-[18px] font-black italic ${isTop3 ? 'text-white' : 'text-white/20'} tracking-tighter`}>
                             {rank}
                         </span>
                     )}
                 </div>
 
-                {/* 2. Photo / Avatar */}
-                <div className="relative cursor-pointer group" onClick={onPhotoClick}>
+                {/* 2. Avatar with Glow */}
+                <div className="relative cursor-pointer" onClick={onPhotoClick}>
                     <div
-                        className="w-14 h-14 rounded-full border-2 overflow-hidden bg-[#333D4B] shadow-lg transition-transform group-hover:scale-105"
-                        style={{ borderColor: cardColor }}
+                        className={`w-14 h-14 rounded-full border-2 overflow-hidden bg-[#0A0E17] transition-all group-hover:scale-105 ${isTop3 ? 'shadow-[0_0_15px_rgba(204,255,0,0.15)]' : ''}`}
+                        style={{ borderColor: isTop3 ? cardColor : 'rgba(255,255,255,0.1)' }}
                     >
                         {player.photo_url ? (
                             <img src={player.photo_url} alt={player.nickname} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xl font-bold text-white bg-gradient-to-b from-[#333D4B] to-[#111315]">
+                            <div className="w-full h-full flex items-center justify-center text-xl font-black text-white bg-gradient-to-b from-white/10 to-transparent">
                                 {player.nickname?.[0]}
                             </div>
                         )}
                     </div>
-                    {/* Badge (e.g. KR) - Optional decor */}
-                    <div
-                        className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-black border border-[#1a1c20]"
-                        style={{ backgroundColor: cardColor }}
-                    >
-                        KR
-                    </div>
-                    {/* View Label on hover */}
-                    <div className="absolute -top-1 px-1 bg-black/60 rounded text-[8px] text-white opacity-0 group-hover:opacity-100 transition-opacity">VIEW</div>
                 </div>
 
-                {/* 3. Info */}
+                {/* 3. Info Panel */}
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-end gap-2 mb-1">
-                        <h4 className="font-black text-[18px] text-white tracking-tight truncate leading-none">
+                    <div className="flex items-center gap-2 mb-1">
+                        <h4 className={`font-black text-[17px] tracking-tight truncate leading-none ${isTop3 ? 'text-white' : 'text-white/80'}`}>
                             {player.nickname}
                         </h4>
-                        <span className="text-[11px] font-bold text-gray-500 mb-0.5">
-                            {player.position || 'ALL'} / {player.pref_side === '포사이드' ? 'FORE' : player.pref_side === '백사이드' ? 'BACK' : 'ALL'}
-                        </span>
+                        {rank === 1 && <span className="text-[10px] bg-[#CCFF00] text-black font-black px-1.5 py-0.5 rounded italic shadow-[0_0_10px_#CCFF00]/50">CHAMP</span>}
                     </div>
 
-                    <div className="flex items-center gap-3 text-[12px] font-medium text-gray-400">
+                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/30">
                         <div className="flex items-center gap-1">
-                            <span style={{ color: cardColor }}>W</span>
-                            <span className="text-white">{player.wins}</span>
+                            <span className="text-white/40">W:</span>
+                            <span className="text-white/80">{player.wins || 0}</span>
                         </div>
-                        <div className="w-[1px] h-2.5 bg-gray-700" />
+                        <div className="w-[1px] h-2 bg-white/10" />
                         <div className="flex items-center gap-1">
-                            <span style={{ color: cardColor }}>M</span>
-                            <span className="text-white">{player.matches}</span>
+                            <span className="text-white/40">M:</span>
+                            <span className="text-white/80">{player.matches || 0}</span>
                         </div>
-                        <div className="w-[1px] h-2.5 bg-gray-700" />
+                        <div className="w-[1px] h-2 bg-white/10" />
                         <div className="flex items-center gap-1">
-                            <span>{player.matches ? Math.round((player.wins / player.matches) * 100) : 0}%</span>
+                            <span className={player.matches ? 'text-[#CCFF00]' : ''}>
+                                {player.matches ? Math.round((player.wins / player.matches) * 100) : 0}%
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                {/* 4. Score */}
-                <div className="text-right">
-                    <div className="text-[11px] font-bold text-gray-500 tracking-wider mb-0.5">PTS</div>
-                    <div className="text-[24px] font-black leading-none" style={{ color: cardColor }}>
-                        {Number(player.points).toFixed(1)}
+                {/* 4. Points Section */}
+                <div className="text-right flex flex-col items-end">
+                    <span className="text-[10px] font-black text-white/10 tracking-widest mb-0.5 uppercase mb-1">Points</span>
+                    <div className={`text-[24px] font-black italic leading-none tracking-tighter ${rank === 1 ? 'text-[#CCFF00] drop-shadow-[0_0_5px_rgba(204,255,0,0.3)]' : 'text-white'}`}>
+                        {Number(player.points || 0).toFixed(1)}
                     </div>
                 </div>
             </div>
 
-            {/* Shine Effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 hover:opacity-100 transition-opacity pointer-events-none" />
+            {/* Hover Shine Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer pointer-events-none" />
         </div>
     )
 }

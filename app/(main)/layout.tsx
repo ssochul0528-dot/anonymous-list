@@ -1,22 +1,19 @@
-
 'use client'
 
 import React, { useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
+import FloatingHome from '@/components/FloatingHome'
 
 export default function MainLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    const { user, isLoading, signOut, isStaff } = useAuth()
+    const { user, isLoading, signOut, isStaff, isAdmin: isSuperAdmin } = useAuth()
     const router = useRouter()
     const pathname = usePathname()
-
-    // We now allow public access for Landing Page.
-    // Auth protection is handled by specific pages or child components.
 
     if (isLoading) {
         return (
@@ -29,7 +26,6 @@ export default function MainLayout({
         )
     }
 
-    // Layout renders children (which will decode to Landing or Dashboard)
     return (
         <div className="min-h-screen pb-20 max-w-[600px] mx-auto bg-[#0A0E17] min-[600px]:border-x border-white/5 text-white">
             {/* Header and Nav should condition on user presence? */}
@@ -37,8 +33,28 @@ export default function MainLayout({
 
             {user && (
                 <header className="sticky top-0 z-50 bg-[#0A0E17]/80 backdrop-blur-md px-5 py-4 flex items-center justify-between border-b border-white/5">
-                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
-                        <h1 className="text-[22px] font-black italic text-white tracking-tighter uppercase">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
+                            <h1 className="text-[20px] font-black italic text-white tracking-tighter uppercase leading-none">MatchUp <span className="text-[#CCFF00]">Pro</span></h1>
+                        </div>
+                        {isSuperAdmin && (
+                            <div className="flex items-center gap-2 border-l border-white/10 pl-2">
+                                <button
+                                    onClick={() => router.push('/super')}
+                                    className="bg-[#CCFF00] text-black text-[9px] font-black px-2 py-1 rounded-md tracking-tighter hover:bg-[#b3e600] transition-all"
+                                >
+                                    SUPER MASTER
+                                </button>
+                                <div className="relative cursor-pointer group p-1" onClick={() => router.push('/admin/notifications')}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/40 group-hover:text-[#CCFF00] transition-colors">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                                    </svg>
+                                    <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#0A0E17] scale-90">
+                                        <span className="text-[8px] font-black text-white leading-none">3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="flex gap-2 items-center">
                         {pathname !== '/my-club' && (
@@ -68,16 +84,20 @@ export default function MainLayout({
                 {children}
             </main>
 
-            {/* Bottom Navigation for Mobile - Only for Logged In Users */}
-            {user && (
-                <nav className="fixed bottom-0 left-0 right-0 bg-[#0A0E17]/90 backdrop-blur-xl border-t border-white/5 px-4 py-2 flex justify-between items-center z-20 max-w-[600px] mx-auto pb-safe">
-                    <NavItem label="HOME" icon="home" path="/" active={pathname === '/'} />
-                    <NavItem label="RANK" icon="chart" path="/rankings" active={pathname === '/rankings'} />
-                    <NavItem label="PLAY" icon="calendar" path="/admin/schedule" active={pathname?.startsWith('/admin/schedule')} />
-                    {isStaff && <NavItem label="DUES" icon="wallet" path="/settlement" active={pathname === '/settlement'} />}
-                    <NavItem label="PRO" icon="user" path="/profile" active={pathname === '/profile'} />
-                </nav>
-            )}
+
+            {/* Bottom Navigation for Mobile (Optional, can be disabled if FAB is preferred) */}
+            <nav className="fixed bottom-0 left-0 right-0 bg-[#0A0E17]/90 backdrop-blur-xl border-t border-white/5 px-4 py-2 flex justify-around items-center z-20 max-w-[600px] mx-auto pb-safe">
+                <NavItem label="홈" icon="home" path="/" active={pathname === '/'} />
+                <NavItem label="클럽 랭킹" icon="chart" path="/club-rankings" active={pathname === '/club-rankings'} />
+
+                {/* Centered Quick Menu Trigger */}
+                <div className="relative -top-3">
+                    <FloatingHome />
+                </div>
+
+                {isStaff && <NavItem label="ADMIN" icon="shield" path="/settlement" active={pathname === '/settlement'} />}
+                <NavItem label="PRO" icon="user" path="/profile" active={pathname === '/profile'} />
+            </nav>
         </div>
     )
 }
@@ -90,7 +110,8 @@ function NavItem({ label, icon, path, active }: { label: string; icon: string; p
         chart: <path d="M12 20V10M18 20V4M6 20v-4"></path>,
         calendar: <path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm-2-12h-2v2h2V8zm-4 0h-2v2h2V8zm-4 0H7v2h2V8z"></path>,
         wallet: <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />,
-        user: <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        user: <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>,
+        shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
     }
 
     return (

@@ -15,7 +15,7 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
 
     // Badge Logic (Same as in ProfilePage)
     const getActiveBadges = (p: any) => {
-        const badges = []
+        const badges = [...(p.badges || [])]
         if (p.skill_serve >= 80) badges.push('big_server')
         if (p.skill_stamina >= 80) badges.push('court_dog')
         if (p.style === '수비' && p.skill_stamina >= 70) badges.push('iron_wall')
@@ -23,7 +23,7 @@ export default function PlayerCard({ profile }: PlayerCardProps) {
         if (p.skill_manner >= 90) badges.push('gentleman')
         if (p.skill_forehand >= 85 || p.skill_backhand >= 85) badges.push('sniper')
         if (p.skill_serve >= 70 && p.skill_forehand >= 70 && p.skill_backhand >= 70) badges.push('streak_king')
-        return badges
+        return Array.from(new Set(badges))
     }
 
     const cardColor = profile.color || '#D4AF37'

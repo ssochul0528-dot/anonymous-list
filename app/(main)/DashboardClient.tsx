@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -10,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { getAttendanceTargetDate, isAttendanceWindowOpen, formatDate } from '@/utils/attendance'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext'
+import { Trophy, Award } from 'lucide-react'
 
 interface DashboardClientProps {
     clubSlug?: string
@@ -95,10 +95,24 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
     // Real Data States
     const [topRankings, setTopRankings] = useState<any[]>([])
     const [recentMatchesData, setRecentMatchesData] = useState<any[]>([])
+    const [tournaments, setTournaments] = useState<any[]>([])
     const [memberCount, setMemberCount] = useState(0)
     const [isLoadingData, setIsLoadingData] = useState(true)
 
     // Data Fetching
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search)
+        if (searchParams.get('action') === 'attendance') {
+            const el = document.getElementById('attendance-section')
+            if (el) {
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    // Pulse or highlight effect could be added here
+                }, 500)
+            }
+        }
+    }, [myClub?.id])
+
     useEffect(() => {
         const fetchClubData = async () => {
             if (!myClub?.id) {
@@ -139,24 +153,24 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                 }
 
                 // 3. Fetch Recent Matches
-                const { data: matches } = await supabase
-                    .from('matches')
-                    .select(`
-                        id, 
-                        round_number, 
-                        court_label, 
-                        created_at,
-                        weeks (
-                            id, 
-                            label,
-                            seasons (id, club_id)
-                        )
-                    `)
-                    .order('created_at', { ascending: false })
-                    .limit(10)
+                const { data: participantMatches } = await supabase
+                    .from('match_participants')
+                    .select('*, matches!inner(*, weeks!inner(*, seasons!inner(*))), profiles(nickname)')
+                    .limit(50)
+                    .order('match_id', { ascending: false })
 
-                const filteredMatches = matches?.filter((m: any) => m.weeks?.seasons?.club_id === myClub.id).slice(0, 3) || []
+                const filteredMatches = participantMatches?.filter((m: any) => m.weeks?.seasons?.club_id === myClub.id).slice(0, 3) || []
                 setRecentMatchesData(filteredMatches)
+
+                // 4. Fetch Tournaments
+                const { data: tournamentData } = await supabase
+                    .from('tournaments')
+                    .select('*')
+                    .eq('club_id', myClub.id)
+                    .order('created_at', { ascending: false })
+                    .limit(3)
+
+                setTournaments(tournamentData || [])
 
             } catch (e) {
                 console.error("Error fetching club data:", e)
@@ -385,59 +399,6 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                 </Card>
             </div>
 
-            {/* Public Ranking Section */}
-            <section>
-                <div className="flex justify-between items-center mb-3 px-1">
-                    <h3 className="font-bold text-[18px] text-white italic tracking-tighter">CLUB RANKING (REAL)</h3>
-                    <button className="text-[12px] text-white/40 font-bold" onClick={() => router.push('/rankings')}>VIEW ALL &gt;</button>
-                </div>
-                <Card className="bg-[#121826] border-white/5 overflow-hidden">
-                    {isLoadingData ? (
-                        <div className="p-8 text-center text-white/10 italic font-bold">LOADING...</div>
-                    ) : topRankings.length > 0 ? (
-                        topRankings.map((player, i) => (
-                            <div key={player.id} className={`p-4 flex items-center justify-between ${i !== topRankings.length - 1 ? 'border-b border-white/5' : ''}`}>
-                                <div className="flex items-center gap-3">
-                                    <span className="font-black italic text-[#CCFF00] w-4 text-[16px]">{i + 1}</span>
-                                    <div className="w-8 h-8 rounded-full bg-white/10 overflow-hidden">
-                                        {player.photo_url ? (
-                                            <img src={player.photo_url} alt={player.nickname} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-[10px] font-bold">{player.nickname[0]}</div>
-                                        )}
-                                    </div>
-                                    <span className="font-bold text-[14px]">{player.nickname}</span>
-                                </div>
-                                <span className="text-[13px] font-black italic text-white/40">{Number(player.points).toFixed(1)} Pts</span>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="p-8 text-center text-white/20 text-[13px] italic font-bold uppercase tracking-widest">
-                            No rankings recorded yet
-                        </div>
-                    )}
-                </Card>
-            </section>
-
-            {/* Recent Match Feed */}
-            <section>
-                <div className="flex justify-between items-center mb-3 px-1">
-                    <h3 className="font-bold text-[18px] text-white italic tracking-tighter">RECENT MATCHES</h3>
-                </div>
-                <Card padding="none" className="divide-y divide-white/5 border-none shadow-sm overflow-hidden bg-[#121826]/30">
-                    {isLoadingData ? (
-                        <div className="p-8 text-center text-white/10 italic">LOADING...</div>
-                    ) : recentMatchesData.length > 0 ? (
-                        recentMatchesData.map(m => (
-                            <MatchResultItem key={m.id} match={m} />
-                        ))
-                    ) : (
-                        <div className="p-8 text-center text-white/20 text-[13px] font-bold italic uppercase tracking-widest">
-                            No match history
-                        </div>
-                    )}
-                </Card>
-            </section>
         </div>
     )
 
@@ -491,16 +452,6 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                             {isAnyStaff && <span className="text-[9px] font-black bg-[#CCFF00]/20 px-1.5 py-0.5 rounded text-[#CCFF00] uppercase">Global Staff</span>}
                         </div>
                     </div>
-                    {isSuperAdmin && (
-                        <Button
-                            size="sm"
-                            variant="primary"
-                            className="h-7 px-3 text-[10px] font-black bg-white/10 hover:bg-[#CCFF00] hover:text-black border border-white/10"
-                            onClick={() => router.push('/super')}
-                        >
-                            SUPER MASTER
-                        </Button>
-                    )}
                 </div>
                 <h1 className="text-[28px] font-black leading-tight tracking-tighter">
                     {myClub ? (
@@ -523,6 +474,7 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
             {/* Attendance Section */}
             {isOpen && (
                 <motion.div
+                    id="attendance-section"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
@@ -623,87 +575,83 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
                     </Card>
                 </motion.div>
             )}
+            {/* Tournaments Section */}
+            {(tournaments && tournaments.length > 0 || isAnyStaff) && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="px-1 mb-10"
+                >
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                            <h3 className="font-black text-[15px] tracking-tight uppercase italic text-white/90">Club Tournaments</h3>
+                        </div>
+                        {isAnyStaff && tournaments.length > 0 && (
+                            <button
+                                onClick={() => router.push('/admin/tournament')}
+                                className="text-[11px] font-bold text-[#CCFF00] uppercase tracking-wider bg-[#CCFF00]/10 px-2 py-1 rounded"
+                            >
+                                + NEW
+                            </button>
+                        )}
+                    </div>
 
+                    <div className="space-y-3">
+                        {tournaments.length > 0 ? (
+                            tournaments.map((t: any) => (
+                                <Card key={t.id} className="bg-[#121826]/80 backdrop-blur-xl border-white/5 p-4 hover:border-white/20 transition-all cursor-pointer group" onClick={() => router.push(`/admin/tournament/${t.id}/results`)}>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white shadow-lg">
+                                            <Trophy size={20} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-[15px] text-white group-hover:text-[#CCFF00] transition-colors">{t.name}</h4>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">{t.status}</span>
+                                                <span className="w-1 h-1 rounded-full bg-white/10" />
+                                                <span className="text-[10px] font-medium text-white/40">{new Date(t.created_at).toLocaleDateString()}</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-white/10 group-hover:text-white transition-all">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M9 18l6-6-6-6" /></svg>
+                                        </div>
+                                    </div>
+                                </Card>
+                            ))
+                        ) : (
+                            isAnyStaff && (
+                                <Card className="bg-white/5 border-dashed border-white/10 p-8 flex flex-col items-center justify-center text-center gap-3 cursor-pointer hover:bg-white/10 transition-all" onClick={() => router.push('/admin/tournament')}>
+                                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/20">
+                                        <Trophy size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-white font-bold">첫 번째 대회를 만들어보세요!</h4>
+                                        <p className="text-white/40 text-[12px] mt-1">대진표 생성부터 인쇄까지 한 번에 가능합니다.</p>
+                                    </div>
+                                    <Button size="sm" className="mt-2 bg-[#CCFF00] text-black font-bold">대회 생성하러 가기</Button>
+                                </Card>
+                            )
+                        )}
+                    </div>
+                </motion.div>
+            )}
 
-
-            <div className="grid grid-cols-2 gap-3">
-                <ActionCard
-                    title="SCHEDULE"
-                    desc="경기 스케줄"
-                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>}
-                    onClick={() => router.push('/admin/schedule')}
-                />
+            <div className="grid grid-cols-1 gap-3">
                 <ActionCard
                     title="SCORE"
-                    desc="결과 입력"
+                    desc="결과 입력 (매치 등록)"
                     icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>}
                     onClick={() => router.push('/score')}
                 />
-                <ActionCard
-                    title="RANKING"
-                    desc="실시간 순위"
-                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="20" x2="12" y2="10" /><line x1="18" y1="20" x2="18" y2="4" /><line x1="6" y1="20" x2="6" y2="16" /></svg>}
-                    onClick={() => router.push('/rankings')}
-                />
-                <ActionCard
-                    title="PROFILE"
-                    desc="플레이어 카드"
-                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
-                    onClick={() => router.push('/profile')}
-                />
             </div>
 
-            {hasManagementPower && (
-                <div className="space-y-3">
-                    <h3 className="font-black text-[14px] px-1 text-white/40 tracking-[0.2em] uppercase">Club Management</h3>
 
-                    <Card className="flex items-center justify-between border border-white/5 shadow-sm hover:border-[#CCFF00]/30 transition-all bg-[#121826] text-white p-4">
-                        <div>
-                            <h4 className="font-black text-[15px] uppercase italic">Match History</h4>
-                            <p className="text-white/40 text-[12px]">전체 경기 내역 기록 및 수정</p>
-                        </div>
-                        <Button size="sm" className="bg-white/10 hover:bg-[#CCFF00] hover:text-[#0A0E17] font-black text-[11px] rounded transition-colors" onClick={() => router.push('/admin/history')}>
-                            MANAGE
-                        </Button>
-                    </Card>
-
-                    <Card className="flex items-center justify-between border border-white/5 shadow-sm hover:border-[#CCFF00]/30 transition-all bg-[#121826] text-white p-4">
-                        <div>
-                            <h4 className="font-black text-[15px] uppercase italic">Season Schedule</h4>
-                            <p className="text-white/40 text-[12px]">라운드별 대진표 랜덤 생성</p>
-                        </div>
-                        <Button size="sm" className="bg-white/10 hover:bg-[#CCFF00] hover:text-[#0A0E17] font-black text-[11px] rounded transition-colors" onClick={() => router.push('/admin/schedule')}>
-                            START
-                        </Button>
-                    </Card>
-
-                </div>
-            )}
-
-            {/* Recent Matches Feed */}
-            <section>
-                <div className="flex justify-between items-center mb-3 px-1">
-                    <h3 className="font-bold text-[18px] text-[#333D4B]">최근 경기 결과</h3>
-                    <button className="text-[13px] text-[#8B95A1] font-bold">더보기 &gt;</button>
-                </div>
-                <Card padding="none" className="divide-y divide-[#F2F4F6] border-none shadow-sm overflow-hidden bg-white/5">
-                    {isLoadingData ? (
-                        <div className="p-8 text-center text-white/10 italic font-bold">LOADING MATCHES...</div>
-                    ) : recentMatchesData.length > 0 ? (
-                        recentMatchesData.map(m => (
-                            <MatchResultItem key={m.id} match={m} />
-                        ))
-                    ) : (
-                        <div className="p-8 text-center text-white/20 text-[13px] font-bold italic uppercase tracking-widest leading-relaxed">
-                            아직 진행된 경기가 없습니다.<br />
-                            <span className="text-[10px] opacity-50">스케줄을 생성하고 기록을 시작하세요!</span>
-                        </div>
-                    )}
-                </Card>
-            </section>
         </div>
     )
 }
+
 
 function ActionCard({ title, desc, icon, onClick }: any) {
     return (

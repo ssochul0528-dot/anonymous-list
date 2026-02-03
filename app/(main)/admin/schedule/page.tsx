@@ -88,33 +88,86 @@ export default function ScheduleGeneratorPage() {
         const newSchedule = []
         const playerCountNeededPerRound = courtCount * 4
 
+        // Track partner and opponent history during this generation
+        const partnerHistory: Record<string, Set<string>> = {}
+        const opponentHistory: Record<string, Set<string>> = {}
+
+        participants.forEach(p => {
+            partnerHistory[p] = new Set()
+            opponentHistory[p] = new Set()
+        })
+
         for (let r = 1; r <= roundCount; r++) {
-            const shuffled = [...participants].sort(() => Math.random() - 0.5)
+            let roundMatches: any[] = []
+            let waiting: string[] = []
+            let success = false
 
-            const playing = shuffled.slice(0, playerCountNeededPerRound)
-            const waiting = shuffled.slice(playerCountNeededPerRound)
+            // Try shuffling and pairing multiple times to find a good mix
+            for (let retry = 0; retry < 100; retry++) {
+                const shuffled = [...participants].sort(() => Math.random() - 0.5)
+                const playing = shuffled.slice(0, playerCountNeededPerRound)
+                const currentWaiting = shuffled.slice(playerCountNeededPerRound)
 
-            const matches = []
-            for (let c = 0; c < courtCount; c++) {
-                if (playing.length < (c * 4) + 4) break;
+                const tempMatches = []
+                let roundScore = 0
+                let hasPartnerRepeat = false
 
-                const p1 = playing[c * 4]
-                const p2 = playing[c * 4 + 1]
-                const p3 = playing[c * 4 + 2]
-                const p4 = playing[c * 4 + 3]
+                for (let c = 0; c < courtCount; c++) {
+                    if (playing.length < (c * 4) + 4) break;
 
-                matches.push({
-                    court: String.fromCharCode(65 + c),
-                    teamA: [p1, p2],
-                    teamB: [p3, p4]
-                })
+                    const p = playing.slice(c * 4, c * 4 + 4)
+                    const options = [
+                        { teamA: [p[0], p[1]], teamB: [p[2], p[3]] },
+                        { teamA: [p[0], p[2]], teamB: [p[1], p[3]] },
+                        { teamA: [p[0], p[3]], teamB: [p[1], p[2]] }
+                    ]
+
+                    const scoredOptions = options.map(opt => {
+                        let s = 0
+                        if (partnerHistory[opt.teamA[0]].has(opt.teamA[1])) s += 100
+                        if (partnerHistory[opt.teamB[0]].has(opt.teamB[1])) s += 100
+
+                        opt.teamA.forEach(ta => opt.teamB.forEach(tb => {
+                            if (opponentHistory[ta].has(tb)) s += 1
+                        }))
+                        return { ...opt, score: s }
+                    })
+
+                    scoredOptions.sort((a, b) => a.score - b.score)
+                    const best = scoredOptions[0]
+
+                    if (best.score >= 100) hasPartnerRepeat = true
+                    roundScore += best.score
+
+                    tempMatches.push({
+                        court: String.fromCharCode(65 + c),
+                        teamA: best.teamA,
+                        teamB: best.teamB
+                    })
+                }
+
+                // If we found a round with no partner repeats, or we've tried enough
+                if (!hasPartnerRepeat || retry === 99) {
+                    roundMatches = tempMatches
+                    waiting = currentWaiting
+                    success = true
+                    break
+                }
             }
 
-            newSchedule.push({
-                round: r,
-                matches,
-                waiting
+            // Record the matches into history
+            roundMatches.forEach(m => {
+                partnerHistory[m.teamA[0]].add(m.teamA[1])
+                partnerHistory[m.teamA[1]].add(m.teamA[0])
+                partnerHistory[m.teamB[0]].add(m.teamB[1])
+                partnerHistory[m.teamB[1]].add(m.teamB[0])
+
+                m.teamA.forEach(ta => m.teamB.forEach(tb => {
+                    opponentHistory[ta].add(tb); opponentHistory[tb].add(ta);
+                }))
             })
+
+            newSchedule.push({ round: r, matches: roundMatches, waiting })
         }
 
         setSchedule(newSchedule)

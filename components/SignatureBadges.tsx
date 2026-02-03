@@ -3,7 +3,7 @@
 
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Flame, Shield, Zap, HeartHandshake, Waves, Trophy, Target } from 'lucide-react'
+import { Flame, Shield, Zap, HeartHandshake, Waves, Trophy, Target, Medal, Disc } from 'lucide-react'
 
 interface BadgeProps {
     id: string
@@ -15,6 +15,22 @@ interface BadgeProps {
 }
 
 const BADGE_TEMPLATES: Record<string, BadgeProps> = {
+    tournament_winner: {
+        id: 'tournament_winner',
+        label: '그랜드슬램 우승',
+        description: '오스틴급 트로피를 거머쥔 챔피언',
+        icon: <Trophy className="w-4 h-4" />,
+        color: 'from-yellow-300 via-yellow-500 to-amber-600',
+        borderColor: 'border-yellow-200 shadow-[0_0_10px_rgba(234,179,8,0.3)]'
+    },
+    tournament_runnerup: {
+        id: 'tournament_runnerup',
+        label: '준우승 은반',
+        description: '결승전의 치열한 사투 끝에 쟁취한 은쟁반',
+        icon: <Disc className="w-4 h-4" />,
+        color: 'from-slate-200 via-slate-400 to-slate-600',
+        borderColor: 'border-slate-300/50 shadow-[0_0_10px_rgba(148,163,184,0.3)]'
+    },
     big_server: {
         id: 'big_server',
         label: '빅 서버',
@@ -74,10 +90,19 @@ const BADGE_TEMPLATES: Record<string, BadgeProps> = {
 }
 
 export default function SignatureBadges({ activeBadgeIds }: { activeBadgeIds: string[] }) {
+    // Count occurrences of each badge
+    const badgeCounts = activeBadgeIds.reduce((acc: Record<string, number>, id) => {
+        acc[id] = (acc[id] || 0) + 1
+        return acc
+    }, {})
+
+    const uniqueBadgeIds = Array.from(new Set(activeBadgeIds))
+
     return (
         <div className="flex flex-wrap justify-center gap-2 px-2">
-            {activeBadgeIds.map((id) => {
+            {uniqueBadgeIds.map((id) => {
                 const badge = BADGE_TEMPLATES[id]
+                const count = badgeCounts[id]
                 if (!badge) return null
 
                 return (
@@ -90,8 +115,13 @@ export default function SignatureBadges({ activeBadgeIds }: { activeBadgeIds: st
                 shadow-lg overflow-hidden cursor-help
               `}
                         >
-                            <div className={`p-1 rounded-full bg-gradient-to-br ${badge.color} text-white shadow-inner`}>
+                            <div className={`p-1 rounded-full bg-gradient-to-br ${badge.color} text-white shadow-inner relative`}>
                                 {badge.icon}
+                                {count > 1 && (
+                                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-sm ring-1 ring-red-500/50">
+                                        {count}
+                                    </div>
+                                )}
                             </div>
                             <span className="text-[10px] font-black text-white/90 tracking-tighter uppercase whitespace-nowrap">
                                 {badge.label}
@@ -105,7 +135,9 @@ export default function SignatureBadges({ activeBadgeIds }: { activeBadgeIds: st
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-32 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                             <div className="bg-black/90 backdrop-blur-xl border border-white/10 p-2 rounded-xl text-center shadow-2xl">
                                 <p className="text-[10px] font-bold text-white mb-0.5">{badge.label}</p>
-                                <p className="text-[8px] text-white/60 leading-tight">{badge.description}</p>
+                                <p className="text-[8px] text-white/60 leading-tight">
+                                    {count > 1 ? `${count}회 수상: ` : ''}{badge.description}
+                                </p>
                                 <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-black/90" />
                             </div>
                         </div>

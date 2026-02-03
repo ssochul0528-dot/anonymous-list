@@ -11,6 +11,7 @@ interface Profile {
     email: string
     nickname: string
     real_name: string
+    photo_url?: string
     club_id?: string
 }
 
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try {
                 let { data, error } = await supabase
                     .from('profiles')
-                    .select('id, role, email, nickname, real_name, club_id')
+                    .select('id, role, email, nickname, real_name, photo_url, club_id')
                     .eq('id', userId)
                     .single()
 

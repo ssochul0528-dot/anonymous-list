@@ -38,6 +38,7 @@ export default function ProfilePage() {
     // New Fields
     const [racket, setRacket] = useState('')
     const [stringTension, setStringTension] = useState('')
+    const [badges, setBadges] = useState<string[]>([])
     const [prefDays, setPrefDays] = useState('무관')
     const [prefSlots, setPrefSlots] = useState('아침')
     const [prefEnv, setPrefEnv] = useState('무관')
@@ -54,15 +55,15 @@ export default function ProfilePage() {
 
     // Badge Logic
     const getActiveBadges = () => {
-        const badges = []
-        if (skillServe >= 80) badges.push('big_server')
-        if (skillStamina >= 80) badges.push('court_dog')
-        if (style === '수비' && skillStamina >= 70) badges.push('iron_wall')
-        if ((position === '전위(네트)' || position === '무관') && skillVolley >= 75) badges.push('net_shark')
-        if (skillManner >= 90) badges.push('gentleman')
-        if (skillForehand >= 85 || skillBackhand >= 85) badges.push('sniper')
-        if (skillServe >= 70 && skillForehand >= 70 && skillBackhand >= 70) badges.push('streak_king') // Placeholder logic
-        return badges
+        const active = [...badges]
+        if (skillServe >= 80) active.push('big_server')
+        if (skillStamina >= 80) active.push('court_dog')
+        if (style === '수비' && skillStamina >= 70) active.push('iron_wall')
+        if ((position === '전위(네트)' || position === '무관') && skillVolley >= 75) active.push('net_shark')
+        if (skillManner >= 90) active.push('gentleman')
+        if (skillForehand >= 85 || skillBackhand >= 85) active.push('sniper')
+        if (skillServe >= 70 && skillForehand >= 70 && skillBackhand >= 70) active.push('streak_king')
+        return Array.from(new Set(active))
     }
 
     useEffect(() => {
@@ -103,6 +104,7 @@ export default function ProfilePage() {
                 setMembershipType(data.membership_type || 'NONE')
                 setMembershipUntil(data.membership_until || null)
                 setBankInfo(data.bank_info || '')
+                setBadges(data.badges || [])
             }
         } catch (error) {
             console.error(error)
@@ -171,6 +173,7 @@ export default function ProfilePage() {
                 membership_type: membershipType,
                 membership_until: membershipUntil,
                 bank_info: bankInfo,
+                badges: badges,
                 updated_at: new Date().toISOString(),
             }
 

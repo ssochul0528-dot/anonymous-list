@@ -36,7 +36,6 @@ export default function MemberManagementPage() {
         setLoading(true)
         if (!profile?.club_id) return
 
-        // Fetch members of THIS club
         const { data, error } = await supabase
             .from('club_members')
             .select(`
@@ -54,7 +53,6 @@ export default function MemberManagementPage() {
             .order('role', { ascending: true })
 
         if (data) {
-            // Sort: President -> Staff -> User
             const sorted = data.sort((a, b) => {
                 const roleOrder: any = { 'PRESIDENT': 0, 'STAFF': 1, 'MEMBER': 2, 'USER': 2 }
                 return roleOrder[a.role] - roleOrder[b.role]
@@ -64,7 +62,34 @@ export default function MemberManagementPage() {
         setLoading(false)
     }
 
+    const handleSyncAll = async () => {
+        if (!isPresident) return
+        if (!profile?.club_id) {
+            alert('클럽 ID가 없습니다. 새로고침 후 다시 시도해주세요.');
+            return;
+        }
+
+        if (!confirm('시스템의 모든 유저를 현재 클럽 멤버로 일괄 등록하시겠습니까?')) return
+
+        setLoading(true)
+        try {
+            const { data, error } = await supabase.rpc('admin_sync_all_to_club', { p_club_id: profile.club_id })
+
+            if (error) throw error
+
+            const { inserted, total_updated } = data || {}
+            alert(`동기화 완료!\n- 새 멤버 추가: ${inserted}명\n- 프로필 업데이트: ${total_updated}명`)
+
+            fetchMembers()
+        } catch (err: any) {
+            alert('동기화 중 오류 발생: ' + err.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const toggleStaff = async (memberId: string, memberUserId: string, currentRole: string) => {
+        // ... (rest remains same)
         if (currentRole === 'PRESIDENT') {
             alert('회장 권한은 변경할 수 없습니다.')
             return
@@ -132,11 +157,22 @@ export default function MemberManagementPage() {
     return (
         <div className="pb-10 space-y-6 bg-[#0A0E17] min-h-screen text-white pt-4 px-1">
             <header className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => router.back()} className="-ml-2 text-white/60">
-                        &lt; 뒤로
-                    </Button>
-                    <h2 className="text-[22px] font-black tracking-tight uppercase italic">Member Manage</h2>
+                <div className="flex items-center justify-between w-full pr-1">
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => router.back()} className="-ml-2 text-white/60">
+                            &lt; 뒤로
+                        </Button>
+                        <h2 className="text-[22px] font-black tracking-tight uppercase italic">Member Manage</h2>
+                    </div>
+                    {isPresident && (
+                        <Button
+                            size="sm"
+                            onClick={handleSyncAll}
+                            className="bg-[#CCFF00] text-black font-black text-[11px] rounded-lg px-3 h-8 shadow-lg shadow-[#CCFF00]/10"
+                        >
+                            멤버 일괄 등록
+                        </Button>
+                    )}
                 </div>
                 <p className="text-white/40 text-[14px] font-medium px-1">멤버 관리 및 운영진 설정</p>
             </header>
