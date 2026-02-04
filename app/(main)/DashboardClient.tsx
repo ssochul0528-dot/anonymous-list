@@ -37,7 +37,8 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
 
             // 1. Get Club Data
             if (clubSlug) {
-                const { data } = await supabase.from('clubs').select('*').eq('slug', clubSlug).maybeSingle()
+                const decodedSlug = decodeURIComponent(clubSlug)
+                const { data } = await supabase.from('clubs').select('*').eq('slug', decodedSlug).maybeSingle()
                 clubDataResult = data
                 targetId = data?.id
             } else {
