@@ -141,7 +141,7 @@ export default function LandingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0A0E17] text-white flex flex-col relative overflow-hidden">
+        <div className="min-h-screen bg-[#0A0E17] text-white flex flex-col relative">
             {/* Background Effects */}
             <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#121826] to-transparent z-0" />
             <div className="absolute top-[-100px] right-[-100px] w-[300px] h-[300px] bg-[#CCFF00]/10 rounded-full blur-[100px]" />
@@ -178,7 +178,7 @@ export default function LandingPage() {
             )}
 
             {/* Main Content Scroll Area */}
-            <main className="relative z-10 flex-1 flex flex-col px-6 pt-4 pb-12 overflow-y-auto">
+            <main className="relative z-10 flex-1 flex flex-col px-6 pt-4 pb-20">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

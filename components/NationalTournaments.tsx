@@ -63,7 +63,6 @@ export default function NationalTournaments() {
 
     return (
         <div className="w-full space-y-6 mt-8 relative">
-            <div className="bg-[#CCFF00] text-black text-[10px] font-black p-1 text-center rounded-t-lg">TEST_VISIBILITY_ACTIVE</div>
             <div className="flex justify-between items-end">
                 <div className="space-y-1">
                     <h3 className="text-[20px] font-black italic tracking-tighter text-white uppercase leading-none">
