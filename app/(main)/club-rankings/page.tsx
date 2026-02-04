@@ -24,13 +24,21 @@ export default function ClubRankingsPage() {
             const { data: clubs, error: cError } = await supabase
                 .from('clubs')
                 .select('id, name, logo_url, level')
+
+            console.log('Clubs fetch result:', { clubs: clubs?.length, error: cError })
             if (cError) throw cError
+            if (!clubs || clubs.length === 0) {
+                setClubRankings([])
+                return
+            }
 
             // 2. Fetch all Scores
             const { data: scores, error: sError } = await supabase
                 .from('scores')
                 .select('points, club_id')
-            if (sError) throw sError
+
+            console.log('Scores fetch result:', { scores: scores?.length, error: sError })
+            if (sError) console.error('Scores fetch error:', sError)
 
             // 3. Aggregate Stats
             const stats = new Map()
@@ -45,9 +53,11 @@ export default function ClubRankingsPage() {
             })
 
             // Fetch member counts from profiles
-            const { data: profileCounts } = await supabase
+            const { data: profileCounts, error: pError } = await supabase
                 .from('profiles')
                 .select('club_id')
+
+            console.log('Profiles fetch result:', { profiles: profileCounts?.length, error: pError })
 
             profileCounts?.forEach(p => {
                 if (p.club_id && stats.has(p.club_id)) {
@@ -58,9 +68,8 @@ export default function ClubRankingsPage() {
             // 4. Sort and Set
             const sorted = Array.from(stats.values())
                 .sort((a, b) => b.totalPoints - a.totalPoints)
-                // We show clubs even if they have 0 points if they are legitimate clubs
-                .filter(c => c.name)
 
+            console.log('Final sorted rankings:', sorted)
             setClubRankings(sorted)
 
         } catch (e) {
@@ -87,6 +96,10 @@ export default function ClubRankingsPage() {
                     {[1, 2, 3].map(i => (
                         <div key={i} className="h-24 bg-white/5 rounded-3xl border border-white/5 animate-pulse" />
                     ))}
+                </div>
+            ) : clubRankings.length === 0 ? (
+                <div className="text-center py-20">
+                    <p className="text-white/20 font-bold">아직 등록된 클럽 랭킹이 없습니다.</p>
                 </div>
             ) : (
                 <div className="space-y-4 pb-10">
