@@ -343,9 +343,10 @@ export default function LandingPage() {
                         </>
                     )}
 
-                    {/* National Tournaments Section - Visible to All */}
-                    <NationalTournaments />
                 </motion.div>
+
+                {/* National Tournaments Section - Visible to All */}
+                <NationalTournaments />
 
                 {/* Club List Carousel */}
                 <div className="space-y-4 mb-8">
