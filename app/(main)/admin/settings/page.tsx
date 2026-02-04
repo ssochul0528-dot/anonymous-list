@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Clock, Plus, Trash2, Save, ArrowLeft } from 'lucide-react'
+import { Clock, Plus, Trash2, Save, ArrowLeft, Calendar } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ClubSettingsPage() {
@@ -25,6 +25,7 @@ export default function ClubSettingsPage() {
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
     const [clubLevel, setClubLevel] = useState('MID')
     const [inviteCode, setInviteCode] = useState('')
+    const [gameDay, setGameDay] = useState(3) // Default to Wednesday
 
     const [timeSlots, setTimeSlots] = useState<string[]>([])
     const [newTime, setNewTime] = useState('09:00')
@@ -55,9 +56,9 @@ export default function ClubSettingsPage() {
                     setLogoUrl(data.logo_url || null)
                     setClubLevel(data.level || 'MID')
                     setInviteCode(data.invite_code || '')
+                    setGameDay(data.game_day ?? 3) // Fetch game_day from DB
 
-                    // Parse attendance_options if exists, else default
-                    let options = ['08:00', '09:00'] // Fallback
+                    let options = ['08:00', '09:00']
                     if (data.attendance_options) {
                         if (typeof data.attendance_options === 'string') {
                             try {
@@ -113,10 +114,8 @@ export default function ClubSettingsPage() {
             alert('이미 존재하는 시간입니다.')
             return
         }
-        // Sort slots properly
         const newSlots = [...timeSlots, newTime].sort()
         setTimeSlots(newSlots)
-        // setNewTime('') // Keep last input or clear? Clear is better but let's keep it easy to add similar
     }
 
     const handleDeleteTime = (timeParam: string) => {
@@ -138,38 +137,17 @@ export default function ClubSettingsPage() {
                 logo_url: logoUrl,
                 level: clubLevel,
                 invite_code: inviteCode,
-                attendance_options: timeSlots
+                attendance_options: timeSlots,
+                game_day: gameDay // Save game_day to DB
             })
             .eq('id', club.id)
 
         if (error) {
             console.error('Save Error:', error)
-            // Fallback: If level column missing, try saving without it
-            if (error.message.includes('level')) {
-                const { error: retryError } = await supabase
-                    .from('clubs')
-                    .update({
-                        name: clubName,
-                        region,
-                        description,
-                        logo_url: logoUrl,
-                        invite_code: inviteCode,
-                        attendance_options: timeSlots
-                    })
-                    .eq('id', club.id)
-
-                if (retryError) {
-                    alert('저장 실패: ' + retryError.message)
-                } else {
-                    alert('설정이 저장되었습니다! (참고: level 컬럼이 DB에 없어 해당 필드는 제외됨)')
-                    router.push('/settlement')
-                }
-            } else {
-                alert('저장 실패: ' + error.message)
-            }
+            alert('저장 실패: ' + error.message)
         } else {
             alert('설정이 저장되었습니다!')
-            router.push('/settlement') // Go back to management hub
+            router.push('/settlement')
         }
         setSaving(false)
     }
@@ -177,7 +155,7 @@ export default function ClubSettingsPage() {
     if (loading) return <div className="p-10 text-center text-white/50">로딩중...</div>
 
     return (
-        <div className="pb-40 space-y-6 pt-4 px-1">
+        <div className="pb-40 space-y-6 pt-4 px-1 max-w-[600px] mx-auto">
             <header className="flex flex-col gap-2 mb-6">
                 <div className="flex items-center gap-2">
                     <Link href="/settlement" className="p-2 -ml-2 text-white/60 hover:text-white transition-colors">
@@ -188,11 +166,11 @@ export default function ClubSettingsPage() {
                 <p className="text-white/40 text-[14px] font-medium">클럽 운영 설정을 변경할 수 있습니다.</p>
             </header>
 
-            {/* Club Profile & Showcase */}
+            {/* Club Profile */}
             <Card className="bg-[#121826] border-white/5 p-5 space-y-6">
                 <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 rounded-full bg-[#CCFF00]/10 flex items-center justify-center text-[#CCFF00]">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                        <Calendar size={20} />
                     </div>
                     <div>
                         <h3 className="text-white font-bold text-[16px]">클럽 프로필 설정</h3>
@@ -212,7 +190,7 @@ export default function ClubSettingsPage() {
                                 )}
                             </div>
                             <label className="flex-1">
-                                <span className="inline-block px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[12px] font-bold text-white cursor-pointer hover:bg-white/10">
+                                <span className="inline-block px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[12px] font-bold text-white cursor-pointer hover:bg-white/10 transition-all">
                                     {saving ? 'UPLOADING...' : 'CHANGE LOGO'}
                                 </span>
                                 <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" disabled={saving} />
@@ -226,7 +204,7 @@ export default function ClubSettingsPage() {
                             type="text"
                             value={clubName}
                             onChange={(e) => setClubName(e.target.value)}
-                            className="w-full p-4 bg-white/5 rounded-xl border border-white/5 text-white outline-none focus:border-[#CCFF00]/50"
+                            className="w-full p-4 bg-white/5 rounded-xl border border-white/5 text-white outline-none focus:border-[#CCFF00]/50 transition-all"
                             placeholder="클럽 이름"
                         />
                     </div>
@@ -238,7 +216,7 @@ export default function ClubSettingsPage() {
                                 type="text"
                                 value={region}
                                 onChange={(e) => setRegion(e.target.value)}
-                                className="w-full p-4 bg-white/5 rounded-xl border border-white/5 text-white outline-none focus:border-[#CCFF00]/50"
+                                className="w-full p-4 bg-white/5 rounded-xl border border-white/5 text-white outline-none focus:border-[#CCFF00]/50 transition-all"
                                 placeholder="활동 지역"
                             />
                         </div>
@@ -247,7 +225,7 @@ export default function ClubSettingsPage() {
                             <select
                                 value={clubLevel}
                                 onChange={(e) => setClubLevel(e.target.value)}
-                                className="w-full p-4 bg-white/5 rounded-xl border border-white/5 text-white outline-none focus:border-[#CCFF00]/50 appearance-none font-bold"
+                                className="w-full p-4 bg-white/5 rounded-xl border border-white/5 text-white outline-none focus:border-[#CCFF00]/50 appearance-none font-bold cursor-pointer"
                             >
                                 <option value="ENTRY" className="bg-[#121826]">ENTRY (초보)</option>
                                 <option value="MID" className="bg-[#121826]">MID (중급)</option>
@@ -263,7 +241,7 @@ export default function ClubSettingsPage() {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             rows={3}
-                            className="w-full p-4 bg-white/5 rounded-xl border border-white/5 text-white outline-none focus:border-[#CCFF00]/50 resize-none text-[14px]"
+                            className="w-full p-4 bg-white/5 rounded-xl border border-white/5 text-white outline-none focus:border-[#CCFF00]/50 resize-none text-[14px] transition-all"
                             placeholder="클럽에 대한 설명을 적어주세요."
                         />
                     </div>
@@ -271,94 +249,109 @@ export default function ClubSettingsPage() {
                     <div className="pt-4 border-t border-white/5">
                         <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Invite Code</label>
                         <div className="flex gap-2 mt-1">
-                            <div className="flex-1 p-4 bg-black/40 rounded-xl border border-white/5 text-[#CCFF00] font-mono font-bold text-center tracking-widest">
+                            <div className="flex-1 p-4 bg-black/40 rounded-xl border border-white/5 text-[#CCFF00] font-mono font-bold text-center tracking-widest shadow-inner">
                                 {inviteCode}
                             </div>
                             <button
                                 onClick={handleRegenerateInvite}
-                                className="px-4 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white"
+                                className="px-4 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all"
                                 title="코드 재생성"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6" /><path d="M1 20v-6h6" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" /></svg>
                             </button>
                         </div>
-                        <p className="text-[10px] text-white/20 mt-2 ml-1">초대 코드가 변경되면 기존 공유된 링크로는 가입이 불가할 수 있습니다.</p>
-                    </div>
-
-                    {/* Quick Save for Profile */}
-                    <div className="pt-2">
-                        <Button
-                            fullWidth
-                            onClick={handleSave}
-                            isLoading={saving}
-                            className="bg-[#CCFF00] text-black font-black"
-                        >
-                            <Save size={18} className="mr-2" />
-                            프로필 정보 저장하기
-                        </Button>
                     </div>
                 </div>
             </Card>
 
+            {/* Attendance Settings */}
             <Card className="bg-[#121826] border-white/5 p-5">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-full bg-[#CCFF00]/10 flex items-center justify-center text-[#CCFF00]">
                         <Clock size={20} />
                     </div>
                     <div>
-                        <h3 className="text-white font-bold text-[16px]">출석 시간 설정</h3>
-                        <p className="text-white/40 text-[12px]">멤버들이 선택할 수 있는 시간 옵션입니다.</p>
+                        <h3 className="text-white font-bold text-[16px]">출석 및 요일 설정</h3>
+                        <p className="text-white/40 text-[12px]">정기 모임 요일과 참석 가능 시간 옵션입니다.</p>
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    {/* List */}
-                    <div className="grid grid-cols-2 gap-3">
-                        {timeSlots.map((time, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                                <span className="text-white font-mono font-bold text-[16px]">{time}</span>
+                <div className="space-y-8">
+                    {/* Game Day Selection */}
+                    <div className="space-y-3">
+                        <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Game Day (정기 모임 요일)</label>
+                        <div className="flex gap-1.5">
+                            {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
                                 <button
-                                    onClick={() => handleDeleteTime(time)}
-                                    className="p-2 hover:bg-red-500/20 rounded-lg text-white/40 hover:text-red-500 transition-colors"
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => setGameDay(idx)}
+                                    className={`flex-1 h-12 rounded-xl text-[14px] font-black transition-all ${gameDay === idx
+                                        ? 'bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.4)] scale-105 z-10'
+                                        : 'bg-white/5 text-white/40 hover:bg-white/10'
+                                        }`}
                                 >
-                                    <Trash2 size={16} />
+                                    {day}
                                 </button>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                        <p className="text-[10px] text-white/20 mt-1 ml-1 leading-relaxed">
+                            설정된 요일이 <span className="text-[#CCFF00] font-bold">매주 정기 모임일</span>로 지정됩니다.
+                        </p>
                     </div>
 
-                    {/* Add New */}
-                    <div className="flex gap-2 pt-4 border-t border-white/5 mt-4">
-                        <input
-                            type="time"
-                            className="flex-1 bg-black/40 border-none rounded-xl text-white px-4 py-3 font-mono font-bold outline-none ring-1 ring-white/10 focus:ring-[#CCFF00]"
-                            value={newTime}
-                            onChange={(e) => setNewTime(e.target.value)}
-                        />
-                        <button
-                            onClick={handleAddTime}
-                            className="bg-[#CCFF00] text-black w-14 rounded-xl flex items-center justify-center hover:bg-[#b3e600] active:scale-95 transition-all"
-                        >
-                            <Plus size={24} />
-                        </button>
+                    {/* Time Slots */}
+                    <div className="space-y-3">
+                        <label className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Time Slots (시간 옵션)</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            {timeSlots.map((time, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/5 group hover:border-white/20 transition-all">
+                                    <span className="text-white font-mono font-bold text-[16px]">{time}</span>
+                                    <button
+                                        onClick={() => handleDeleteTime(time)}
+                                        className="p-2 hover:bg-red-500/20 rounded-lg text-white/20 group-hover:text-red-500 transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex gap-2 pt-4 border-t border-white/5 mt-4">
+                            <input
+                                type="time"
+                                className="flex-1 bg-black/40 border-none rounded-xl text-white px-4 py-3.5 font-mono font-bold outline-none ring-1 ring-white/10 focus:ring-[#CCFF00] transition-all"
+                                value={newTime}
+                                onChange={(e) => setNewTime(e.target.value)}
+                            />
+                            <button
+                                onClick={handleAddTime}
+                                className="bg-[#CCFF00] text-black w-14 rounded-xl flex items-center justify-center hover:bg-[#b3e600] active:scale-95 transition-all shadow-lg shadow-[#CCFF00]/10"
+                            >
+                                <Plus size={24} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </Card>
 
-            <div className="fixed bottom-4 left-0 right-0 p-4 bg-gradient-to-t from-[#0A0E17] to-transparent z-20 max-w-[600px] mx-auto flex flex-col gap-2">
-                <Button
-                    fullWidth
-                    size="lg"
-                    onClick={handleSave}
-                    isLoading={saving}
-                    className="h-14 text-[16px] shadow-2xl shadow-[#CCFF00]/20 bg-[#CCFF00] text-black font-black"
-                >
-                    <Save size={18} className="mr-2" />
-                    전체 설정 완료 및 저장
-                </Button>
-                <p className="text-[10px] text-center text-white/10 uppercase tracking-widest">
-                    V.1.0.8-STABLE • AUTO_SYNC_ENABLED
-                </p>
+            {/* Bottom Action Bar */}
+            <div className="fixed bottom-4 left-0 right-0 p-4 bg-gradient-to-t from-[#0A0E17] via-[#0A0E17]/90 to-transparent z-20">
+                <div className="max-w-[600px] mx-auto flex flex-col gap-2">
+                    <Button
+                        fullWidth
+                        size="lg"
+                        onClick={handleSave}
+                        isLoading={saving}
+                        className="h-14 text-[16px] shadow-2xl shadow-[#CCFF00]/20 bg-[#CCFF00] text-black font-black hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                        <Save size={18} className="mr-2" />
+                        설정 저장 및 적용하기
+                    </Button>
+                    <p className="text-[10px] text-center text-white/20 uppercase tracking-[0.3em] mt-1">
+                        MatchUp Pro • System Stable
+                    </p>
+                </div>
             </div>
         </div>
     )

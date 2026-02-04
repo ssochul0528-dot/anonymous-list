@@ -1,45 +1,43 @@
-
-export function getAttendanceTargetDate(now: Date = new Date()): Date {
-    // Attendance window: Wed 12:00 to Tue 12:00
-    // If now is before Tue 12:00, target is this week's Wednesday (if now is Mon) or upcoming Wednesday.
-    // Actually, let's simplify: 
-    // If now is after Wednesday 12:00, the target is the NEXT Wednesday.
-    // If now is before Wednesday 12:00, the target is THIS Wednesday.
-
-    const day = now.getDay(); // 0 (Sun) to 6 (Sat)
+export function getAttendanceTargetDate(now: Date = new Date(), gameDay: number = 3): Date {
+    // gameDay: 0 (Sun) to 6 (Sat). Default 3 (Wed)
+    const day = now.getDay();
     const hours = now.getHours();
 
     const target = new Date(now);
     target.setHours(0, 0, 0, 0);
 
-    // Find this week's Wednesday (3)
-    const diff = 3 - day;
+    // Find this week's gameDay
+    const diff = gameDay - day;
     target.setDate(now.getDate() + diff);
 
-    // If today is Wednesday and it's after 12:00, target is next week's Wednesday
-    if (day === 3 && hours >= 12) {
+    // If today is gameDay and it's after 12:00, target is next week's gameDay
+    if (day === gameDay && hours >= 12) {
         target.setDate(target.getDate() + 7);
     }
-    // If today is Thu, Fri, Sat, it's already past this week's window start, so target is next Wed
-    else if (day > 3) {
+    // If today is after gameDay, target is next week's gameDay
+    else if (day > gameDay) {
         target.setDate(target.getDate() + 7);
     }
 
     return target;
 }
 
-export function isAttendanceWindowOpen(now: Date = new Date()): boolean {
-    const day = now.getDay(); // 0 (Sun) to 6 (Sat)
+export function isAttendanceWindowOpen(now: Date = new Date(), gameDay: number = 3): boolean {
+    const day = now.getDay();
     const hours = now.getHours();
 
-    // Window: Wed 12:00 to Tue 18:00
-    // Closed if:
-    // 1. Tue after 18:00
-    if (day === 2 && hours >= 18) return false;
-    // 2. Wed before 12:00
-    if (day === 3 && hours < 12) return false;
+    // Window: Opens GameDay 12:00 (for NEXT week), Closes (GameDay-1) 18:00 (for THIS week)
+    // This is equivalent to saying it's CLOSED between (GameDay-1) 18:00 and GameDay 12:00
 
-    // Otherwise open
+    const closeDay = (gameDay - 1 + 7) % 7;
+    const openDay = gameDay;
+
+    // 1. If it's the day before gameDay, closed after 18:00
+    if (day === closeDay && hours >= 18) return false;
+
+    // 2. If it's the gameDay itself, closed before 12:00
+    if (day === openDay && hours < 12) return false;
+
     return true;
 }
 

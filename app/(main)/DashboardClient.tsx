@@ -188,8 +188,8 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
     const [attendanceStatus, setAttendanceStatus] = useState<string | null>(null)
     const [selectedTime, setSelectedTime] = useState<string | null>(null)
     const [isLoadingAttendance, setIsLoadingAttendance] = useState(true)
-    const targetDate = getAttendanceTargetDate()
-    const isOpen = isAttendanceWindowOpen()
+    const targetDate = React.useMemo(() => getAttendanceTargetDate(new Date(), myClub?.game_day ?? 3), [myClub?.game_day])
+    const isOpen = React.useMemo(() => isAttendanceWindowOpen(new Date(), myClub?.game_day ?? 3), [myClub?.game_day])
 
     useEffect(() => {
         const fetchAttendance = async () => {
@@ -220,7 +220,7 @@ export default function DashboardClient({ clubSlug }: DashboardClientProps = {})
             setIsLoadingAttendance(false)
         }
         if (myClub?.id) fetchAttendance()
-    }, [user, targetDate, myClub?.id])
+    }, [user, targetDate, myClub?.id, myClub?.game_day])
 
     const handleAttendance = async (status: string, time?: string) => {
         const supabase = createClient()
