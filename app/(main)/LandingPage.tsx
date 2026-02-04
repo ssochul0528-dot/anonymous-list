@@ -178,7 +178,10 @@ export default function LandingPage() {
             )}
 
             {/* Main Content Scroll Area */}
-            <main className="relative z-10 flex-1 flex flex-col px-6 pt-4 pb-20">
+            <main className="relative z-10 flex-1 flex flex-col px-6 pt-4 pb-20 overflow-y-auto">
+                {/* National Tournaments Section - MOVED TO TOP FOR VISIBILITY */}
+                <NationalTournaments />
+
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -344,9 +347,6 @@ export default function LandingPage() {
                     )}
 
                 </motion.div>
-
-                {/* National Tournaments Section - Visible to All */}
-                <NationalTournaments />
 
                 {/* Club List Carousel */}
                 <div className="space-y-4 mb-8">

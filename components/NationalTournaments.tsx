@@ -48,9 +48,9 @@ export default function NationalTournaments() {
     }
 
     if (loading) return (
-        <div className="w-full space-y-4 py-8">
-            <div className="h-6 w-48 bg-white/5 rounded-lg animate-pulse" />
-            <div className="h-40 bg-white/5 rounded-[24px] animate-pulse" />
+        <div className="w-full space-y-4 py-8 text-center">
+            <p className="text-[#CCFF00] font-bold text-[12px] animate-pulse">LOADING NATIONAL TOURNAMENTS...</p>
+            <div className="h-32 bg-white/5 rounded-[24px] animate-pulse" />
         </div>
     )
 
