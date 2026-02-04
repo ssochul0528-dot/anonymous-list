@@ -96,12 +96,12 @@ export default function FloatingHome() {
                             // Calculate angle for radial/rainbow layout
                             // We want items to spread from 210 degrees to -30 degrees (arc above)
                             const total = actions.length;
-                            const startAngle = 210;
-                            const endAngle = -30;
+                            const startAngle = 200; // Slightly wider than 180 to wrap around
+                            const endAngle = -20;
                             const angleStep = total > 1 ? (startAngle - endAngle) / (total - 1) : 0;
                             const angle = startAngle - (index * angleStep);
                             const radian = (angle * Math.PI) / 180;
-                            const radius = 110; // Distance from center
+                            const radius = 130; // Increased distance from center to prevent clipping
 
                             const x = radius * Math.cos(radian);
                             const y = radius * Math.sin(radian) * -1; // Negative because Y grows downwards in CSS
@@ -114,17 +114,17 @@ export default function FloatingHome() {
                                         opacity: 1,
                                         scale: 1,
                                         x: x,
-                                        y: y,
+                                        y: y - 20, // Extra vertical lift to clear the center button
                                         transition: { delay: index * 0.03, type: 'spring', stiffness: 200, damping: 15 }
                                     }}
                                     exit={{ opacity: 0, scale: 0, x: 0, y: 0 }}
                                     onClick={() => handleNavigate(action.path)}
-                                    className="fixed left-1/2 bottom-[60px] -translate-x-1/2 pointer-events-auto flex flex-col items-center gap-1 group z-[9999]"
+                                    className="fixed left-1/2 bottom-[80px] -translate-x-1/2 pointer-events-auto flex flex-col items-center gap-1 group z-[9999]"
                                 >
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/10 ${action.color} group-hover:scale-110 active:scale-95 transition-all`}>
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-[0_15px_35px_rgba(0,0,0,0.6)] border border-white/10 ${action.color} group-hover:scale-110 active:scale-95 transition-all`}>
                                         {action.icon}
                                     </div>
-                                    <span className="text-white text-[9px] font-black uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] bg-black/40 px-2 py-0.5 rounded-md backdrop-blur-sm">
+                                    <span className="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/60 px-2 py-1 rounded-md backdrop-blur-md">
                                         {action.label}
                                     </span>
                                 </motion.button>
