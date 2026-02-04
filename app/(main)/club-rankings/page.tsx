@@ -19,13 +19,14 @@ export default function ClubRankingsPage() {
 
     const fetchClubRankings = async () => {
         setLoading(true)
+        const supabase = createClient()
         try {
             // 1. Fetch all Clubs
             const { data: clubs, error: cError } = await supabase
                 .from('clubs')
-                .select('id, name, logo_url, level')
+                .select('*')
+                .eq('status', 'ACTIVE')
 
-            console.log('Clubs fetch result:', { clubs: clubs?.length, error: cError })
             if (cError) throw cError
             if (!clubs || clubs.length === 0) {
                 setClubRankings([])
@@ -33,18 +34,14 @@ export default function ClubRankingsPage() {
             }
 
             // 2. Fetch all Scores
-            const { data: scores, error: sError } = await supabase
+            const { data: scores } = await supabase
                 .from('scores')
                 .select('points, club_id')
-
-            console.log('Scores fetch result:', { scores: scores?.length, error: sError })
-            if (sError) console.error('Scores fetch error:', sError)
 
             // 3. Aggregate Stats
             const stats = new Map()
             clubs.forEach(c => stats.set(c.id, { ...c, totalPoints: 0, memberCount: 0 }))
 
-            // Aggregating points from scores
             scores?.forEach(s => {
                 if (s.club_id && stats.has(s.club_id)) {
                     const current = stats.get(s.club_id)
@@ -53,11 +50,9 @@ export default function ClubRankingsPage() {
             })
 
             // Fetch member counts from profiles
-            const { data: profileCounts, error: pError } = await supabase
+            const { data: profileCounts } = await supabase
                 .from('profiles')
                 .select('club_id')
-
-            console.log('Profiles fetch result:', { profiles: profileCounts?.length, error: pError })
 
             profileCounts?.forEach(p => {
                 if (p.club_id && stats.has(p.club_id)) {
@@ -65,15 +60,12 @@ export default function ClubRankingsPage() {
                 }
             })
 
-            // 4. Sort and Set
             const sorted = Array.from(stats.values())
                 .sort((a, b) => b.totalPoints - a.totalPoints)
 
-            console.log('Final sorted rankings:', sorted)
             setClubRankings(sorted)
-
         } catch (e) {
-            console.error('Fetch club rankings error:', e)
+            console.error('Fetch error:', e)
         } finally {
             setLoading(false)
         }
