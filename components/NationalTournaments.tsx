@@ -21,31 +21,45 @@ export interface Tournament {
 export default function NationalTournaments() {
     const [tournaments, setTournaments] = useState<Tournament[]>([])
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         fetchTournaments()
     }, [])
 
     const fetchTournaments = async () => {
+        setLoading(true)
         const supabase = createClient()
-        const { data, error } = await supabase
-            .from('tournaments')
-            .select('*')
-            .order('start_date', { ascending: true })
-            .limit(5)
+        try {
+            const { data, error } = await supabase
+                .from('tournaments')
+                .select('*')
+                .order('start_date', { ascending: true })
+                .limit(5)
 
-        if (data) setTournaments(data)
-        setLoading(false)
+            if (error) throw error
+            setTournaments(data || [])
+        } catch (err: any) {
+            console.error('Fetch error:', err)
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
     }
 
     if (loading) return (
-        <div className="w-full space-y-4 animate-pulse">
-            <div className="h-6 w-48 bg-white/5 rounded-lg" />
-            <div className="h-32 bg-white/5 rounded-3xl" />
+        <div className="w-full space-y-4 py-8">
+            <div className="h-6 w-48 bg-white/5 rounded-lg animate-pulse" />
+            <div className="h-40 bg-white/5 rounded-[24px] animate-pulse" />
         </div>
     )
 
-    if (tournaments.length === 0) return null
+    if (tournaments.length === 0) return (
+        <div className="w-full py-10 text-center border-2 border-dashed border-white/5 rounded-[32px] mt-8 bg-white/2">
+            <p className="text-white/20 font-bold uppercase tracking-widest text-[12px]">진행 중인 전국 대회가 없습니다</p>
+            {error && <p className="text-red-500/40 text-[10px] mt-2">{error}</p>}
+        </div>
+    )
 
     return (
         <div className="w-full space-y-6 mt-8">

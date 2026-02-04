@@ -319,9 +319,6 @@ export default function LandingPage() {
                                     다른 클럽 선택하기
                                 </button>
                             </div>
-
-                            {/* National Tournaments Section */}
-                            <NationalTournaments />
                         </div>
                     ) : (
                         <>
@@ -345,6 +342,9 @@ export default function LandingPage() {
                             )}
                         </>
                     )}
+
+                    {/* National Tournaments Section - Visible to All */}
+                    <NationalTournaments />
                 </motion.div>
 
                 {/* Club List Carousel */}
