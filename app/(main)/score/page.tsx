@@ -17,7 +17,7 @@ interface ScoreRecord {
 }
 
 export default function ScorePage() {
-    const { user } = useAuth()
+    const { user, profile } = useAuth()
     const supabase = createClient()
     const router = useRouter()
     const [loading, setLoading] = useState(false)
@@ -104,7 +104,8 @@ export default function ScorePage() {
                     .update({
                         result: result,
                         points: points,
-                        week_id: weekId
+                        week_id: weekId,
+                        club_id: (profile as any)?.club_id // Include club_id on update
                     })
                     .eq('id', editingId)
                     .eq('user_id', user?.id) // Extra safety check
@@ -118,7 +119,8 @@ export default function ScorePage() {
                     week_id: weekId,
                     user_id: user?.id,
                     result: result,
-                    points: points
+                    points: points,
+                    club_id: (profile as any)?.club_id // Include club_id on insert
                 })
                 if (error) throw error
                 alert('점수가 저장되었습니다!')
