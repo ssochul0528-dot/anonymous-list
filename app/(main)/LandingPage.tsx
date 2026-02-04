@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getAttendanceTargetDate, formatDate } from '@/utils/attendance'
+import NationalTournaments from '@/components/NationalTournaments'
 
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -318,6 +319,9 @@ export default function LandingPage() {
                                     다른 클럽 선택하기
                                 </button>
                             </div>
+
+                            {/* National Tournaments Section */}
+                            <NationalTournaments />
                         </div>
                     ) : (
                         <>
