@@ -179,8 +179,7 @@ export default function LandingPage() {
 
             {/* Main Content Scroll Area */}
             <main className="relative z-10 flex-1 flex flex-col px-6 pt-4 pb-20 overflow-y-auto">
-                {/* National Tournaments Section - MOVED TO TOP FOR VISIBILITY */}
-                <NationalTournaments />
+                <div className="bg-red-600 text-white font-black text-center p-2 mb-4">DEPLOYED_VERSION_v2</div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -321,6 +320,12 @@ export default function LandingPage() {
                                 >
                                     다른 클럽 선택하기
                                 </button>
+                            </div>
+
+                            {/* Tournament Section HERE */}
+                            <div className="border-4 border-[#CCFF00] p-4 rounded-3xl my-8">
+                                <h2 className="text-black bg-[#CCFF00] font-black p-1 text-center mb-4">LOCAL TOURNAMENT SECTION</h2>
+                                <NationalTournaments />
                             </div>
                         </div>
                     ) : (
