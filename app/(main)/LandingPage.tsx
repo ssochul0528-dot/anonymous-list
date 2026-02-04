@@ -179,7 +179,10 @@ export default function LandingPage() {
 
             {/* Main Content Scroll Area */}
             <main className="relative z-10 flex-1 flex flex-col px-6 pt-4 pb-20 overflow-y-auto">
-                <div className="bg-red-600 text-white font-black text-center p-2 mb-4">DEPLOYED_VERSION_v2</div>
+                {/* Deployment Check Banner */}
+                <div className="fixed bottom-4 left-4 right-4 bg-red-600 text-white p-3 rounded-2xl z-[9999] text-center font-black shadow-2xl">
+                    DEPLOYMENT_VERIFIED_V3
+                </div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -230,7 +233,7 @@ export default function LandingPage() {
                                                     <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">{formatDate(targetDate)} 출석</p>
                                                     <p className="text-[15px] font-black">
                                                         {myAttendance.status === 'ATTEND'
-                                                            ? `✅ ${formatTimeOption(myAttendance.preferred_time)} 참석`
+                                                            ? `✅ ${myAttendance.preferred_time ? formatTimeOption(myAttendance.preferred_time) : '시간 미정'} 참석`
                                                             : '❌ 이번 주 참석 불가'}
                                                     </p>
                                                 </div>
@@ -321,12 +324,6 @@ export default function LandingPage() {
                                     다른 클럽 선택하기
                                 </button>
                             </div>
-
-                            {/* Tournament Section HERE */}
-                            <div className="border-4 border-[#CCFF00] p-4 rounded-3xl my-8">
-                                <h2 className="text-black bg-[#CCFF00] font-black p-1 text-center mb-4">LOCAL TOURNAMENT SECTION</h2>
-                                <NationalTournaments />
-                            </div>
                         </div>
                     ) : (
                         <>
@@ -415,6 +412,11 @@ export default function LandingPage() {
                     <p className="text-[11px] text-white/30 font-medium">
                         운영진이신가요? <span className="text-white underline cursor-pointer hover:text-[#CCFF00]" onClick={() => router.push('/club-join')}>클럽 등록 신청하기</span>
                     </p>
+                </div>
+
+                {/* FINAL TOURNAMENT ATTEMPT - ABSOLUTE BOTTOM */}
+                <div className="mt-20 pb-20">
+                    <NationalTournaments />
                 </div>
             </main>
         </div>

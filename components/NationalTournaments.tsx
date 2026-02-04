@@ -62,10 +62,40 @@ export default function NationalTournaments() {
     )
 
     return (
-        <div className="bg-blue-600 p-20 text-white font-black text-center rounded-[40px]">
-            HELLO!!! I AM THE TOURNAMENT SECTION!!
-            <br />
-            DATA COUNT: {tournaments.length}
+        <div className="w-full space-y-6 mt-8 p-4 border-2 border-dashed border-[#CCFF00] rounded-[32px]">
+            <div className="flex justify-between items-end">
+                <div className="space-y-1">
+                    <h3 className="text-[20px] font-black italic tracking-tighter text-white uppercase leading-none">
+                        National <span className="text-[#CCFF00]">Tournaments</span>
+                    </h3>
+                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">전국 테니스 대회 일정</p>
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                {tournaments.length === 0 ? (
+                    <p className="text-white/20 text-center py-10 font-bold">진행 중인 대회가 없습니다.</p>
+                ) : (
+                    tournaments.map((t, idx) => (
+                        <div
+                            key={t.id}
+                            className="bg-[#121826] border border-white/10 rounded-[20px] p-4 flex gap-4 items-center"
+                        >
+                            <div className="min-w-[40px] text-center border-r border-white/5 pr-4">
+                                <span className="block text-[16px] font-black text-[#CCFF00]">{new Date(t.start_date).getDate()}</span>
+                                <span className="block text-[10px] font-bold text-white/40 uppercase">{new Date(t.start_date).toLocaleString('en-US', { month: 'short' })}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h4 className="font-black text-white text-[14px] truncate italic uppercase">{t.title}</h4>
+                                <p className="text-white/40 text-[10px] truncate">{t.location}</p>
+                            </div>
+                            <a href={t.link_url} target="_blank" className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[#CCFF00]">
+                                <ExternalLink size={14} />
+                            </a>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     )
 }
