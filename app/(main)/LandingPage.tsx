@@ -350,11 +350,8 @@ export default function LandingPage() {
 
                 </motion.div>
 
-                {/* 억지로라도 화면에 띄우는 긴급 섹션 */}
-                <div style={{ border: '5px solid #CCFF00', padding: '20px', margin: '20px 0', backgroundColor: '#121826', borderRadius: '30px', zIndex: 9999, position: 'relative' }}>
-                    <h1 style={{ color: '#CCFF00', fontSize: '24px', fontWeight: '900', fontStyle: 'italic', marginBottom: '15px' }}>DEBUG: TOURNAMENT SECTION</h1>
-                    <NationalTournaments />
-                </div>
+                {/* 전국 대회 일정 섹션 */}
+                <NationalTournaments />
 
                 {/* Club List Carousel */}
                 <div className="space-y-4 mb-8">
