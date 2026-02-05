@@ -72,6 +72,7 @@ export default function NationalTournaments() {
                 <div className="p-8 bg-red-500/10 border border-red-500/20 rounded-[32px] mb-10 text-center">
                     <AlertCircle className="text-red-500 mx-auto mb-3" size={32} />
                     <h4 className="text-white font-black italic mb-1 uppercase">Connection Error</h4>
+                    <p className="text-white/40 text-[10px] mb-4">{error}</p>
                     <button onClick={fetchTournaments} className="mt-2 text-[#CCFF00] underline font-bold">RETRY</button>
                 </div>
             ) : tournaments.length === 0 ? (
