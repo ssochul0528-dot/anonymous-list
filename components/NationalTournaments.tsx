@@ -104,7 +104,9 @@ export default function NationalTournaments() {
                                     </span>
                                     <span className="text-white/20 text-[9px] font-bold uppercase truncate">{t.organizer}</span>
                                 </div>
-                                <h4 className="font-black text-white text-[15px] truncate italic uppercase tracking-tight">{t.name}</h4>
+                                <h4 className="font-black text-white text-[15px] italic uppercase tracking-tight leading-snug">
+                                    {t.name}
+                                </h4>
                                 <p className="text-white/40 text-[11px] truncate mt-1 flex items-center gap-1">
                                     <MapPin size={10} className="text-[#CCFF00]/40" />
                                     {t.location}
