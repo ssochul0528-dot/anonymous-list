@@ -34,7 +34,6 @@ export default function NationalTournaments() {
             const { data, error } = await supabase
                 .from('tournaments')
                 .select('*')
-                .is('club_id', null)
                 .order('start_date', { ascending: true })
                 .limit(5)
 
