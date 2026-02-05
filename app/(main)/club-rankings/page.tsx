@@ -32,7 +32,7 @@ export default function ClubRankingsPage() {
                 .select('*')
 
             if (cError) throw cError
-            setDebugInfo(prev => ({ ...prev, clubsCount: clubs?.length }))
+            setDebugInfo((prev: any) => ({ ...prev, clubsCount: clubs?.length }))
 
             if (!clubs || clubs.length === 0) {
                 setClubRankings([])
@@ -45,7 +45,7 @@ export default function ClubRankingsPage() {
                 .select('points, club_id')
 
             if (sError) console.error('Scores fetch error:', sError)
-            setDebugInfo(prev => ({ ...prev, scoresCount: scores?.length }))
+            setDebugInfo((prev: any) => ({ ...prev, scoresCount: scores?.length }))
 
             // 3. Aggregate Stats
             const stats = new Map()
@@ -64,7 +64,7 @@ export default function ClubRankingsPage() {
                 .select('club_id')
 
             if (pError) console.error('Profiles fetch error:', pError)
-            setDebugInfo(prev => ({ ...prev, profilesCount: profileCounts?.length }))
+            setDebugInfo((prev: any) => ({ ...prev, profilesCount: profileCounts?.length }))
 
             profileCounts?.forEach(p => {
                 if (p.club_id && stats.has(p.club_id)) {
